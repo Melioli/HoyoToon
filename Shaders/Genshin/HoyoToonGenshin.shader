@@ -302,7 +302,7 @@
         #include "UnityLightingCommon.cginc"
         #include "UnityShaderVariables.cginc"
 
-        #include "HoyoToon-inputs.hlsli"
+        #include "HoyoToonGenshin-inputs.hlsli"
 
 
         /* properties */
@@ -484,7 +484,7 @@
         /* end of properties */
 
 
-        #include "HoyoToon-helpers.hlsl"
+        #include "HoyoToonGenshin-helpers.hlsl"
 
         ENDHLSL
 
@@ -501,7 +501,7 @@
 
             #pragma multi_compile_fwdbase
 
-            #include "HoyoToon-main.hlsl"
+            #include "HoyoToonGenshin-main.hlsl"
 
             ENDHLSL
         }
@@ -518,7 +518,7 @@
 
             #pragma multi_compile_fwdbase
 
-            #include "HoyoToon-outlines.hlsl"
+            #include "HoyoToonGenshin-outlines.hlsl"
 
             ENDHLSL
         }
@@ -533,7 +533,7 @@
 		    #pragma multi_compile_shadowcaster
 
             // template by mochie bestie: https://github.com/cnlohr/shadertrixx/blob/main/README.md#shadowcasting
-            #include "HoyoToon-shadows.hlsl"
+            #include "HoyoToonGenshin-shadows.hlsl"
 
             ENDHLSL
         }
