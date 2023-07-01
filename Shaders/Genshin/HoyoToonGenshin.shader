@@ -2,7 +2,7 @@
     Properties 
   { 
         //Header
-        [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon 2.0</color></i></b>✧", Float) = 0
+        [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Genshin Impact</color></i></b>✧", Float) = 0
 		[HideInInspector] shader_is_using_thry_editor ("", Float) = 0
 		[HideInInspector] footer_github ("{texture:{name:github},action:{type:URL,data:https://github.com/festivities/HoyoToon},hover:GITHUB}", Float) = 0
 		[HideInInspector] footer_discord ("{texture:{name:discord},action:{type:URL,data:https://discord.gg/85rP9SpAkF},hover:GITHUB}", Float) = 0
