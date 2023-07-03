@@ -231,29 +231,50 @@
         [HideInInspector] m_end_emissionpulse ("", Float) = 0
         [HideInInspector] m_end_emissionglow ("", Float) = 0
 
-
+        [HideInInspector] m_start_starcock("StarGlow--{tooltip:Paimon & Dainsleif Cape}", Float) = 0 //tribute to the starcock 
         [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
-        [Toggle] _StarCloakOveride("Disable all shading but star cloak", Float) = 0.0
-        _StarCloakBlendRate ("Star Cloak Blend Rate", Range(0.0, 2.0)) = 1.0
-        _StarTex ("Star Texture 1", 2D) = "black" { } // cock 
-        _StarBrightness ("Star Brightness", Float) = 60
-        _StarHeight ("Star Texture Height", Float) = 14.89
-        _Star02Tex ("Star Texture 2", 2D) = "black" { }
-        _Star02Height ("Star Texture 2 Heightt", Float) = 0
-        _Star01Speed ("Star Scroll Speed", Float) = 0
+        [Toggle] _StarCloakOveride("Disable all shading but star cloak--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
+        _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Range(0.0, 2.0)) = 1.0
+        _StarTex ("Star Texture 1--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { } // cock 
+        _Star02Tex ("Star Texture 2--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { }
+        _Star01Speed ("Star 1 Scroll Speed--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
+        _StarBrightness ("Star Brightness--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 60
+        _StarHeight ("Star Texture Height--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 14.89
+        _Star02Height ("Star Texture 2 Height--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
+
+        [HideInInspector] m_start_starcocknoise("Noise--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0 //starcock: the phantom cock
+
         _NoiseTex01 ("Noise Texture 1", 2D) = "white" { }
-        _Noise01Speed ("Noise 1 Scroll Speed", Float) = 0.1
         _NoiseTex02 ("Noise Texture 2", 2D) = "white" { }
+        _Noise01Speed ("Noise 1 Scroll Speed", Float) = 0.1
         _Noise02Speed ("Noise 2 Scroll Speed", Float) = -0.1
-        _Noise03Brightness ("Noise Brightness", Float) = 0.2
+        _Noise03Brightness ("Noise 3 Brightness", Float) = 0.2
+
+        [HideInInspector] m_end_starcocknoise("", Float) = 0 //starcock: attack of the cocks
+
+        [HideInInspector] m_start_starcockcolorpallete("Color Pallete--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0 //starcock: revenge of the cock
+
         _ColorPaletteTex ("Color Palette Texture", 2D) = "white" { }
         _ColorPalletteSpeed ("Color Palette Scroll Speed", Float) = -0.1
+
+        [HideInInspector] m_end_starcockcolorpallete("", Float) = 0 //starcock: the cock awakens
+        
+        [HideInInspector] m_start_starcockconstellation("Constellation--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0 //starcock: the last cock
         _ConstellationTex ("Constellation Texture", 2D) = "white" { }
         _ConstellationHeight ("Constellation Texture Height", Float) = 1.2
         _ConstellationBrightness ("Constellation Brightness", Float) = 5
+
+        [HideInInspector] m_end_starcockconstellation("", Float) = 0 //starcock: a starcock story
+
+        [HideInInspector] m_start_starcockcloud("Cloud--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0 //starcock: the rise of cock
+
         _CloudTex ("Cloud Texture", 2D) = "white" { }
         _CloudBrightness ("Cloud Texture Brightness", Float) = 1
         _CloudHeight ("Cloud Texture Height", Float) = 1
+
+        [HideInInspector] m_end_starcockcloud("", Float) = 0 //starcock: the cock strikes back
+
+        [HideInInspector] m_end_starcock ("", Float) = 0
 
         [HideInInspector] m_start_fresnel("Fresnel", Float) = 0
         [Toggle] _UseFresnel ("Enable Fresnel", Range(0.0, 1.0)) = 1.0
