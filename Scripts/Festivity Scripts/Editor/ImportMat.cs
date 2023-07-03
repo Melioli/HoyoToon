@@ -103,7 +103,7 @@ internal class GenshinMat{
 
 [System.Serializable]
 public class ImportMat : EditorWindow{
-    [MenuItem("Assets/Genshin Impact/Import Material Properties From .json")]
+    [MenuItem("Assets/Festivity/Import Material Properties From .json")]
     public static void ImportMatFile(){
         string path = EditorUtility.OpenFilePanel("Select a Genshin Impact material .json file", "", "json");
         if(path.Length == 0){

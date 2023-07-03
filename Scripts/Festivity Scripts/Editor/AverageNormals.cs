@@ -7,7 +7,7 @@ using UnityEngine; // 作者：艺术菌毯 https://www.bilibili.com/read/cv1641
 
 public class AverageNormals
 {
-    [MenuItem("Assets/Tools/Reconstruct Tangents with Split Normals")]
+    [MenuItem("Assets/Festivity/Reconstruct Tangents with Split Normals")]
     public static void WirteAverageNormalToTangentToos()
     {
         MeshFilter[] meshFilters = Selection.activeGameObject.GetComponentsInChildren<MeshFilter>();
