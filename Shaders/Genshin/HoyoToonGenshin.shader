@@ -49,8 +49,10 @@
         //Normal Map
         [HideInInspector] m_start_normalmap ("Normal Map", Float) = 0
         [Toggle] _UseBumpMap("Normal Map", Float) = 0.0
-        [SmallTexture]_BumpMap("Normal Map",2D)= "white"{ }
-        _BumpScale ("Normal Map Scale", Range(0.0, 1.0)) = 0.2
+        [SmallTexture]_BumpMap("Normal Map",2D)= "bump" { } 
+        // changed the default normal map texture to unitys basic bump map
+        // [SmallTexture]_BumpMap("Normal Map",2D)= "white" { }
+        _BumpScale ("Normal Map Scale", Range(0.0, 1.0)) = 0.0 
         [HideInInspector] m_end_normalmap ("", Float) = 0
         //Normal Map End
 
@@ -229,6 +231,30 @@
         [HideInInspector] m_end_emissionpulse ("", Float) = 0
         [HideInInspector] m_end_emissionglow ("", Float) = 0
 
+
+        [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
+        [Toggle] _StarCloakOveride("Disable all shading but star cloak", Float) = 0.0
+        _StarCloakBlendRate ("Star Cloak Blend Rate", Range(0.0, 2.0)) = 1.0
+        _StarTex ("Star Texture 1", 2D) = "black" { } // cock 
+        _StarBrightness ("Star Brightness", Float) = 60
+        _StarHeight ("Star Texture Height", Float) = 14.89
+        _Star02Tex ("Star Texture 2", 2D) = "black" { }
+        _Star02Height ("Star Texture 2 Heightt", Float) = 0
+        _Star01Speed ("Star Scroll Speed", Float) = 0
+        _NoiseTex01 ("Noise Texture 1", 2D) = "white" { }
+        _Noise01Speed ("Noise 1 Scroll Speed", Float) = 0.1
+        _NoiseTex02 ("Noise Texture 2", 2D) = "white" { }
+        _Noise02Speed ("Noise 2 Scroll Speed", Float) = -0.1
+        _Noise03Brightness ("Noise Brightness", Float) = 0.2
+        _ColorPaletteTex ("Color Palette Texture", 2D) = "white" { }
+        _ColorPalletteSpeed ("Color Palette Scroll Speed", Float) = -0.1
+        _ConstellationTex ("Constellation Texture", 2D) = "white" { }
+        _ConstellationHeight ("Constellation Texture Height", Float) = 1.2
+        _ConstellationBrightness ("Constellation Brightness", Float) = 5
+        _CloudTex ("Cloud Texture", 2D) = "white" { }
+        _CloudBrightness ("Cloud Texture Brightness", Float) = 1
+        _CloudHeight ("Cloud Texture Height", Float) = 1
+
         [HideInInspector] m_start_fresnel("Fresnel", Float) = 0
         [Toggle] _UseFresnel ("Enable Fresnel", Range(0.0, 1.0)) = 1.0
         [Gamma] _HitColor ("Fresnel Color", Color) = (0.0, 0.0, 0.0, 1.0)
@@ -321,6 +347,25 @@
         Texture2D _CustomEmissionTex;       SamplerState sampler_CustomEmissionTex;
         Texture2D _CustomEmissionAOTex;     SamplerState sampler_CustomEmissionAOTex;
 
+        // star cloak textures and samplers
+        Texture2D _StarTex;
+        SamplerState sampler_StarTex;  
+        float4 _StarTex_ST;
+        Texture2D _Star02Tex;               
+        float4 _Star02Tex_ST; 
+        Texture2D _NoiseTex01;
+        SamplerState sampler_NoiseTex01;
+        float4 _NoiseTex01_ST;
+        Texture2D _NoiseTex02;
+        float4 _NoiseTex02_ST;
+        Texture2D _ColorPaletteTex;
+        SamplerState sampler_ColorPaletteTex;
+        float4 _ColorPaletteTex_ST;  
+        Texture2D _ConstellationTex;
+        float4 _ConstellationTex_ST;
+        Texture2D _CloudTex; 
+        float4 _CloudTex_ST;
+
         UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
         float _DayOrNight;
@@ -391,7 +436,7 @@
         float _ShadowTransitionSoftness4;
         float _ShadowTransitionSoftness5;
         float _UseBackFaceUV2;
-        float _UseBumpMap;
+        bool _UseBumpMap;
         float _UseLightMapColorAO;
         float _UseMaterial2;
         float _UseMaterial3;
@@ -442,6 +487,22 @@
         float _TextureLineUse;
         vector<float, 4> _TextureLineDistanceControl;
         vector<float, 4> _TextureLineMultiplier;
+
+        float _StarCloakEnable;
+        float _StarCloakBlendRate;
+        float _StarCloakOveride;
+        float _StarBrightness;
+        float _StarHeight;
+        float _Star02Height;
+        float _Noise01Speed;
+        float _Noise02Speed;
+        float _ColorPalletteSpeed;
+        float _ConstellationHeight;
+        float _ConstellationBrightness;
+        float _Star01Speed;
+        float _Noise03Brightness;
+        float _CloudBrightness;
+        float _CloudHeight;
 
         float _ClipPlaneWorld;
         float _MaxOutlineZOffset;

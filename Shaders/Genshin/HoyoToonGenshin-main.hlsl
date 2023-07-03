@@ -1,6 +1,6 @@
 // vertex
 vsOut vert(vsIn v){
-    vsOut o;
+    vsOut o = (vsOut)0.0f;
     o.pos = UnityObjectToClipPos(v.vertex);
     o.vertexWS = mul(UNITY_MATRIX_M, v.vertex); // TransformObjectToWorld
     o.vertexOS = v.vertex;
@@ -10,9 +10,33 @@ vsOut vert(vsIn v){
     o.normal = v.normal;
     o.screenPos = ComputeScreenPos(o.pos);
     o.vertexcol = (_VertexColorLinear != 0.0) ? VertexColorConvertToLinear(v.vertexcol) : v.vertexcol;
+    o.parallax = 0.0f;
 
+    float4 view;
+    view.xyz = _WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz;
+    view.xyz = normalize(view.xyz);
+    view.w = 0.0f;
+    float3 normal  = mul((float3x3)unity_ObjectToWorld, v.normal); // transform normals to worldspace
+    normal = normalize(normal);
+    float4 tangent;
+    tangent.xyz = mul((float3x3)unity_ObjectToWorld, v.tangent.xyz); // transform tangents to worldspace
+    tangent.xyz = normalize(tangent.xyz);
+    tangent.w = v.tangent.w * unity_WorldTransformParams.w; // tangent uv direction
+    float3 bitangent = cross(normal.xyz, tangent.xyz) * tangent.w; // get worldspace bitangent
+
+    float3 parallax;
+    parallax.y = bitangent.x;
+    parallax.x = tangent.y;
+    parallax.z = normal.z;
+    parallax = view.yyy * parallax;
+    tangent.y = bitangent.z;
+    tangent.z = normal.x;
+    bitangent.x = tangent.z;
+    bitangent.z = normal.y;
+
+    view.xyw = bitangent.xyz * view.xxx + parallax;
+    o.parallax = float4(tangent.xyz * view.zzz + view.xyw, 0.0f);
     UNITY_TRANSFER_FOG(o, o.pos);
-
     return o;
 }
 
@@ -42,20 +66,97 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
     /* BUFFER, IGNORE */
 
-    vector<half, 3> headForward;
-    vector<half, 3> headRight;
+    vector<half, 3> headForward = (float3)0.0f;
+    vector<half, 3> headRight = (float3)0.0f;
 
-    vector<half, 3> modifiedNormalsWS = 0.0;
+    vector<half, 3> modifiedNormalsWS = rawNormalsWS;
     vector<half, 3> finalNormalsWS = rawNormalsWS;
 
-    half litFactor;
-    fixed emissionFactor;
-    vector<fixed, 4> metal;
+    // why not initialize these things??? 
+    half litFactor = 0.0f;
+    fixed emissionFactor = 0.0f;
+    vector<fixed, 4> metal = (float4)0.0f;
 
     vector<fixed, 4> finalColor = 1.0;
 
     /* END OF BUFFER */
 
+    
+    /* MATERIAL IDS */
+    half idMasks = lightmapTex.w;
+
+    half materialID = 1;
+    if(idMasks >= 0.2 && idMasks <= 0.4 && _UseMaterial4 != 0)
+    {
+        materialID = 4;
+    } 
+    else if(idMasks >= 0.4 && idMasks <= 0.6 && _UseMaterial3 != 0)
+    {
+        materialID = 3;
+    }
+    else if(idMasks >= 0.6 && idMasks <= 0.8 && _UseMaterial5 != 0)
+    {
+        materialID = 5;
+    }
+    else if(idMasks >= 0.8 && idMasks <= 1.0 && _UseMaterial2 != 0)
+    {
+        materialID = 2;
+    }
+
+
+    // ========================================================= //
+    // star cloak chunk 
+    if(_StarCloakEnable)
+    {
+        float3 parallax = normalize(i.parallax);
+
+        // float2 startex_uv = TRANSFORM_TEX(i.uv,  _StarTex);
+        float star_speed = _Time.y * _Star01Speed;
+
+        parallax = normalize(parallax);
+        float2 star_01_parallax = (parallax.xy * (_StarHeight - 1.0f))   * (float2)-0.1 + (float2(0.0f, star_speed) + TRANSFORM_TEX(newUVs, _StarTex));
+        float2 star_02_parallax = (parallax.xy * (_Star02Height - 1.0f)) * (float2)-0.1 + (float2(0.0f, star_speed * 0.5f) + TRANSFORM_TEX(newUVs, _Star02Tex));
+                
+        // float2 pallete_uv = (newUVs * _ColorPaletteTex_TexelSize.xy + _ColorPaletteTex_TexelSize.zw);
+        float2 pallete_uv = TRANSFORM_TEX(newUVs, _ColorPaletteTex);
+        pallete_uv.x = _Time.y * _ColorPalletteSpeed +  pallete_uv.x;
+        float3 pallete = _ColorPaletteTex.Sample(sampler_ColorPaletteTex, pallete_uv);
+
+        float2 noise_01_uv = _Time.y * (float2)_Noise01Speed + TRANSFORM_TEX(newUVs, _NoiseTex01);
+        float2 noise_02_uv = _Time.y * (float2)_Noise02Speed + TRANSFORM_TEX(newUVs, _NoiseTex02);
+
+        float noise_01_tex = _NoiseTex01.Sample(sampler_NoiseTex01, noise_01_uv).x;
+        float noise_02_tex = _NoiseTex02.Sample(sampler_NoiseTex01, noise_02_uv).x;
+
+        float noise = noise_01_tex * noise_02_tex;
+
+        // float2 constellation_uv = (newUVs * _ConstellationTex_TexelSize.zw + _ConstellationTex_TexelSize.xy);
+        float2 constellation_uv = TRANSFORM_TEX(newUVs, _ConstellationTex);
+        float2 const_parallax = (parallax.xy * (_ConstellationHeight - 1.0f)) * (float2)-0.1f + constellation_uv;
+        float3 constellation_tex = _ConstellationTex.Sample(sampler_LightMapTex, const_parallax).xyz * (float3)_ConstellationBrightness;
+
+        // float2 cloud_uv = (newUVs * _CloudTex_TexelSize.xy + _CloudTex_TexelSize.zw);
+        float2 cloud_uv = TRANSFORM_TEX(newUVs, _CloudTex);
+        float2 cloud_parallax = (parallax.xy * (_CloudHeight - 1.0f)) * (float2)-0.1 + (noise * (float2)_Noise03Brightness + cloud_uv);
+        float cloud_tex = _CloudTex.Sample(sampler_NoiseTex01, cloud_parallax).x;
+
+        float star_01 = _StarTex.Sample(sampler_StarTex, star_01_parallax).x;
+        float star_02 = _Star02Tex.Sample(sampler_StarTex, star_02_parallax).y;
+
+        float stars = star_01 + star_02;
+        stars = stars * mainTex.w;
+        cloud_tex = cloud_tex * mainTex.w;
+
+        float3 star_color = pallete * stars;
+        star_color = star_color * (float3)_StarBrightness;
+
+        float3 cloak = star_color * noise + constellation_tex;
+        cloak = ((cloud_tex * (float3)_CloudBrightness) * pallete + cloak);
+        mainTex.xyz = lerp(mainTex.xyz, cloak + mainTex.xyz, mainTex.w * _StarCloakBlendRate);
+        // mainTex.xyz = noise;
+
+        if(_StarCloakOveride) return mainTex;
+    }
 
     /* ENVIRONMENT LIGHTING */
 
@@ -64,7 +165,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
     /* END OF ENVIRONMENT LIGHTING */
 
 
-    if(_UseFaceMapNew != 0){
+    if(_UseFaceMapNew != 0)
+    {
         /* TEXTURE CREATION */
 
         vector<fixed, 4> lightmapTex_mirrored = SampleTexture2DBicubicFilter(_LightMapTex, sampler_LightMapTex, vector<half, 2>(1.0 - i.uv.x, i.uv.y), _LightMapTex_TexelSize.zwxy);
@@ -108,7 +210,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
         vector<fixed, 4> ShadowFinal;
 
-        if(_UseShadowRamp != 0){
+        if(_UseShadowRamp != 0)
+        {
             vector<half, 2> ShadowRampDayUVs = vector<float, 2>(faceFactor, (((6 - _MaterialID) - 1) * 0.1) + 0.05);
             vector<fixed, 4> ShadowRampDay = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ShadowRampDayUVs);
 
@@ -117,7 +220,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
             ShadowFinal = lerp(ShadowRampNight, ShadowRampDay, _DayOrNight);
         }
-        else{
+        else
+        {
             vector<fixed, 4> ShadowDay = _FirstShadowMultColor;
             vector<fixed, 4> ShadowNight = _CoolShadowMultColor;
 
@@ -143,51 +247,59 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
         // apply environment lighting
         finalColor.xyz *= lerp(1.0, environmentLighting, _EnvironmentLightingStrength).xyz;
-
+        if(_ReturnFaceMap) return faceFactor;
         /* END OF COLOR CREATION */
     }
-    else{
+    else
+    {
         /* NORMAL CREATION */
 
-        vector<half, 3> normalCreationBuffer;
+       
+        if(_UseBumpMap)
+        {
+            vector<half, 3> normalCreationBuffer;
 
-        vector<fixed, 4> modifiedNormalMap;
-        modifiedNormalMap.xyz = bumpmapTex.xyz;
-        normalCreationBuffer.xy = modifiedNormalMap.xy * 2 - 1;
-        normalCreationBuffer.z = max(1 - min(_BumpScale, 0.95), 0.001);
-        modifiedNormalMap.xyw = normalCreationBuffer * rsqrt(dot(normalCreationBuffer, normalCreationBuffer));
+            vector<fixed, 4> modifiedNormalMap;
+            modifiedNormalMap.xyz = bumpmapTex.xyz;
+            normalCreationBuffer.xy = modifiedNormalMap.xy * 2 - 1;
+            normalCreationBuffer.z = max(1 - min(_BumpScale, 0.95), 0.001);
+            // modifiedNormalMap.xyw = normalCreationBuffer * rsqrt(dot(normalCreationBuffer, normalCreationBuffer));
+            modifiedNormalMap.xyw = normalize(normalCreationBuffer);
 
-        /* because miHoYo stores outline directions in the tangents of the mesh,
-        // they cannot be used for normal and bump mapping. because of this, we can just recalculate
-        // for them with ddx() and ddy(), don't ask me how they work - I don't know as well kekw */ 
-        vector<half, 3> dpdx = ddx(i.vertexWS);
-        vector<half, 3> dpdy = ddy(i.vertexWS);
-        vector<half, 3> dhdx; dhdx.xy = ddx(newUVs);
-        vector<half, 3> dhdy; dhdy.xy = ddy(newUVs);
+            /* because miHoYo stores outline directions in the tangents of the mesh,
+            // they cannot be used for normal and bump mapping. because of this, we can just recalculate
+            // for them with ddx() and ddy(), don't ask me how they work - I don't know as well kekw */ 
+            vector<half, 3> dpdx = ddx(i.vertexWS);
+            vector<half, 3> dpdy = ddy(i.vertexWS);
+            vector<half, 3> dhdx; dhdx.xy = ddx(newUVs);
+            vector<half, 3> dhdy; dhdy.xy = ddy(newUVs);
 
-        // modify normals
-        dhdy.z = dhdx.y; dhdx.z = dhdy.x;
-        normalCreationBuffer = dot(dhdx.xz, dhdy.yz);
-        vector<half, 3> recalcTangent = -(0 < normalCreationBuffer) + (normalCreationBuffer < 0);
-        dhdx.xy = vector<half, 2>(recalcTangent.xy) * dhdy.yz;
-        dpdy *= -dhdx.y;
-        dpdx = dpdx * dhdx.x + dpdy;
-        normalCreationBuffer = rsqrt(dot(dpdx, dpdx));
-        dpdx *= normalCreationBuffer;
-        normalCreationBuffer = rawNormalsWS;
-        dpdy = normalCreationBuffer.zxy * dpdx.yzx;
-        dpdy = normalCreationBuffer.yzx * dpdx.zxy - dpdy.xyz;
-        dpdy *= -recalcTangent;
-        dpdy *= modifiedNormalMap.y;
-        dpdx = modifiedNormalMap.x * dpdx + dpdy;
-        modifiedNormalMap.xyw = modifiedNormalMap.www * normalCreationBuffer + dpdx;
-        recalcTangent = rsqrt(dot(modifiedNormalMap.xyw, modifiedNormalMap.xyw));
-        modifiedNormalMap.xyw *= recalcTangent;
-        normalCreationBuffer = (0.99 >= modifiedNormalMap.w) ? modifiedNormalMap.xyw : normalCreationBuffer;
+            // modify normals
+            dhdy.z = dhdx.y; dhdx.z = dhdy.x;
+            normalCreationBuffer = dot(dhdx.xz, dhdy.yz);
+            vector<half, 3> recalcTangent = -(0 < normalCreationBuffer) + (normalCreationBuffer < 0);
+            dhdx.xy = vector<half, 2>(recalcTangent.xy) * dhdy.yz;
+            dpdy *= -dhdx.y;
+            dpdx = dpdx * dhdx.x + dpdy;
+            // normalCreationBuffer = rsqrt(dot(dpdx, dpdx));
+            // dpdx *= normalCreationBuffer;
+            dpdx = normalize(normalCreationBuffer);
+            normalCreationBuffer = rawNormalsWS;
+            dpdy = normalCreationBuffer.zxy * dpdx.yzx;
+            dpdy = normalCreationBuffer.yzx * dpdx.zxy - dpdy.xyz;
+            dpdy *= -recalcTangent;
+            dpdy *= modifiedNormalMap.y;
+            dpdx = modifiedNormalMap.x * dpdx + dpdy;
+            modifiedNormalMap.xyw = modifiedNormalMap.www * normalCreationBuffer + dpdx;
+            // recalcTangent = rsqrt(dot(modifiedNormalMap.xyw, modifiedNormalMap.xyw));
+            // modifiedNormalMap.xyw *= recalcTangent;
+            modifiedNormalMap.xyw = normalize(recalcTangent);
+            normalCreationBuffer = (0.99 >= modifiedNormalMap.w) ? modifiedNormalMap.xyw : normalCreationBuffer;
 
-        // hope you understood any of that KEKW, finally switch between normal map and raw normals
-        modifiedNormalsWS = normalCreationBuffer;
-        finalNormalsWS = (_UseBumpMap != 0) ? modifiedNormalsWS : finalNormalsWS;
+            // hope you understood any of that KEKW, finally switch between normal map and raw normals
+            modifiedNormalsWS = normalCreationBuffer;
+            finalNormalsWS = (_UseBumpMap) ? modifiedNormalsWS : finalNormalsWS;
+        }
 
         /* END OF NORMAL CREATION */
 
@@ -249,26 +361,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
         /* END OF DOT CREATION */
 
-
-        /* MATERIAL IDS */
-
-        half idMasks = lightmapTex.w;
-
-        half materialID = 1;
-        if(idMasks >= 0.2 && idMasks <= 0.4 && _UseMaterial4 != 0){
-            materialID = 4;
-        } 
-        else if(idMasks >= 0.4 && idMasks <= 0.6 && _UseMaterial3 != 0){
-            materialID = 3;
-        }
-        else if(idMasks >= 0.6 && idMasks <= 0.8 && _UseMaterial5 != 0){
-            materialID = 5;
-        }
-        else if(idMasks >= 0.8 && idMasks <= 1.0 && _UseMaterial2 != 0){
-            materialID = 2;
-        }
-
-        /* END OF MATERIAL IDS */
+        // getting the materials inside this branch is weird, why are we doing this
+        // its something shared by a bunch of stuff 
 
 
         /* SHADOW RAMP CREATION */
@@ -385,7 +479,7 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
         half metalFactor = (lightmapTex.r > 0.9) * _MetalMaterial;
 
         // multiply world space normals with view matrix
-        vector<half, 3> viewNormal = mul(UNITY_MATRIX_V, modifiedNormalsWS);
+        vector<half, 3> viewNormal = mul(UNITY_MATRIX_V, finalNormalsWS);
         // https://github.com/poiyomi/PoiyomiToonShader/blob/master/_PoiyomiShaders/Shaders/8.0/Poiyomi.shader#L8397
         // this part (all 5 lines) i literally do not understand but it fixes the skewing that occurs when the camera 
         // views the mesh at the edge of the screen (PLEASE LET ME GO BACK TO BLENDER)
@@ -627,8 +721,9 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
     u_xlat42 = u_xlat42 * _HitColorFresnelPower;
     u_xlat42 = exp2(u_xlat42);
     /----------------------------------------------------*/
-    vector<half, 3> fresnel = rsqrt(dot(finalNormalsWS, finalNormalsWS));
-    fresnel *= finalNormalsWS;
+    // vector<half, 3> fresnel = rsqrt(dot(finalNormalsWS, finalNormalsWS));
+    // fresnel *= finalNormalsWS; // this is just normalizing it dog
+    float3 fresnel = normalize(finalNormalsWS);
 
     // NdotV
     half NdotV = 1.0 - saturate(dot(fresnel, viewDir));
@@ -688,7 +783,10 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
     if(_ReturnVertexColorB != 0){ return vector<fixed, 4>(i.vertexcol.zzz, 1.0); }
     if(_ReturnVertexColorA != 0){ return vector<fixed, 4>(i.vertexcol.www, 1.0); }
     if(_ReturnRimLight != 0){ return vector<fixed, 4>(rimLight.xxx, 1.0); }
-    if(_ReturnNormals != 0){ return vector<fixed, 4>(modifiedNormalsWS, 1.0); }
+    if(_ReturnNormals != 0){ return vector<fixed, 4>(finalNormalsWS, 1.0); }
+    // why was it outputting the modified normals and not the final that were created
+    // this is why even if the normal map was turned off it was still acting as if it they were on
+    // smfh
     if(_ReturnRawNormals != 0){ return vector<fixed, 4>(rawNormalsWS, 1.0); }
     if(_ReturnTangents != 0){ return i.tangent; }
     if(_ReturnMetal != 0){ return metal; }
