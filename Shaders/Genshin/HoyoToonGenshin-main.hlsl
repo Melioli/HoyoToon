@@ -1,5 +1,6 @@
 // vertex
-vsOut vert(vsIn v){
+vsOut vert(vsIn v)
+{
     vsOut o = (vsOut)0.0f;
     o.pos = UnityObjectToClipPos(v.vertex);
     o.vertexWS = mul(UNITY_MATRIX_M, v.vertex); // TransformObjectToWorld
@@ -41,7 +42,8 @@ vsOut vert(vsIn v){
 }
 
 // fragment
-vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
+vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
+{
     // if frontFacing == 1 or _UseBackFaceUV2 == 0, use uv.xy, else uv.zw
     vector<half, 2> newUVs = (frontFacing || !_UseBackFaceUV2) ? i.uv.xy : i.uv.zw;
     // use only uv.xy for face shader
@@ -83,7 +85,7 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
     
     /* MATERIAL IDS */
-    half idMasks = lightmapTex.w;
+    half idMasks = (_UseFaceMapNew) ? facemapTex.w : lightmapTex.w;
 
     half materialID = 1;
     if(idMasks >= 0.2 && idMasks <= 0.4 && _UseMaterial4 != 0)
@@ -110,14 +112,12 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
     {
         float3 parallax = normalize(i.parallax);
 
-        // float2 startex_uv = TRANSFORM_TEX(i.uv,  _StarTex);
         float star_speed = _Time.y * _Star01Speed;
 
         parallax = normalize(parallax);
         float2 star_01_parallax = (parallax.xy * (_StarHeight - 1.0f))   * (float2)-0.1 + (float2(0.0f, star_speed) + TRANSFORM_TEX(newUVs, _StarTex));
         float2 star_02_parallax = (parallax.xy * (_Star02Height - 1.0f)) * (float2)-0.1 + (float2(0.0f, star_speed * 0.5f) + TRANSFORM_TEX(newUVs, _Star02Tex));
                 
-        // float2 pallete_uv = (newUVs * _ColorPaletteTex_TexelSize.xy + _ColorPaletteTex_TexelSize.zw);
         float2 pallete_uv = TRANSFORM_TEX(newUVs, _ColorPaletteTex);
         pallete_uv.x = _Time.y * _ColorPalletteSpeed +  pallete_uv.x;
         float3 pallete = _ColorPaletteTex.Sample(sampler_ColorPaletteTex, pallete_uv);
@@ -130,12 +130,10 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
 
         float noise = noise_01_tex * noise_02_tex;
 
-        // float2 constellation_uv = (newUVs * _ConstellationTex_TexelSize.zw + _ConstellationTex_TexelSize.xy);
         float2 constellation_uv = TRANSFORM_TEX(newUVs, _ConstellationTex);
         float2 const_parallax = (parallax.xy * (_ConstellationHeight - 1.0f)) * (float2)-0.1f + constellation_uv;
         float3 constellation_tex = _ConstellationTex.Sample(sampler_LightMapTex, const_parallax).xyz * (float3)_ConstellationBrightness;
 
-        // float2 cloud_uv = (newUVs * _CloudTex_TexelSize.xy + _CloudTex_TexelSize.zw);
         float2 cloud_uv = TRANSFORM_TEX(newUVs, _CloudTex);
         float2 cloud_parallax = (parallax.xy * (_CloudHeight - 1.0f)) * (float2)-0.1 + (noise * (float2)_Noise03Brightness + cloud_uv);
         float cloud_tex = _CloudTex.Sample(sampler_NoiseTex01, cloud_parallax).x;
@@ -153,7 +151,6 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
         float3 cloak = star_color * noise + constellation_tex;
         cloak = ((cloud_tex * (float3)_CloudBrightness) * pallete + cloak);
         mainTex.xyz = lerp(mainTex.xyz, cloak + mainTex.xyz, mainTex.w * _StarCloakBlendRate);
-        // mainTex.xyz = noise;
 
         if(_StarCloakOveride) return mainTex;
     }
@@ -168,7 +165,6 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
     if(_UseFaceMapNew != 0)
     {
         /* TEXTURE CREATION */
-
         vector<fixed, 4> lightmapTex_mirrored = SampleTexture2DBicubicFilter(_LightMapTex, sampler_LightMapTex, vector<half, 2>(1.0 - i.uv.x, i.uv.y), _LightMapTex_TexelSize.zwxy);
 
         /* END OF TEXTURE CREATION */
@@ -199,7 +195,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
         half faceFactor = smoothstep(shadowRange - _FaceMapSoftness, shadowRange + _FaceMapSoftness, lightmapDir.w);
 
         // use FdotL once again to lerp between shaded and lit for the mouth area
-        faceFactor = faceFactor + facemapTex.w * (1 - FdotL);
+        // faceFactor = faceFactor + facemapTex.w * (1 - FdotL); // this isnt necessary since in game they actually have shadows
+        // the thing is that its harder to notice since it uses multiple materials
 
         litFactor = 1.0 - faceFactor;
 
@@ -224,7 +221,11 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
         {
             vector<fixed, 4> ShadowDay = _FirstShadowMultColor;
             vector<fixed, 4> ShadowNight = _CoolShadowMultColor;
-
+            if(materialID == 2) ShadowDay = _FirstShadowMultColor2; ShadowNight = _CoolShadowMultColor2;
+            if(materialID == 3) ShadowDay = _FirstShadowMultColor3; ShadowNight = _CoolShadowMultColor3;
+            if(materialID == 4) ShadowDay = _FirstShadowMultColor4; ShadowNight = _CoolShadowMultColor4;
+            if(materialID == 5) ShadowDay = _FirstShadowMultColor5; ShadowNight = _CoolShadowMultColor5;
+                
             ShadowFinal = lerp(ShadowDay, ShadowNight, _DayOrNight);
         }
 
@@ -293,12 +294,13 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
             modifiedNormalMap.xyw = modifiedNormalMap.www * normalCreationBuffer + dpdx;
             // recalcTangent = rsqrt(dot(modifiedNormalMap.xyw, modifiedNormalMap.xyw));
             // modifiedNormalMap.xyw *= recalcTangent;
-            modifiedNormalMap.xyw = normalize(recalcTangent);
+            modifiedNormalMap.xyw = normalize(modifiedNormalMap);
             normalCreationBuffer = (0.99 >= modifiedNormalMap.w) ? modifiedNormalMap.xyw : normalCreationBuffer;
 
             // hope you understood any of that KEKW, finally switch between normal map and raw normals
             modifiedNormalsWS = normalCreationBuffer;
             finalNormalsWS = (_UseBumpMap) ? modifiedNormalsWS : finalNormalsWS;
+
         }
 
         /* END OF NORMAL CREATION */
@@ -374,7 +376,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
         half occlusion = ((_UseLightMapColorAO != 0) ? lightmapTex.g : 0.5) * ((_UseVertexColorAO != 0) ? i.vertexcol.r : 1.0);
 
         // switch between the shadow ramp and custom shadow colors
-        if(_UseShadowRamp != 0){
+        if(_UseShadowRamp != 0)
+        {
             // calculate shadow ramp width from _ShadowRampWidth and i.vertexcol.g
             half ShadowRampWidthCalc = i.vertexcol.g * 2.0 * _ShadowRampWidth;
 
@@ -400,7 +403,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
             // switch between 1 and ramp edge like how the game does it, also make eyes always lit
             ShadowFinal = (litFactor && lightmapTex.g < 0.95) ? ShadowFinal : 1;
         }
-        else{
+        else
+        {
             // apply occlusion
             NdotL = (NdotL + occlusion) * 0.5;
             NdotL = (occlusion > 0.95) ? 1.0 : NdotL;
@@ -452,7 +456,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target{
                 NdotL = (buffer2) ? 1.0 : NdotL;
                 NdotL = (buffer1) ? NdotL : 1.0;
             }
-            else{
+            else
+            {
                 NdotL = 0.0;
             }
 
