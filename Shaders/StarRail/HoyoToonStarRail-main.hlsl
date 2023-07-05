@@ -1,4 +1,4 @@
-vs_out vert(vs_in i)
+vs_out vs_base(vs_in i)
 {
     vs_out o = (vs_out)0.0f;
     float4 pos_ws  = mul(unity_ObjectToWorld, i.pos);
@@ -18,7 +18,8 @@ vs_out vert(vs_in i)
     return o;
 }
 
-float4 frag(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+#ifdef BASE_MATERIAL
+float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
     // INITIALIZE VERTEX SHADER INPUTS : 
     float3 normal = normalize(i.normal);
@@ -109,12 +110,130 @@ float4 frag(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         _SpecularColor6,
         _SpecularColor7,
     };
+
+    float3 specular_values[8] =
+    {
+        float3(_SpecularShininess0, max(_SpecularRoughness0, 0.001f), _SpecularIntensity0),
+        float3(_SpecularShininess1, max(_SpecularRoughness1, 0.001f), _SpecularIntensity1),
+        float3(_SpecularShininess2, max(_SpecularRoughness2, 0.001f), _SpecularIntensity2),
+        float3(_SpecularShininess3, max(_SpecularRoughness3, 0.001f), _SpecularIntensity3),
+        float3(_SpecularShininess4, max(_SpecularRoughness4, 0.001f), _SpecularIntensity4),
+        float3(_SpecularShininess5, max(_SpecularRoughness5, 0.001f), _SpecularIntensity5),
+        float3(_SpecularShininess6, max(_SpecularRoughness6, 0.001f), _SpecularIntensity6),
+        float3(_SpecularShininess7, max(_SpecularRoughness7, 0.001f), _SpecularIntensity7),
+    };
+
+
+    float3 specular = ndoth;
+    specular = pow(max(specular, 0.01f), specular_values[curr_region].x);
+
+    float highlight = pow(ndoth, specular_values[curr_region].x);
+    float specular_thresh = 1.0f - lightmp.z; 
+    float rough_thresh = specular_thresh - specular_values[curr_region].y;
+    specular_thresh = (specular_values[curr_region].y + specular_thresh) - rough_thresh;
+    specular = shadow_area * highlight - rough_thresh; 
+    specular_thresh = saturate((1.0f / specular_thresh) * specular);
+    specular = (specular_thresh * - 2.0f + 3.0f) * pow(specular_thresh, 2.0f);
+
+    specular = (specular_color[curr_region] * _ES_SPColor) * specular *(specular_values[curr_region].z * _ES_SPIntensity);
+
     // ================================================================================================ //
     out_color = out_color * diffuse;
-    out_color.xyz = out_color * shadow_color; 
+    out_color.xyz = out_color * shadow_color + specular; 
 
     // DEBUG
-    out_color = specular_color[curr_region];
+    // out_color.xyz = specular;
+    // out_color.xyz = lightmp.x;
     
     return out_color;
 }
+#endif
+
+#ifdef HAIR_MATERIAL
+float4 ps_hair(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+{
+     // INITIALIZE VERTEX SHADER INPUTS : 
+    float3 normal = normalize(i.normal);
+    float3 view   = normalize(i.view);
+    float2 uv     = i.uv.xy;
+    float4 vcol   = i.v_col;
+
+    // MATERIAL COLOR :
+    float4 color = _Color;
+
+    if(!vface) // use uv2 if vface is false
+    { // so basically if its a backfacing face
+        uv.xy = i.uv.zw;
+        color = _BackColor;
+        normal = normal * -1.0f;
+    }
+
+    // INITIALIZE OUTPUT COLOR : 
+    float4 out_color = color;
+
+    // COMPUTE HALF VECTOR : 
+    float3 half_vector = normalize(view + _WorldSpaceLightPos0);
+
+    // DOT PRODUCTS : 
+    float ndotl = dot(normal, _WorldSpaceLightPos0);
+    float ndoth = dot(normal, half_vector);
+    float ndotv = dot(normal, view);
+
+    // SAMPLE TEXTURES : 
+    float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
+    float4 lightmp = _LightMap.Sample(sampler_LightMap, uv);
+
+    out_color = diffuse;  
+    
+    return out_color;
+}
+#endif
+
+#ifdef FACE_MATERIAL
+float4 ps_face(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+{
+    // INITIALIZE VERTEX SHADER INPUTS : 
+    float3 normal = normalize(i.normal);
+    float3 view   = normalize(i.view);
+    float2 uv     = i.uv.xy;
+    float4 vcol   = i.v_col;
+
+    // MATERIAL COLOR :
+    float4 color = _Color;
+
+    if(!vface) // use uv2 if vface is false
+    { // so basically if its a backfacing face
+        uv.xy = i.uv.zw;
+        color = _BackColor;
+        normal = normal * -1.0f;
+    }
+
+    // INITIALIZE OUTPUT COLOR : 
+    float4 out_color = color;
+
+    // COMPUTE HALF VECTOR : 
+    float3 half_vector = normalize(view + _WorldSpaceLightPos0);
+
+    // DOT PRODUCTS : 
+    float ndotl = dot(normal, _WorldSpaceLightPos0);
+    float ndoth = dot(normal, half_vector);
+    float ndotv = dot(normal, view);
+
+    // SAMPLE TEXTURES : 
+    float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
+    float4 lightmp = _LightMap.Sample(sampler_LightMap, uv);
+
+    out_color = diffuse;     
+    
+    return out_color;
+}
+#endif
+
+#ifdef SHADOW_MATERIAL
+float4 ps_shadow(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+{
+
+    float4 color = _Color;
+    return color;
+}
+#endif
