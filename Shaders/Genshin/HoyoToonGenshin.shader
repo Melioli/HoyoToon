@@ -60,7 +60,7 @@
         //Face Shading
         [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_UseFaceMapNew==1.0}}", Float) = 0
         [Toggle] _flipFaceLighting ("Flip Face Lighting", Range(0.0, 1.0)) = 0.0
-        [SmallTexture]_FaceMap ("Face Shadow Ramp",2D)= "white"{ }
+        [SmallTexture]_FaceMap ("Face Shadow",2D)= "white"{ }
         [HideInInspector] _UseFaceMapNew ("Enable Face Shader", Range(0.0, 1.0)) = 0.0
         _FaceMapSoftness ("Face Lighting Softness", Range(0.0, 1.0)) = 0.001
         [IntRange] _MaterialID ("Face Material ID", Range(1.0, 5.0)) = 2.0
