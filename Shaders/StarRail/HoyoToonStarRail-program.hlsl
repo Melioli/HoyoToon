@@ -4,6 +4,8 @@ vs_out vs_base(vs_in i)
     float4 pos_ws  = mul(unity_ObjectToWorld, i.pos);
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
     o.pos = pos_wvp;
+    o.ws_pos =  mul(unity_ObjectToWorld, i.pos);
+    o.ss_pos = ComputeScreenPos(o.pos);
 
     o.uv = float4(i.uv_0, i.uv_1); // populate this with both uvs to save on texcoords 
     o.normal = mul((float3x3)unity_ObjectToWorld, i.normal) ; // WORLD SPACE NORMAL 
@@ -13,12 +15,24 @@ vs_out vs_base(vs_in i)
     o.view = _WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, i.pos).xyz;
     // its more efficient to do this in the vertex shader instead of trying to calculate the view vector for every pixel 
     o.v_col = i.v_col;    
-    
+       
     UNITY_TRANSFER_FOG(o, o.pos);
     return o;
 }
 
-#ifdef BASE_MATERIAL
+vs_out vs_edge(vs_in i)
+{
+    vs_out o = (vs_out)0.0f; // cast to 0 to avoid intiailization warnings
+    float3 ws_normal = mul(UNITY_MATRIX_V, i.tangent.xyz);
+    float3 ws_ps     = mul(i.pos, mul(unity_ObjectToWorld, unity_MatrixV));
+    float fov = 1.0f / rsqrt(abs(ws_ps.z / unity_CameraProjection._m11) / 1000.0f);
+    i.pos.xyz = i.pos.xyz + (ws_normal.xyz * (i.v_col.w * 1.0f * fov));
+    float4 pos_ws  = mul(unity_ObjectToWorld, i.pos);
+    o.pos = UnityObjectToClipPos(i.pos.xyz);
+    o.uv = float4(i.uv_0, i.uv_1);
+    return o;
+}
+
 float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
     // INITIALIZE VERTEX SHADER INPUTS : 
@@ -59,35 +73,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     // I dont want to write a set of if else statements like this for the specular, rim, and mlut
     // so this is the next best thing i can do
-    int curr_region = 0; // 0-7 in case i want to throw stuff into arrays 
-    if(material_ID > 0.5 && material_ID < 1.5 )
-    {
-        curr_region = 1;
-    } 
-    else if(material_ID > 1.5f && material_ID < 2.5f)
-    {
-        curr_region = 2;
-    } 
-    else if(material_ID > 2.5f && material_ID < 3.5f)
-    {
-        curr_region = 3;
-    } 
-    else
-    {
-        curr_region = (material_ID > 6.5f && material_ID < 7.5f) ? 7 : 0;
-        curr_region = (material_ID > 5.5f && material_ID < 6.5f) ? 6 : curr_region;
-        curr_region = (material_ID > 4.5f && material_ID < 5.5f) ? 5 : curr_region;
-        curr_region = (material_ID > 3.5f && material_ID < 4.5f) ? 4 : curr_region;
-    }
+    int curr_region = material_region(material_ID);
     
     
     // ================================================================================================ //
     // SHADOW AREA :
-    float shadow_ndotl  = ndotl * 0.5f + 0.5f;
-    float shadow_thresh = (lightmp.y + lightmp.y) * vcol.x;
-    float shadow_area   = min(1.0f, dot(shadow_ndotl.xx, shadow_thresh.xx));
-    shadow_area = max(0.001f, shadow_area) * 0.85f + 0.15f;
-    shadow_area = (shadow_area > _ShadowRamp) ? 0.99f : shadow_area;
+    float shadow_area = shadow_rate(ndotl, lightmp.y, vcol.x, _ShadowRamp);
 
     // RAMP UVS 
     float2 ramp_uv = {shadow_area, ramp_ID};
@@ -97,6 +88,17 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float3 cool_ramp = _DiffuseCoolRampMultiTex.Sample(sampler_DiffuseRampMultiTex, ramp_uv).xyz;
 
     float3 shadow_color = lerp(warm_ramp, cool_ramp, 0.0f);
+
+    
+    if(_FaceMaterial)
+    {
+        float face_sdf_right = _FaceMap.Sample(sampler_FaceMap, uv).w;
+        float face_sdf_left  = _FaceMap.Sample(sampler_FaceMap, float2(1.0f - uv.x, uv.y)).w;
+
+        shadow_area = shadow_rate_face(face_sdf_left, face_sdf_right);
+
+        shadow_color = lerp(_ShadowColor, 1.0f, shadow_area);
+    }
     // ================================================================================================ //
     // specular : 
     float4 specular_color[8] =
@@ -124,18 +126,8 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     };
 
 
-    float3 specular = ndoth;
-    specular = pow(max(specular, 0.01f), specular_values[curr_region].x);
-
-    float highlight = pow(ndoth, specular_values[curr_region].x);
-    float specular_thresh = 1.0f - lightmp.z; 
-    float rough_thresh = specular_thresh - specular_values[curr_region].y;
-    specular_thresh = (specular_values[curr_region].y + specular_thresh) - rough_thresh;
-    specular = shadow_area * highlight - rough_thresh; 
-    specular_thresh = saturate((1.0f / specular_thresh) * specular);
-    specular = (specular_thresh * - 2.0f + 3.0f) * pow(specular_thresh, 2.0f);
-
-    specular = (specular_color[curr_region] * _ES_SPColor) * specular *(specular_values[curr_region].z * _ES_SPIntensity);
+    float3 specular = specular_base(shadow_area, ndoth, lightmp.z, specular_color[curr_region], specular_values[curr_region], _ES_SPColor, _ES_SPIntensity);
+    
 
     // ================================================================================================ //
     out_color = out_color * diffuse;
@@ -144,96 +136,55 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // DEBUG
     // out_color.xyz = specular;
     // out_color.xyz = lightmp.x;
-    
+
+    if(_EyeShadowMat) out_color = _Color;
+
+    // out_color.xyz = lightmp.w;
+    // out_color = shadow_area;
+
     return out_color;
 }
-#endif
 
-#ifdef HAIR_MATERIAL
-float4 ps_hair(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+float4 ps_face_stencil(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
-     // INITIALIZE VERTEX SHADER INPUTS : 
-    float3 normal = normalize(i.normal);
-    float3 view   = normalize(i.view);
     float2 uv     = i.uv.xy;
-    float4 vcol   = i.v_col;
-
-    // MATERIAL COLOR :
-    float4 color = _Color;
-
-    if(!vface) // use uv2 if vface is false
-    { // so basically if its a backfacing face
-        uv.xy = i.uv.zw;
-        color = _BackColor;
-        normal = normal * -1.0f;
+    float4 facemap = _FaceMap.Sample(sampler_FaceMap, uv);
+    float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);  
+    if(!_FaceMaterial)
+    {
+        _HairBlendSilhouette = 1.0;
+        facemap = 0.0;
     }
-
-    // INITIALIZE OUTPUT COLOR : 
-    float4 out_color = color;
-
-    // COMPUTE HALF VECTOR : 
-    float3 half_vector = normalize(view + _WorldSpaceLightPos0);
-
-    // DOT PRODUCTS : 
-    float ndotl = dot(normal, _WorldSpaceLightPos0);
-    float ndoth = dot(normal, half_vector);
-    float ndotv = dot(normal, view);
-
-    // SAMPLE TEXTURES : 
-    float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
-    float4 lightmp = _LightMap.Sample(sampler_LightMap, uv);
-
-    out_color = diffuse;  
-    
+    clip(facemap.y - _HairBlendSilhouette);
+    float4 out_color = diffuse;
+    out_color.a = 0.5f;
+    // out_color.xyz = facemap.y;
     return out_color;
 }
-#endif
 
-#ifdef FACE_MATERIAL
-float4 ps_face(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+float4 ps_edge(vs_out i) : SV_Target
 {
-    // INITIALIZE VERTEX SHADER INPUTS : 
-    float3 normal = normalize(i.normal);
-    float3 view   = normalize(i.view);
-    float2 uv     = i.uv.xy;
-    float4 vcol   = i.v_col;
+    float2 uv      = i.uv.xy;
+    float lightmp = _LightMap.Sample(sampler_LightMap, uv).w;
 
-    // MATERIAL COLOR :
-    float4 color = _Color;
+    int material_ID = floor(lightmp * 8.0f);
 
-    if(!vface) // use uv2 if vface is false
-    { // so basically if its a backfacing face
-        uv.xy = i.uv.zw;
-        color = _BackColor;
-        normal = normal * -1.0f;
-    }
+    int material = material_region(material_ID);
 
-    // INITIALIZE OUTPUT COLOR : 
-    float4 out_color = color;
-
-    // COMPUTE HALF VECTOR : 
-    float3 half_vector = normalize(view + _WorldSpaceLightPos0);
-
-    // DOT PRODUCTS : 
-    float ndotl = dot(normal, _WorldSpaceLightPos0);
-    float ndoth = dot(normal, half_vector);
-    float ndotv = dot(normal, view);
-
-    // SAMPLE TEXTURES : 
-    float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
-    float4 lightmp = _LightMap.Sample(sampler_LightMap, uv);
-
-    out_color = diffuse;     
+    float4 outline_color[8] =
+    {
+        _OutlineColor0,
+        _OutlineColor1,
+        _OutlineColor2,
+        _OutlineColor3,
+        _OutlineColor4,
+        _OutlineColor5,
+        _OutlineColor6,
+        _OutlineColor7,
+    };
     
+    float4 out_color = outline_color[material];
+    if(_FaceMaterial) out_color = _OutlineColor;
+
     return out_color;
 }
-#endif
-
-#ifdef SHADOW_MATERIAL
-float4 ps_shadow(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
-{
-
-    float4 color = _Color;
-    return color;
-}
-#endif

@@ -1,16 +1,24 @@
-Shader "HoyoToon/StarRail/Base"
+Shader "HoyoToon/StarRail"
 {
     Properties
     {
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
+		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
+        [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
+
         // material types
         [Header(Material Shaders)] [Space]
         [Toggle(BASE_MATERIAL)] _BaseMaterial ("Use Base Shader", Float) = 1 // on by default
         [Toggle(FACE_MATERIAL)] _FaceMaterial ("Use Face Shader", Float) = 0
         [Toggle(EYESHADOW_MATERIAL)] _EyeShadowMat ("Use EyeShadow Shader", Float) = 0
         [Toggle(HAIR_MATERIAL)] _HairMaterial ("Use Hair Shader", Float) = 0
-
         // main coloring 
+        [Header(COMMON)]
         [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
         _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
@@ -18,18 +26,32 @@ Shader "HoyoToon/StarRail/Base"
         _EnvColor ("Env Color", Color) = (1, 1, 1, 1)
         _AddColor ("Env Color", Color) = (0, 0, 0, 0)
         [NoScaleOffset] _LightMap ("Light Map Texture", 2D) = "grey" {}
-        // -------------------------------------------
-        // normal map, dont know if star rail even uses these yet... 
-        [Toggle] _UseNormalMap ("Use Normal Map", Float) = 0
-        _NormalMap ("Normal Map Texture", 2D) = "bump" {}
-        _NormalScale ("Normal Map Scale", Range(0, 4)) = 1
+
+        [Header(FACE)]
+        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 1, 0, 0)
+        _headRightVector ("Right Vector | XYZ ", Vector) = (0, 0, -1, 0)
+        [NoScaleOffset] _FaceMap ("Face Map Texture", 2D) = "white" {}
+        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
+        [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
+
         // -------------------------------------------
         // shadow 
+        [Header(SHADOW)] 
         [NoScaleOffset]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
         [NoScaleOffset]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
         _ShadowRamp ("Shadow Ramp", Range(0.01, 1)) = 1
         [Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
         _ShadowBoostVal ("Shadow Boost Value", Range(0,1)) = 0
+
+        _ShadowColor ("Shadow Color", Color) = (0.5,0.5,0.5,1)
+        _DarkColor   ("Dark Color", Color) = (0.85,0.85,0.85,1)
+        _EyeShadowColor ("Eye Shadow Color", Color) = (1,1,1,1)
+        _EyeBaseShadowColor ("EyeBase Shadow Color", Vector) = (1,1,1,1)
+		_EyeShadowAngleMin ("EyeBase Shadow Min Angle", Range(0.36, 1.36)) = 0.85
+		_EyeShadowMaxAngle ("EyeBase Shadow Max Angle", Range(0, 1)) = 1
+		_ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
+		_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
+		_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
         // -------------------------------------------
         // specular 
         [Header(SPECULAR)]
@@ -130,8 +152,21 @@ Shader "HoyoToon/StarRail/Base"
         _RimDark5 ("Rim Dark 5 | (RGB ID = 159)", Range(0.0, 1.0)) = 0.5
         _RimDark6 ("Rim Dark 6 | (RGB ID = 192)", Range(0.0, 1.0)) = 0.5
         _RimDark7 ("Rim Dark 7 | (RGB ID = 223)", Range(0.0, 1.0)) = 0.5
-        
-        // outline 
+        // -------------------------------------------
+        // OUTLINE 
+        // --- 
+        [Header(OUTLINE)] _Outline ("Outline", Range(0, 1)) = 0
+        _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
+		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0,0,0,1)
+		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0,0,0,1)
+		_OutlineColor2 ("Outline Color 2 | (ID = 63)", Color) = (0,0,0,1)
+		_OutlineColor3 ("Outline Color 3 | (ID = 95)", Color) = (0,0,0,1)
+		_OutlineColor4 ("Outline Color 4 | (ID = 127)", Color) = (0,0,0,1)
+		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0,0,0,1)
+		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0,0,0,1)
+		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0,0,0,1)
+		_OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
+		[KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalFrom ("Outline Normal From", Float) = 0 
 
 
         // _LightMap
@@ -143,7 +178,7 @@ Shader "HoyoToon/StarRail/Base"
         // ZWrite [_ZWrite]
 
         HLSLINCLUDE
-        #define BASE_MATERIAL
+
 
         // #pragma multi_compile _ UNITY_HDR_ON
         #pragma multi_compile_fog
@@ -158,20 +193,33 @@ Shader "HoyoToon/StarRail/Base"
         // common properties 
         // -------------------------------------------
         // TEXTURES AND SAMPLERS
-        Texture2D _MainTex;
-        SamplerState sampler_MainTex; 
+        Texture2D _MainTex; 
         Texture2D _LightMap;
-        SamplerState sampler_LightMap;
         Texture2D _DiffuseRampMultiTex;
-        SamplerState sampler_DiffuseRampMultiTex;
         Texture2D _DiffuseCoolRampMultiTex;
-        SamplerState sampler_DiffuseCoolRampMultiTex;
+        Texture2D _FaceMap;
+        SamplerState sampler_MainTex;
+        SamplerState sampler_LightMap;
+        SamplerState sampler_DiffuseRampMultiTex;
+        SamplerState sampler_FaceMap;
+        
+        // MATERIAL STATES
+        bool _BaseMaterial;
+        bool _FaceMaterial;
+        bool _EyeShadowMat;
+        bool _HairMaterial;
 
         // COLORS
         float4 _Color;
         float4 _BackColor;
         float4 _EnvColor;
         float4 _AddColor;
+
+        // face specific properties 
+        float3 _headForwardVector;
+        float3 _headRightVector;
+        float _HairBlendSilhouette;
+        float3 _ShadowColor;
 
         // shadow properties
         float _ShadowRamp;
@@ -214,21 +262,61 @@ Shader "HoyoToon/StarRail/Base"
         float  _SpecularIntensity6; 
         float  _SpecularIntensity7; 
 
+        // outline properties 
+        float4 _OutlineColor;
+        float4 _OutlineColor0;
+        float4 _OutlineColor1;
+        float4 _OutlineColor2;
+        float4 _OutlineColor3;
+        float4 _OutlineColor4;
+        float4 _OutlineColor5;
+        float4 _OutlineColor6;
+        float4 _OutlineColor7;
 
 
-        // #include "HoyoToonGenshin-helpers.hlsl"
+
+        #include "HoyoToonStarRail-common.hlsl"
 
         ENDHLSL
 
         Pass
         {
-            Name "ForwardBase"
+            Name "BasePass"
             Tags{ "LightMode" = "ForwardBase" }
-
-            
-            
-
             Cull [_Cull]
+            Blend 0 [_SrcBlend] [_DstBlend]
+            Stencil
+            {
+				ref [_StencilRef]  
+                Comp [_StencilCompA]
+				Pass [_StencilPassA]
+			}
+
+            HLSLPROGRAM
+            #pragma multi_compile_fwdbase
+            
+            #pragma vertex vs_base
+            #pragma fragment ps_base
+
+            #include "HoyoToonStarRail-program.hlsl"
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "EyeStencilPass"
+            Tags{ "LightMode" = "ForwardBase" }
+            Cull [_Cull]
+            Blend SrcAlpha OneMinusSrcAlpha
+            Stencil
+            {
+                ref [_StencilRef]              
+				Comp [_StencilCompB]
+				Pass [_StencilPassB]  
+			}
+
+            // Cull [_Cull]
+           
 
             // Blend [_SrcBlend] [_DstBlend]
 
@@ -237,12 +325,41 @@ Shader "HoyoToon/StarRail/Base"
             #pragma multi_compile_fwdbase
             
             #pragma vertex vs_base
-            #pragma fragment ps_base
+            #pragma fragment ps_face_stencil
 
-            #include "HoyoToonStarRail-main.hlsl"
+            #include "HoyoToonStarRail-program.hlsl"
 
             ENDHLSL
         }
 
+        Pass
+        {
+            Name "Outline"
+            Tags{ "LightMode" = "ForwardBase" }
+            Cull Front
+            Blend SrcAlpha OneMinusSrcAlpha
+            Stencil
+            {
+                ref [_StencilRef]              
+				Comp [_StencilCompA]
+				Pass [_StencilPassA]  
+			}
+
+            // Cull [_Cull]
+           
+
+            // Blend [_SrcBlend] [_DstBlend]
+
+            HLSLPROGRAM
+
+            #pragma multi_compile_fwdbase
+            
+            #pragma vertex vs_edge
+            #pragma fragment ps_edge
+
+            #include "HoyoToonStarRail-program.hlsl"
+
+            ENDHLSL
+        }
     }
 }
