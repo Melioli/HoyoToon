@@ -20,12 +20,14 @@ Shader "HoyoToon/StarRail"
         // main coloring 
         [Header(COMMON)]
         [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
+        [Toggle]_IsTransparent ("use main texture alpha as transparency", float) = 0
         _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
         _EnvColor ("Env Color", Color) = (1, 1, 1, 1)
         _AddColor ("Env Color", Color) = (0, 0, 0, 0)
         [NoScaleOffset] _LightMap ("Light Map Texture", 2D) = "grey" {}
+        _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
 
         [Header(FACE)]
         _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 1, 0, 0)
@@ -56,9 +58,8 @@ Shader "HoyoToon/StarRail"
         // specular 
         [Header(SPECULAR)]
         [Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
-
-        _ES_SPColor ("Global Specular Color", Color) = (1, 1, 1, 1)
-        _ES_SPIntensity ("Global Specular Intensity", Float) = 1
+        _ES_SPColor ("Global Specular Color", Color) = (0.5, 0.5, 0.5, 1)
+        _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
         // --- specular color
         _SpecularColor0 ("Specular Color 0 | (RGB ID = 0)", Color)   = (1,1,1,1)
         _SpecularColor1 ("Specular Color 1 | (RGB ID = 31)", Color)  = (1,1,1,1)
@@ -156,6 +157,7 @@ Shader "HoyoToon/StarRail"
         // OUTLINE 
         // --- 
         [Header(OUTLINE)] _Outline ("Outline", Range(0, 1)) = 0
+        [Toggle]_EnableFOVWidth ("Use camera perspective FOV to scale outlines", Float) = 1
         _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
 		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0,0,0,1)
 		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0,0,0,1)
@@ -165,7 +167,15 @@ Shader "HoyoToon/StarRail"
 		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0,0,0,1)
 		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0,0,0,1)
 		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0,0,0,1)
-		_OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
+        _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
+        _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
+        _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
+        _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
+        _OutlineFixRange4 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
+        _OutlineFixSide ("Outline Fix Star Side", Range(0, 1)) = 0.6
+		_OutlineFixFront ("Outline Fix Star Front", Range(0, 1)) = 0.05
+        _FixLipOutline ("TurnOn Temp Lip Outline", Range(0, 1)) = 0
+		// _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
 		[KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalFrom ("Outline Normal From", Float) = 0 
 
 
@@ -198,16 +208,21 @@ Shader "HoyoToon/StarRail"
         Texture2D _DiffuseRampMultiTex;
         Texture2D _DiffuseCoolRampMultiTex;
         Texture2D _FaceMap;
+        Texture2D _FaceExpression;
         SamplerState sampler_MainTex;
         SamplerState sampler_LightMap;
         SamplerState sampler_DiffuseRampMultiTex;
         SamplerState sampler_FaceMap;
+
+
+        UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
         
         // MATERIAL STATES
         bool _BaseMaterial;
         bool _FaceMaterial;
         bool _EyeShadowMat;
         bool _HairMaterial;
+        bool _IsTransparent;
 
         // COLORS
         float4 _Color;
@@ -225,6 +240,8 @@ Shader "HoyoToon/StarRail"
         float _ShadowRamp;
         float _ShadowBoost; // these two values are used on the shadow mapping to increase its brightness
         float _ShadowBoostVal;
+
+        float _EnvironmentLightingStrength;
 
         // specular properties 
         float4 _ES_SPColor;
@@ -262,7 +279,67 @@ Shader "HoyoToon/StarRail"
         float  _SpecularIntensity6; 
         float  _SpecularIntensity7; 
 
+        // rim light properties 
+        float _RimLightMode;
+        float _RimCt;
+        float _Rimintensity;
+        float _RimWeight;
+        float _RimFeatherWidth;
+        float _RimIntensityTexIntensity;
+        float _RimWidth;
+        float4 _RimOffset;
+        float _RimEdge;
+        float4 _RimColor0;
+        float4 _RimColor1;
+        float4 _RimColor2;
+        float4 _RimColor3;
+        float4 _RimColor4;
+        float4 _RimColor5;
+        float4 _RimColor6;
+        float4 _RimColor7;
+        float _RimWidth0;
+        float _RimWidth1;
+        float _RimWidth2;
+        float _RimWidth3;
+        float _RimWidth4;
+        float _RimWidth5;
+        float _RimWidth6;
+        float _RimWidth7;
+        float _RimEdgeSoftness0;
+        float _RimEdgeSoftness1;
+        float _RimEdgeSoftness2;
+        float _RimEdgeSoftness3;
+        float _RimEdgeSoftness4;
+        float _RimEdgeSoftness5;
+        float _RimEdgeSoftness6;
+        float _RimEdgeSoftness7;
+        float _RimType0;
+        float _RimType1;
+        float _RimType2;
+        float _RimType3;
+        float _RimType4;
+        float _RimType5;
+        float _RimType6;
+        float _RimType7;
+        float _RimDark0;
+        float _RimDark1;
+        float _RimDark2;
+        float _RimDark3;
+        float _RimDark4;
+        float _RimDark5;
+        float _RimDark6;
+        float _RimDark7;
+
         // outline properties 
+        float _EnableFOVWidth;
+        float _OutlineWidth;
+        float _OutlineFixFront;
+        float _OutlineFixSide;
+        float _OutlineFixRange1;
+        float _OutlineFixRange2;
+        float _OutlineFixRange3;
+        float _OutlineFixRange4;
+        float _FixLipOutline;
         float4 _OutlineColor;
         float4 _OutlineColor0;
         float4 _OutlineColor1;
@@ -272,6 +349,7 @@ Shader "HoyoToon/StarRail"
         float4 _OutlineColor5;
         float4 _OutlineColor6;
         float4 _OutlineColor7;
+        
 
 
 
@@ -284,12 +362,14 @@ Shader "HoyoToon/StarRail"
             Name "BasePass"
             Tags{ "LightMode" = "ForwardBase" }
             Cull [_Cull]
-            Blend 0 [_SrcBlend] [_DstBlend]
+            Blend [_SrcBlend] [_DstBlend]
             Stencil
             {
 				ref [_StencilRef]  
                 Comp [_StencilCompA]
 				Pass [_StencilPassA]
+                Fail Keep
+				ZFail Keep
 			}
 
             HLSLPROGRAM
@@ -306,24 +386,25 @@ Shader "HoyoToon/StarRail"
         {
             Name "EyeStencilPass"
             Tags{ "LightMode" = "ForwardBase" }
-            Cull [_Cull]
-            Blend SrcAlpha OneMinusSrcAlpha
+            Cull [_Cull] 
+            Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
+            // BlendOp Add
+            // ZWrite Off
+            // Ztest Equal
             Stencil
             {
                 ref [_StencilRef]              
 				Comp [_StencilCompB]
 				Pass [_StencilPassB]  
+                Fail Keep
+				ZFail Keep
 			}
 
             // Cull [_Cull]
-           
-
             // Blend [_SrcBlend] [_DstBlend]
 
             HLSLPROGRAM
-
-            #pragma multi_compile_fwdbase
-            
+            #pragma multi_compile_fwdbase            
             #pragma vertex vs_base
             #pragma fragment ps_face_stencil
 
@@ -337,12 +418,15 @@ Shader "HoyoToon/StarRail"
             Name "Outline"
             Tags{ "LightMode" = "ForwardBase" }
             Cull Front
+            
             Blend SrcAlpha OneMinusSrcAlpha
             Stencil
             {
                 ref [_StencilRef]              
 				Comp [_StencilCompA]
 				Pass [_StencilPassA]  
+                Fail Keep
+				ZFail Keep
 			}
 
             // Cull [_Cull]

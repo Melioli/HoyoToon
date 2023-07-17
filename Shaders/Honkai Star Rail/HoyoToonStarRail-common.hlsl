@@ -39,6 +39,7 @@ float shadow_rate(float ndotl, float lightmap_ao, float vertex_ao, float shadow_
 
 float shadow_rate_face(float facemap, float facemap_mirror)
 {
+    // copied from the genshin shader because fuck trying to port my mmd method
     // head directions
     float3 head_forward = normalize(UnityObjectToWorldDir(_headForwardVector.xyz));
     float3 head_right   = normalize(UnityObjectToWorldDir(_headRightVector.xyz));
@@ -58,40 +59,9 @@ float shadow_rate_face(float facemap, float facemap_mirror)
     shadow_range = pow(shadow_range, pow(1, 3));
     // finally drive faceFactor
     half face_factor = smoothstep(shadow_range - 0.001, shadow_range + 0.001, lightmapDir);
-    // use FdotL once again to lerp between shaded and lit for the mouth area
-    // faceFactor = faceFactor + facemapTex.w * (1 - FdotL); // this isnt necessary since in game they actually have shadows
-    // the thing is that its harder to notice since it uses multiple materials
-
-    // litFactor = 1.0 - faceFactor;
 
     return face_factor;
-
 }
-
-/* 
-float shadow_right = (tex2D(_FaceMapTex, float2(      uv.x, uv.y)).a); 
-    float shadow_left  = (tex2D(_FaceMapTex, float2(1.0 - uv.x, uv.y)).a);
-    float ao = tex2D(_LightMapTex, uv).y;
-
-    float3 head_forward = normalize(UnityObjectToWorldDir(_headForward.xyz));
-    float3 head_right = normalize(UnityObjectToWorldDir(_headRight.xyz));
-
-    float rdotl = dot((head_right.xz), -normalize(_WorldSpaceLightPos0.xyz));
-    float fdotl = dot((head_forward.xz), -normalize(_WorldSpaceLightPos0.xyz));
-
-    float shadow = 1.0;
-
-    if (rdotl > 0) {
-        shadow = shadow_left;
-    } else {
-        shadow = shadow_right;
-    }
-
-    float shadow_step = step(abs(rdotl), ((shadow)));
-    float facing_step = step(fdotl, 0);
-
-    return shadow_step * facing_step * ao;
-    */
 
 float3 specular_base(float shadow_area, float ndoth, float lightmap_spec, float3 specular_color, float3 specular_values, float3 specular_color_global, float specular_intensity_global)
 {
@@ -108,3 +78,58 @@ float3 specular_base(float shadow_area, float ndoth, float lightmap_spec, float3
     return specular;
 }
 
+float4 rim_light_calc(float3 normal)
+{
+    
+}
+
+
+// =============================================================================================================== //
+// LIGHTING SPECIFIC 
+
+
+// Took this from primotoon because aint no way in hell im doing it myself if it already works in the genshin shader
+// environment lighting function
+fixed4 get_enviro_light(float3 ws_pos)
+{
+    // get all the point light positions
+    half3 firstPointLightPos = { unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x };
+    half3 secondPointLightPos = { unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y };
+    half3 thirdPointLightPos = { unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z };
+    half3 fourthPointLightPos = { unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w };
+
+    // get all the point light attenuations
+    half firstPointLightAtten = 2 * rsqrt(unity_4LightAtten0.x);
+    half secondPointLightAtten = 2 * rsqrt(unity_4LightAtten0.y);
+    half thirdPointLightAtten = 2 * rsqrt(unity_4LightAtten0.z);
+    half fourthPointLightAtten = 2 * rsqrt(unity_4LightAtten0.w);
+
+    // first, get the distance between each vertex and all of the point light positions,
+    // then invert the result and apply attenuation, saturate to prevent my guy from glowing
+    // lastly, multiply it to the corresponding light's color
+    half3 firstPointLight = saturate(lerp(1, 0, distance(ws_pos, firstPointLightPos) - 
+                                      firstPointLightAtten)) * unity_LightColor[0];
+    half3 secondPointLight = saturate(lerp(1, 0, distance(ws_pos, secondPointLightPos) - 
+                                       secondPointLightAtten)) * unity_LightColor[1];
+    half3 thirdPointLight = saturate(lerp(1, 0, distance(ws_pos, thirdPointLightPos) - 
+                                      thirdPointLightAtten)) * unity_LightColor[2];
+    half3 fourthPointLight = saturate(lerp(1, 0, distance(ws_pos, thirdPointLightPos) - 
+                                       fourthPointLightAtten)) * unity_LightColor[3];
+
+    // THIS COULD USE SOME IMPROVEMENTS, I DON'T KNOW HOW TO DISABLE THIS FOR SPOT LIGHTS
+    // compare with all of the other point lights
+    half3 pointLightCalc = firstPointLight;
+    pointLightCalc = max(pointLightCalc, secondPointLight);
+    pointLightCalc = max(pointLightCalc, thirdPointLight);
+    pointLightCalc = max(pointLightCalc, fourthPointLight);
+
+    // get the color of whichever's greater between the light direction and the strongest nearby point light
+    fixed4 environmentLighting = max(_LightColor0, fixed4(pointLightCalc, 1));
+    // now get whichever's greater than the result of the first and the nearest light probe
+    half3 ShadeSH9Alternative = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + 
+                                          half3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
+    //environmentLighting = max(environmentLighting, fixed4(ShadeSH9(vector<half, 4>(0, 0, 0, 1)), 1));
+    environmentLighting = max(environmentLighting, fixed4(ShadeSH9Alternative, 1));
+
+    return environmentLighting;
+}
