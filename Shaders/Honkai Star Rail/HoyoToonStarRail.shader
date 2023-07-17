@@ -158,6 +158,8 @@ Shader "HoyoToon/StarRail"
         // --- 
         [Header(OUTLINE)] _Outline ("Outline", Range(0, 1)) = 0
         [Toggle]_EnableFOVWidth ("Use camera perspective FOV to scale outlines", Float) = 1
+        _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
+        _OutlineScale ("Outline Scale", Range(0, 1)) = 0.1
         _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
 		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0,0,0,1)
 		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0,0,0,1)
@@ -167,7 +169,6 @@ Shader "HoyoToon/StarRail"
 		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0,0,0,1)
 		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0,0,0,1)
 		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0,0,0,1)
-        _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
         _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
         _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
         _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
@@ -333,6 +334,7 @@ Shader "HoyoToon/StarRail"
         // outline properties 
         float _EnableFOVWidth;
         float _OutlineWidth;
+        float _OutlineScale;
         float _OutlineFixFront;
         float _OutlineFixSide;
         float _OutlineFixRange1;
