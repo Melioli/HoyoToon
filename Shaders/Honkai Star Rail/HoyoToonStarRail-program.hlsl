@@ -24,126 +24,125 @@ vs_out vs_edge(vs_in i)
 {
     vs_out o = (vs_out)0.0f; // cast to 0 to avoid intiailization warnings
     
-    // if(_FaceMaterial) // sigh is this even going to work in vr? 
-    // {
+    if(_FaceMaterial) // sigh is this even going to work in vr? 
+    {
 
-    //     // float3 outline_direction;
-    //     // float3 outline_side = float3(-0.206f, 0.961f, _OutlineFixSide);
-    //     // float3 ws_pos = mul(i.pos.xyz, (float3x3)unity_ObjectToWorld);
-    //     // float3 view_dir = _WorldSpaceCameraPos - ws_pos.xyz;
-    //     // float4 ws_view;
-    //     // ws_view.xyz  = mul(view_dir, (float3x3)unity_ObjectToWorld);
-    //     // float view_length = length(ws_view);
-    //     // // they reuse the length of the view vector for a later line so as to not do the math twice in a row 
-    //     // // ill just use the length to finish up normalizing the view vector
-    //     // ws_view.yzw = view_length * ws_view.xyz;
+        // float3 outline_direction;
+        // float3 outline_side = float3(-0.206f, 0.961f, _OutlineFixSide);
+        // float3 ws_pos = mul(i.pos.xyz, (float3x3)unity_ObjectToWorld);
+        // float3 view_dir = _WorldSpaceCameraPos - ws_pos.xyz;
+        // float4 ws_view;
+        // ws_view.xyz  = mul(view_dir, (float3x3)unity_ObjectToWorld);
+        // float view_length = length(ws_view);
+        // // they reuse the length of the view vector for a later line so as to not do the math twice in a row 
+        // // ill just use the length to finish up normalizing the view vector
+        // ws_view.yzw = view_length * ws_view.xyz;
 
-    //     // float side_pos       = ws_pos.x * view_length + -0.1f;
-    //     // outline_direction.x  = dot(outline_side, ws_view.xyz);
-    //     // float4 outline_front = float4(_OutlineFixSide, -0.206f, 0.961f, _OutlineFixFront);
-    //     // outline_direction.y  = dot(outline_front, ws_view.xyz);
-    //     // outline_direction.z  = dot(float2(0.076f, 0.961f), ws_view.xy);
+        // float side_pos       = ws_pos.x * view_length + -0.1f;
+        // outline_direction.x  = dot(outline_side, ws_view.xyz);
+        // float4 outline_front = float4(_OutlineFixSide, -0.206f, 0.961f, _OutlineFixFront);
+        // outline_direction.y  = dot(outline_front, ws_view.xyz);
+        // outline_direction.z  = dot(float2(0.076f, 0.961f), ws_view.xy);
 
-    //     // outline_direction.x = max(9.999 * (0.1f - max(outline_direction.y, outline_direction.x)), 0.0f);
-    //     // outline_direction.y = outline_direction.x * outline_direction.x * (outline_direction * -2.0f + 3.0f);
-    //     // outline_direction.x = max(outline_direction.x, 1.0f);
+        // outline_direction.x = max(9.999 * (0.1f - max(outline_direction.y, outline_direction.x)), 0.0f);
+        // outline_direction.y = outline_direction.x * outline_direction.x * (outline_direction * -2.0f + 3.0f);
+        // outline_direction.x = max(outline_direction.x, 1.0f);
 
-    //     // outline_direction.y = saturate(outline_direction.z);
-    //     // outline_direction.z = 1.0f - outline_direction.z;
-    //     // outline_direction.y = outline_front.x + outline_direction.y;
-    //     // oultine_direction.yw = 
-    //     float _OutlineScale = 1.0f;
+        // outline_direction.y = saturate(outline_direction.z);
+        // outline_direction.z = 1.0f - outline_direction.z;
+        // outline_direction.y = outline_front.x + outline_direction.y;
+        // oultine_direction.yw = 
 
-    //     float4 tmp0;
-    //     float4 tmp1;
-    //     float4 tmp2;
-    //     float4 tmp3;
-    //     tmp0.xy = float2(-0.206, 0.961);
-    //     tmp0.z = _OutlineFixSide;
-    //     tmp1.xyz = mul(i.pos.xyz, (float3x3)unity_ObjectToWorld).xyz;
-    //     tmp2.xyz = _WorldSpaceCameraPos - tmp1.xyz;
-    //     tmp1.xyz = mul(tmp1.xyz, (float3x3)unity_ObjectToWorld).xyz;
-    //     tmp0.w = length(tmp1.xyz);
-    //     tmp1.yzw = tmp0.w * tmp1.xyz;
-    //     tmp0.w = tmp1.x * tmp0.w + -0.1; // outline_side.x * 
-    //     tmp0.x = dot(tmp0.xyz, tmp1.xyz); 
-    //     tmp2.yz = float2(-0.206, 0.961);
-    //     tmp2.xw = -float2(_OutlineFixSide.x, _OutlineFixFront.x);
-    //     tmp0.y = dot(tmp2.xyz, tmp1.xyz);
-    //     tmp0.z = dot(float2(0.076, 0.961), tmp1.xy);
-    //     tmp0.x = max(tmp0.y, tmp0.x);
-    //     tmp0.x = 0.1 - tmp0.x;
-    //     tmp0.x = tmp0.x * 9.999998;
-    //     tmp0.x = max(tmp0.x, 0.0);
-    //     tmp0.y = tmp0.x * -2.0 + 3.0;
-    //     tmp0.x = tmp0.x * tmp0.x;
-    //     tmp0.x = tmp0.x * tmp0.y;
-    //     tmp0.x = min(tmp0.x, 1.0);
-    //     tmp0.y = saturate(tmp0.z);
-    //     tmp0.z = 1.0 - tmp0.z;
-    //     tmp0.y = tmp2.x + tmp0.y;
-    //     tmp0.yw = saturate(tmp0.yw * float2(20.0, 5.0));
-    //     tmp1.x = tmp0.y * -2.0 + 3.0;
-    //     tmp0.y = tmp0.y * tmp0.y;
-    //     tmp0.y = tmp0.y * tmp1.x;
-    //     tmp0.x = max(tmp0.x, tmp0.y);
-    //     tmp0.x = min(tmp0.x, 1.0);
-    //     tmp0.x = tmp0.x - 1.0;
-    //     tmp0.x = i.v_col.y * tmp0.x + 1.0;
-    //     tmp0.x = tmp0.x * _OutlineWidth;
-    //     tmp0.x = tmp0.x * _OutlineScale;
-    //     tmp0.y = tmp0.w * -2.0 + 3.0;
-    //     tmp0.w = tmp0.w * tmp0.w;
-    //     tmp0.y = tmp0.w * tmp0.y;
-    //     tmp1.xy = -float2(_OutlineFixRange1.x, _OutlineFixRange2.x) + float2(_OutlineFixRange3.x, _OutlineFixRange4.x);
-    //     tmp0.yw = tmp0.yy * tmp1.xy + float2(_OutlineFixRange1.x, _OutlineFixRange2.x);
+        float4 tmp0;
+        float4 tmp1;
+        float4 tmp2;
+        float4 tmp3;
+        tmp0.xy = float2(-0.206, 0.961);
+        tmp0.z = _OutlineFixSide;
+        tmp1.xyz = mul(i.pos.xyz, (float3x3)unity_ObjectToWorld).xyz;
+        tmp2.xyz = _WorldSpaceCameraPos - tmp1.xyz;
+        tmp1.xyz = mul(tmp1.xyz, (float3x3)unity_ObjectToWorld).xyz;
+        tmp0.w = length(tmp1.xyz);
+        tmp1.yzw = tmp0.w * tmp1.xyz;
+        tmp0.w = tmp1.x * tmp0.w + -0.1; // outline_side.x * 
+        tmp0.x = dot(tmp0.xyz, tmp1.xyz); 
+        tmp2.yz = float2(-0.206, 0.961);
+        tmp2.xw = -float2(_OutlineFixSide.x, _OutlineFixFront.x);
+        tmp0.y = dot(tmp2.xyz, tmp1.xyz);
+        tmp0.z = dot(float2(0.076, 0.961), tmp1.xy);
+        tmp0.x = max(tmp0.y, tmp0.x);
+        tmp0.x = 0.1 - tmp0.x;
+        tmp0.x = tmp0.x * 9.999998;
+        tmp0.x = max(tmp0.x, 0.0);
+        tmp0.y = tmp0.x * -2.0 + 3.0;
+        tmp0.x = tmp0.x * tmp0.x;
+        tmp0.x = tmp0.x * tmp0.y;
+        tmp0.x = min(tmp0.x, 1.0);
+        tmp0.y = saturate(tmp0.z);
+        tmp0.z = 1.0 - tmp0.z;
+        tmp0.y = tmp2.x + tmp0.y;
+        tmp0.yw = saturate(tmp0.yw * float2(20.0, 5.0));
+        tmp1.x = tmp0.y * -2.0 + 3.0;
+        tmp0.y = tmp0.y * tmp0.y;
+        tmp0.y = tmp0.y * tmp1.x;
+        tmp0.x = max(tmp0.x, tmp0.y);
+        tmp0.x = min(tmp0.x, 1.0);
+        tmp0.x = tmp0.x - 1.0;
+        tmp0.x = i.v_col.y * tmp0.x + 1.0;
+        tmp0.x = tmp0.x * _OutlineWidth;
+        tmp0.x = tmp0.x * _OutlineScale;
+        tmp0.y = tmp0.w * -2.0 + 3.0;
+        tmp0.w = tmp0.w * tmp0.w;
+        tmp0.y = tmp0.w * tmp0.y;
+        tmp1.xy = -float2(_OutlineFixRange1.x, _OutlineFixRange2.x) + float2(_OutlineFixRange3.x, _OutlineFixRange4.x);
+        tmp0.yw = tmp0.yy * tmp1.xy + float2(_OutlineFixRange1.x, _OutlineFixRange2.x);
 
-    //     tmp0.y = smoothstep(tmp0.y, tmp0.w, tmp0.z);
+        tmp0.y = smoothstep(tmp0.y, tmp0.w, tmp0.z);
 
-    //     tmp0.y = tmp0.y * i.v_col.z;
-    //     tmp0.zw = i.v_col.zy > float2(0.0, 0.0);
-    //     tmp0.y = tmp0.z ? tmp0.y : i.v_col.w;
-    //     tmp0.z = i.v_col.y < 1.0;
-    //     tmp0.z = tmp0.w ? tmp0.z : 0.0;
-    //     tmp0.z = tmp0.z ? 1.0 : 0.0;
-    //     tmp0.y = tmp0.z * _FixLipOutline + tmp0.y;
-    //     tmp0.x = tmp0.y * tmp0.x;
+        tmp0.y = tmp0.y * i.v_col.z;
+        tmp0.zw = i.v_col.zy > float2(0.0, 0.0);
+        tmp0.y = tmp0.z ? tmp0.y : i.v_col.w;
+        tmp0.z = i.v_col.y < 1.0;
+        tmp0.z = tmp0.w ? tmp0.z : 0.0;
+        tmp0.z = tmp0.z ? 1.0 : 0.0;
+        tmp0.y = tmp0.z * _FixLipOutline + tmp0.y;
+        tmp0.x = tmp0.y * tmp0.x;
 
 
-    //     float3 outline_normal;
-    //     outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
-    //     outline_normal.z = -1;
-    //     outline_normal.xyz = normalize(outline_normal.xyz);
-    //     float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
-    //     float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-    //     if(!_EnableFOVWidth) fov_width = 0.5f;
-    //     wv_pos.xyz = wv_pos + (outline_normal * tmp0.x * fov_width);
-    //     o.pos = mul(UNITY_MATRIX_P, wv_pos);
+        float3 outline_normal;
+        outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
+        outline_normal.z = -1;
+        outline_normal.xyz = normalize(outline_normal.xyz);
+        float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
+        float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
+        if(!_EnableFOVWidth) fov_width = 0.5f;
+        wv_pos.xyz = wv_pos + (outline_normal * fov_width * tmp0.x);
+        o.pos = mul(UNITY_MATRIX_P, wv_pos);
         
-    //     // o.pos = mul(UNITY_MATRIX_MV, i.pos);
-    //     // o.pos = mul(UNITY_MATRIX_P, o.pos);
+        // o.pos = mul(UNITY_MATRIX_MV, i.pos);
+        // o.pos = mul(UNITY_MATRIX_P, o.pos);
 
-    // }
-    // else
-    // {
-    //     float3 outline_normal;
-    //     outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
-    //     outline_normal.z = -1;
-    //     outline_normal.xyz = normalize(outline_normal.xyz);
-    //     float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
-    //     float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-    //     if(!_EnableFOVWidth)fov_width = 0.5f;
-    //     wv_pos.xyz = wv_pos + (outline_normal * fov_width * (i.v_col.w * _OutlineWidth ));
-    //     o.pos = mul(UNITY_MATRIX_P, wv_pos);
-    // }
-    float3 outline_normal;
-    outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
-    outline_normal.xyz = normalize(outline_normal.xyz);
-    float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
-    // float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-    // if(!_EnableFOVWidth)fov_width = 0.5f;
-    wv_pos.xyz = wv_pos + (outline_normal * (i.v_col.w * _OutlineWidth * _OutlineScale));
-    o.pos = mul(UNITY_MATRIX_P, wv_pos);
+    }
+    else
+    {
+        float3 outline_normal;
+        outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
+        outline_normal.z = -1;
+        outline_normal.xyz = normalize(outline_normal.xyz);
+        float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
+        float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
+        if(!_EnableFOVWidth)fov_width = 0.5f;
+        wv_pos.xyz = wv_pos + (outline_normal * fov_width * (i.v_col.w * _OutlineWidth * _OutlineScale));
+        o.pos = mul(UNITY_MATRIX_P, wv_pos);
+    }
+    // float3 outline_normal;
+    // outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
+    // outline_normal.xyz = normalize(outline_normal.xyz);
+    // float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
+    // // float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
+    // // if(!_EnableFOVWidth)fov_width = 0.5f;
+    // wv_pos.xyz = wv_pos + (outline_normal * (i.v_col.w * _OutlineWidth * _OutlineScale));
+    // o.pos = mul(UNITY_MATRIX_P, wv_pos);
 
     o.uv = float4(i.uv_0, i.uv_1);
     return o;
