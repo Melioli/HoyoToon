@@ -30,8 +30,8 @@ Shader "HoyoToon/StarRail"
         _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
 
         [Header(FACE)]
-        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 1, 0, 0)
-        _headRightVector ("Right Vector | XYZ ", Vector) = (0, 0, -1, 0)
+        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
+        _headRightVector ("Right Vector | XYZ ", Vector) = (1, 0, 0, 0)
         [NoScaleOffset] _FaceMap ("Face Map Texture", 2D) = "white" {}
         _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
         [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
