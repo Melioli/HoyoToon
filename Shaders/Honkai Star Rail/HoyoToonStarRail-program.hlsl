@@ -27,32 +27,7 @@ vs_out vs_edge(vs_in i)
     if(_FaceMaterial) // sigh is this even going to work in vr? 
     {
 
-        // float3 outline_direction;
-        // float3 outline_side = float3(-0.206f, 0.961f, _OutlineFixSide);
-        // float3 ws_pos = mul(i.pos.xyz, (float3x3)unity_ObjectToWorld);
-        // float3 view_dir = _WorldSpaceCameraPos - ws_pos.xyz;
-        // float4 ws_view;
-        // ws_view.xyz  = mul(view_dir, (float3x3)unity_ObjectToWorld);
-        // float view_length = length(ws_view);
-        // // they reuse the length of the view vector for a later line so as to not do the math twice in a row 
-        // // ill just use the length to finish up normalizing the view vector
-        // ws_view.yzw = view_length * ws_view.xyz;
-
-        // float side_pos       = ws_pos.x * view_length + -0.1f;
-        // outline_direction.x  = dot(outline_side, ws_view.xyz);
-        // float4 outline_front = float4(_OutlineFixSide, -0.206f, 0.961f, _OutlineFixFront);
-        // outline_direction.y  = dot(outline_front, ws_view.xyz);
-        // outline_direction.z  = dot(float2(0.076f, 0.961f), ws_view.xy);
-
-        // outline_direction.x = max(9.999 * (0.1f - max(outline_direction.y, outline_direction.x)), 0.0f);
-        // outline_direction.y = outline_direction.x * outline_direction.x * (outline_direction * -2.0f + 3.0f);
-        // outline_direction.x = max(outline_direction.x, 1.0f);
-
-        // outline_direction.y = saturate(outline_direction.z);
-        // outline_direction.z = 1.0f - outline_direction.z;
-        // outline_direction.y = outline_front.x + outline_direction.y;
-        // oultine_direction.yw = 
-
+        
         float4 tmp0;
         float4 tmp1;
         float4 tmp2;
@@ -118,10 +93,6 @@ vs_out vs_edge(vs_in i)
         if(!_EnableFOVWidth) fov_width = 0.5f;
         wv_pos.xyz = wv_pos + (outline_normal * fov_width * tmp0.x);
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
-        
-        // o.pos = mul(UNITY_MATRIX_MV, i.pos);
-        // o.pos = mul(UNITY_MATRIX_P, o.pos);
-
     }
     else
     {
@@ -135,15 +106,6 @@ vs_out vs_edge(vs_in i)
         wv_pos.xyz = wv_pos + (outline_normal * fov_width * (i.v_col.w * _OutlineWidth * _OutlineScale));
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
-    // float3 outline_normal;
-    // outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, i.tangent.xyz);
-    // outline_normal.xyz = normalize(outline_normal.xyz);
-    // float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
-    // // float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-    // // if(!_EnableFOVWidth)fov_width = 0.5f;
-    // wv_pos.xyz = wv_pos + (outline_normal * (i.v_col.w * _OutlineWidth * _OutlineScale));
-    // o.pos = mul(UNITY_MATRIX_P, wv_pos);
-
     o.uv = float4(i.uv_0, i.uv_1);
     return o;
 }
@@ -185,14 +147,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
     float4 lightmap = _LightMap.Sample(sampler_LightMap, uv);
+    float lightmap_alpha = _LightMap.Sample(sampler_LightMap, i.uv.xy).w;
     float4 facemap = _FaceMap.Sample(sampler_FaceMap, uv);
     float4 faceexp = _FaceExpression.Sample(sampler_LightMap, uv);
 
-    // diffuse alpha toggle
-    if(!_IsTransparent) diffuse.w = 1.0f;
-
     // EXTRACT MATERIAL REGIONS 
-    float material_ID = floor(lightmap.w * 8.0f);
+    float material_ID = floor(8.0f * lightmap_alpha);
     float ramp_ID     = ((material_ID * 2.0f + 1.0f) * 0.0625f);
     // when writing the shader for mmd i had to invert the ramp ID since the uvs are read differently  
 
@@ -213,6 +173,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float3 cool_ramp = _DiffuseCoolRampMultiTex.Sample(sampler_DiffuseRampMultiTex, ramp_uv).xyz;
 
     float3 shadow_color = lerp(warm_ramp, cool_ramp, 0.0f);
+
+    int4 lut_uv;
+    lut_uv.x = material_ID;
+    lut_uv.yzw = int3(1,0,0);
+    float4 lut_a = _MaterialValuesPackLUT.Load(lut_uv.xwww);
+    float4 lut_b = _MaterialValuesPackLUT.Load(lut_uv.xyz);
 
     
     if(_FaceMaterial)
@@ -241,16 +207,22 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     float3 specular_values[8] =
     {
-        float3(_SpecularShininess0, max(_SpecularRoughness0, 0.001f), _SpecularIntensity0),
-        float3(_SpecularShininess1, max(_SpecularRoughness1, 0.001f), _SpecularIntensity1),
-        float3(_SpecularShininess2, max(_SpecularRoughness2, 0.001f), _SpecularIntensity2),
-        float3(_SpecularShininess3, max(_SpecularRoughness3, 0.001f), _SpecularIntensity3),
-        float3(_SpecularShininess4, max(_SpecularRoughness4, 0.001f), _SpecularIntensity4),
-        float3(_SpecularShininess5, max(_SpecularRoughness5, 0.001f), _SpecularIntensity5),
-        float3(_SpecularShininess6, max(_SpecularRoughness6, 0.001f), _SpecularIntensity6),
-        float3(_SpecularShininess7, max(_SpecularRoughness7, 0.001f), _SpecularIntensity7),
+        float3(_SpecularShininess0, _SpecularRoughness0, _SpecularIntensity0),
+        float3(_SpecularShininess1, _SpecularRoughness1, _SpecularIntensity1),
+        float3(_SpecularShininess2, _SpecularRoughness2, _SpecularIntensity2),
+        float3(_SpecularShininess3, _SpecularRoughness3, _SpecularIntensity3),
+        float3(_SpecularShininess4, _SpecularRoughness4, _SpecularIntensity4),
+        float3(_SpecularShininess5, _SpecularRoughness5, _SpecularIntensity5),
+        float3(_SpecularShininess6, _SpecularRoughness6, _SpecularIntensity6),
+        float3(_SpecularShininess7, _SpecularRoughness7, _SpecularIntensity7),
     };
     
+    if(_UseMaterialValuesLUT)
+    {
+        curr_region = 0;
+        specular_color[curr_region] = lut_a;
+        specular_values[curr_region] = lut_b.xyz;
+    }
 
     float3 specular = specular_base(shadow_area, ndoth, lightmap.z, specular_color[curr_region], specular_values[curr_region], _ES_SPColor, _ES_SPIntensity);
     
@@ -281,6 +253,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float4(_RimWidth7, _RimEdgeSoftness7, _RimType0, _RimDark7),
     };
 
+    // dear fucking god i hate this shit
     float2 screen_pos = i.ss_pos.xy / i.ss_pos.ww;
     float camera_depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos);
     camera_depth = LinearEyeDepth(camera_depth);
@@ -296,31 +269,32 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // DEBUG
     // out_color.xyz = specular;
     // out_color.xyz = lightmap.x;
-
+    if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
 
-
-    return out_color;
-}
-
-float4 ps_face_stencil(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
-{
-    float2 uv     = i.uv.xy;
-    float4 facemap = _FaceMap.Sample(sampler_FaceMap, uv);
-    float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);  
+    #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
     {
-        clip(facemap.y - _HairBlendSilhouette);
+        clip(saturate(facemap.y + diffuse.a) - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
+        // but it looks weird if the eye shines are specifically omitted from the stencil
     } 
     else if(_HairMaterial)
     {
-        diffuse.a = 0.5f;
+        // float bangs =saturate(1.0f - dot(normalize(UnityObjectToWorldDir(_headForwardVector.xyz) * view), normal));
+        // out_color.a = saturate(smoothstep(0.0, 1.0, bangs));
+        out_color.a = 0.5f;
     }
     else
     {
         discard;
     }
-    float4 out_color = diffuse;
+    #endif
+
+    // out_color.xyz = lut_a;
+    // out_color.xyz = _MaterialValuesPackLUT.Load(asint(material_ID));
+    // out_color.xyz = specular;
+    // out_color.xyz = material_ID;
+    
     return out_color;
 }
 
@@ -328,11 +302,21 @@ float4 ps_face_stencil(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
     float2 uv      = i.uv.xy;
+
+    // if(!vface) // use uv2 if vface is false
+    // { // so basically if its a backfacing face
+    //     uv.xy = i.uv.zw;
+    // }
     float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
 
     int material_ID = floor(lightmap * 8.0f);
 
     int material = material_region(material_ID);
+
+    int4 lut_uv;
+    lut_uv.x = material_ID;
+    lut_uv.yzw = int3(2,0,0);
+    float4 lut = _MaterialValuesPackLUT.Load(lut_uv.xyww);
 
     float4 outline_color[8] =
     {
@@ -345,7 +329,10 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         _OutlineColor6,
         _OutlineColor7,
     };
-    
+
+    if(_UseMaterialValuesLUT) outline_color[material] = lut;
+
+
     float4 out_color = outline_color[material];
     if(_FaceMaterial) out_color = _OutlineColor;
 

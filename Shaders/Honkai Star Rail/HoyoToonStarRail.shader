@@ -55,6 +55,9 @@ Shader "HoyoToon/StarRail"
 		_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
 		_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
         // -------------------------------------------
+        // material lut 
+        [Toggle]_UseMaterialValuesLUT ("Use Mat Lut", Float) = 0
+		_MaterialValuesPackLUT ("Mat Pack LUT", 2D) = "white" {}
         // specular 
         [Header(SPECULAR)]
         [Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
@@ -210,6 +213,8 @@ Shader "HoyoToon/StarRail"
         Texture2D _DiffuseCoolRampMultiTex;
         Texture2D _FaceMap;
         Texture2D _FaceExpression;
+        Texture2D _MaterialValuesPackLUT;
+        SamplerState sampler_MaterialValuesPackLUT;
         SamplerState sampler_MainTex;
         SamplerState sampler_LightMap;
         SamplerState sampler_DiffuseRampMultiTex;
@@ -243,6 +248,8 @@ Shader "HoyoToon/StarRail"
         float _ShadowBoostVal;
 
         float _EnvironmentLightingStrength;
+
+        bool _UseMaterialValuesLUT;
 
         // specular properties 
         float4 _ES_SPColor;
@@ -375,6 +382,7 @@ Shader "HoyoToon/StarRail"
 			}
 
             HLSLPROGRAM
+            // #define is_stencil
             #pragma multi_compile_fwdbase
             
             #pragma vertex vs_base
@@ -406,9 +414,10 @@ Shader "HoyoToon/StarRail"
             // Blend [_SrcBlend] [_DstBlend]
 
             HLSLPROGRAM
+            #define is_stencil
             #pragma multi_compile_fwdbase            
             #pragma vertex vs_base
-            #pragma fragment ps_face_stencil
+            #pragma fragment ps_base
 
             #include "HoyoToonStarRail-program.hlsl"
 
@@ -422,14 +431,14 @@ Shader "HoyoToon/StarRail"
             Cull Front
             
             Blend SrcAlpha OneMinusSrcAlpha
-            Stencil
-            {
-                ref [_StencilRef]              
-				Comp [_StencilCompA]
-				Pass [_StencilPassA]  
-                Fail Keep
-				ZFail Keep
-			}
+            // Stencil
+            // {
+            //     ref [_StencilRef]              
+			// 	Comp [_StencilCompA]
+			// 	Pass [_StencilPassA]  
+            //     Fail Keep
+			// 	ZFail Keep
+			// }
 
             // Cull [_Cull]
            

@@ -67,6 +67,7 @@ float3 specular_base(float shadow_area, float ndoth, float lightmap_spec, float3
 {
     float3 specular = ndoth;
     specular = pow(max(specular, 0.01f), specular_values.x);
+    specular_values.y = max(specular_values.y, 0.001f);
 
     float specular_thresh = 1.0f - lightmap_spec;
     float rough_thresh = specular_thresh - specular_values.y;
