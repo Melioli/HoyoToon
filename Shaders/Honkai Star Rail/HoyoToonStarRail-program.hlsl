@@ -90,7 +90,7 @@ vs_out vs_edge(vs_in i)
         outline_normal.xyz = normalize(outline_normal.xyz);
         float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
         float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-        if(!_EnableFOVWidth) fov_width = 0.5f;
+        if(!_EnableFOVWidth) fov_width = 1;
         wv_pos.xyz = wv_pos + (outline_normal * fov_width * tmp0.x);
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
@@ -102,7 +102,7 @@ vs_out vs_edge(vs_in i)
         outline_normal.xyz = normalize(outline_normal.xyz);
         float4 wv_pos = mul(UNITY_MATRIX_MV, i.pos);
         float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-        if(!_EnableFOVWidth)fov_width = 0.5f;
+        if(!_EnableFOVWidth)fov_width = 1;
         wv_pos.xyz = wv_pos + (outline_normal * fov_width * (i.v_col.w * _OutlineWidth * _OutlineScale));
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
