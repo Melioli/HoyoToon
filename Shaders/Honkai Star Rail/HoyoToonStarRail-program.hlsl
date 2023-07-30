@@ -335,6 +335,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     float4 out_color = outline_color[material];
     if(_FaceMaterial) out_color = _OutlineColor;
+    out_color.a = 1.0f;
 
     return out_color;
 }
