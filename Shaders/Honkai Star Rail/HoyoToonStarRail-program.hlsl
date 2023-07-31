@@ -5,7 +5,8 @@ vs_out vs_base(vs_in i)
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
     o.pos = pos_wvp;
     o.ws_pos =  mul(unity_ObjectToWorld, i.pos);
-    o.ss_pos = ComputeScreenPos(o.pos);
+    // o.ss_pos = ComputeScreenPos(o.pos);
+    o.ss_pos = o.pos;
 
     o.uv = float4(i.uv_0, i.uv_1); // populate this with both uvs to save on texcoords 
     o.normal = mul((float3x3)unity_ObjectToWorld, i.normal) ; // WORLD SPACE NORMAL 
@@ -107,6 +108,7 @@ vs_out vs_edge(vs_in i)
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
     o.uv = float4(i.uv_0, i.uv_1);
+    o.v_col = i.v_col;    
     return o;
 }
 
@@ -254,7 +256,8 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     };
 
     // dear fucking god i hate this shit
-    float2 screen_pos = i.ss_pos.xy / i.ss_pos.ww;
+    float4 ss_pos = ComputeScreenPos(i.ws_pos);
+    float2 screen_pos = ss_pos.xy / ss_pos.ww;
     float camera_depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos);
     camera_depth = LinearEyeDepth(camera_depth);
     
@@ -265,13 +268,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // ================================================================================================ //
     out_color = out_color * diffuse;
     out_color.xyz = out_color * shadow_color + specular; 
-
+    // float bangs = saturate(1.0f - (dot(normalize(UnityObjectToWorldDir(float3(0, 0, 1))),  i.ss_pos - float3(0,0,1)) * 10));
     // DEBUG
     // out_color.xyz = specular;
     // out_color.xyz = lightmap.x;
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
-
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
     {
@@ -280,7 +282,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     } 
     else if(_HairMaterial)
     {
-        // float bangs =saturate(1.0f - dot(normalize(UnityObjectToWorldDir(_headForwardVector.xyz) * view), normal));
+        // float bangs =saturate(dot(float3(0,1,0), i.ss_pos));
         // out_color.a = saturate(smoothstep(0.0, 1.0, bangs));
         out_color.a = 0.5f;
     }
@@ -294,7 +296,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // out_color.xyz = _MaterialValuesPackLUT.Load(asint(material_ID));
     // out_color.xyz = specular;
     // out_color.xyz = material_ID;
-    
     return out_color;
 }
 
@@ -336,6 +337,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float4 out_color = outline_color[material];
     if(_FaceMaterial) out_color = _OutlineColor;
     out_color.a = 1.0f;
-
+    if(i.v_col.w < 0.05f) discard; // discard all pixels with the a vertex color alpha value of less than 0.05f
+    // this fixes double sided meshes for hsr having bad outlines
     return out_color;
 }

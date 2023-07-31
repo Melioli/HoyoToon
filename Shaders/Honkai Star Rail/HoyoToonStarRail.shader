@@ -370,7 +370,7 @@ Shader "HoyoToon/StarRail"
         {
             Name "BasePass"
             Tags{ "LightMode" = "ForwardBase" }
-            Cull [_Cull]
+            Cull [_CullMode]
             Blend [_SrcBlend] [_DstBlend]
             Stencil
             {
@@ -396,7 +396,7 @@ Shader "HoyoToon/StarRail"
         {
             Name "EyeStencilPass"
             Tags{ "LightMode" = "ForwardBase" }
-            Cull [_Cull] 
+            Cull [_CullMode] 
             Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
             // BlendOp Add
             // ZWrite Off
@@ -431,20 +431,8 @@ Shader "HoyoToon/StarRail"
             Cull Front
             
             Blend SrcAlpha OneMinusSrcAlpha
-            // Stencil
-            // {
-            //     ref [_StencilRef]              
-			// 	Comp [_StencilCompA]
-			// 	Pass [_StencilPassA]  
-            //     Fail Keep
-			// 	ZFail Keep
-			// }
-
-            // Cull [_Cull]
-           
-
-            // Blend [_SrcBlend] [_DstBlend]
-
+            Cull Front
+			
             HLSLPROGRAM
 
             #pragma multi_compile_fwdbase
