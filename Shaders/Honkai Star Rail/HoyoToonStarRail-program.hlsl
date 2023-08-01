@@ -5,8 +5,8 @@ vs_out vs_base(vs_in i)
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
     o.pos = pos_wvp;
     o.ws_pos =  mul(unity_ObjectToWorld, i.pos);
-    // o.ss_pos = ComputeScreenPos(o.pos);
-    o.ss_pos = o.pos;
+    o.ss_pos = ComputeScreenPos(o.pos);
+    // o.ss_pos = o.pos;
 
     o.uv = float4(i.uv_0, i.uv_1); // populate this with both uvs to save on texcoords 
     o.normal = mul((float3x3)unity_ObjectToWorld, i.normal) ; // WORLD SPACE NORMAL 
@@ -130,6 +130,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         normal.z = normal.z * -1.0f;
     }
 
+    color.a = 1.0f; // this prevents issues with the alpha value of the material being less than 1
+    // might remove later
+
     // INITIALIZE OUTPUT COLOR : 
     float4 out_color = color;
 
@@ -154,7 +157,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float4 faceexp = _FaceExpression.Sample(sampler_LightMap, uv);
 
     // EXTRACT MATERIAL REGIONS 
-    float material_ID = floor(8.0f * lightmap_alpha);
+    float material_ID = floor(8.0f * lightmap.w);
     float ramp_ID     = ((material_ID * 2.0f + 1.0f) * 0.0625f);
     // when writing the shader for mmd i had to invert the ramp ID since the uvs are read differently  
 
@@ -256,22 +259,57 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     };
 
     // dear fucking god i hate this shit
-    float4 ss_pos = ComputeScreenPos(i.ws_pos);
-    float2 screen_pos = ss_pos.xy / ss_pos.ww;
-    float camera_depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos);
-    camera_depth = LinearEyeDepth(camera_depth);
+    float2 screen_pos = i.ss_pos.xy / i.ss_pos.ww;
+    // float camera_depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos);
+
     
-    float rim_width = lerp(1.0f, lightmap.x, _RimLightMode) *  _RimWidth;
+    float camera_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screen_pos));    // camera_depth = _ZBufferParams.x * camera_depth.x + _ZBufferParams.y;
+    // camera_depth = 1.0 / camera_depth.x;
+    // camera_depth = LinearEyeDepth(camera_depth);
+    
+    float rim_width = lerp(1.0f, lightmap.x, _RimLightMode) *  rim_values[curr_region].x;
     ndotl = ndotl * 0.5f + 0.5f;
     float rim_shadow = dot(float2(rim_width, ndotl), float2(rim_width, ndotl));
 
+    float3 vs_normal = normalize(mul((float3x3)UNITY_MATRIX_V, i.normal));
+    float rim_side = i.ws_pos.z * -normal.x - (i.ws_pos.x * -normal.z);
+    rim_side = (rim_side > 0.0f) ? -1.0f : 1.0f;
+    // rim_side = rim_side * normal;
+    float rim_depth = camera_depth * _ZBufferParams.z + 3.0f;
+    float rim_area = ((rim_side * rim_width) * 0.0055f) / rim_depth;
+
+    float2 rim_uv = screen_pos;
+    rim_uv.x = rim_uv.x + (0.25f * 0.01f + (rim_area / rim_depth));
+    rim_uv.y = rim_uv.y + (0.25f * 0.01f);
+
+    float offset_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, rim_uv)); 
+
+    float rim_diff = pow(max(offset_depth - camera_depth, 0.0000001f), _RimEdge);
+    float rim_base = rim_diff - 0.82f;
+    rim_base = (saturate(rim_base * 12.5f) * -2.0f + 3.0f) * (rim_base * rim_base);
+    
+    rim_base = (rim_values[curr_region].y < rim_base) ? rim_base * vface : 0.0f;
+    
+    float3 rim_light = rim_base * rim_color[curr_region].xyz;
     // ================================================================================================ //
+    // FACE EXPRESSION MAP
+    float3 nose_view = view;
+    nose_view.y = nose_view.y * 0.5f;
+    float nose_ndotv = max(dot(nose_view, normal), 0.0001f);
+    float nose_power = max(_NoseLinePower * 8.0f, 0.1f);
+    nose_ndotv = pow(nose_ndotv, nose_power);
+
+    float nose_area = facemap.z * nose_ndotv;
+    nose_area = (nose_area > 0.1f) ? 1.0f : 0.0f;
+    if(_FaceMaterial) diffuse.xyz = lerp(diffuse.xyz, _NoseLineColor, nose_area); 
+    
+    // ================================================================================================ //
+   
+   
     out_color = out_color * diffuse;
     out_color.xyz = out_color * shadow_color + specular; 
-    // float bangs = saturate(1.0f - (dot(normalize(UnityObjectToWorldDir(float3(0, 0, 1))),  i.ss_pos - float3(0,0,1)) * 10));
-    // DEBUG
-    // out_color.xyz = specular;
-    // out_color.xyz = lightmap.x;
+    out_color.xyz = out_color.xyz + rim_light;
+    // out_color.xyz = camera_depth;
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
     #ifdef is_stencil // so the hair and eyes dont lose their shading
@@ -282,7 +320,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     } 
     else if(_HairMaterial)
     {
-        // float bangs =saturate(dot(float3(0,1,0), i.ss_pos));
         // out_color.a = saturate(smoothstep(0.0, 1.0, bangs));
         out_color.a = 0.5f;
     }
@@ -291,11 +328,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         discard;
     }
     #endif
-
-    // out_color.xyz = lut_a;
-    // out_color.xyz = _MaterialValuesPackLUT.Load(asint(material_ID));
-    // out_color.xyz = specular;
-    // out_color.xyz = material_ID;
     return out_color;
 }
 
@@ -304,10 +336,10 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
     float2 uv      = i.uv.xy;
 
-    // if(!vface) // use uv2 if vface is false
-    // { // so basically if its a backfacing face
-    //     uv.xy = i.uv.zw;
-    // }
+    if(!vface) // use uv2 if vface is false
+    { // so basically if its a backfacing face
+        uv.xy = i.uv.zw;
+    }
     float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
 
     int material_ID = floor(lightmap * 8.0f);

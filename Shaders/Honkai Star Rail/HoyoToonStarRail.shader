@@ -35,6 +35,8 @@ Shader "HoyoToon/StarRail"
         [NoScaleOffset] _FaceMap ("Face Map Texture", 2D) = "white" {}
         _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
         [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
+        _NoseLineColor ("Nose Line Color", Color) = (1,1,1,1)
+        _NoseLinePower ("Nose Line Power", Range(0, 8)) = 1
 
         // -------------------------------------------
         // shadow 
@@ -200,7 +202,7 @@ Shader "HoyoToon/StarRail"
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
         #include "UnityShaderVariables.cginc"
-
+        #include "AutoLight.cginc"
         #include "HoyoToonStarRail-inputs.hlsli"
 
         // ============================================
@@ -241,6 +243,8 @@ Shader "HoyoToon/StarRail"
         float3 _headRightVector;
         float _HairBlendSilhouette;
         float3 _ShadowColor;
+        float3 _NoseLineColor;
+        float _NoseLinePower;
 
         // shadow properties
         float _ShadowRamp;
@@ -398,9 +402,6 @@ Shader "HoyoToon/StarRail"
             Tags{ "LightMode" = "ForwardBase" }
             Cull [_CullMode] 
             Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
-            // BlendOp Add
-            // ZWrite Off
-            // Ztest Equal
             Stencil
             {
                 ref [_StencilRef]              
@@ -428,8 +429,6 @@ Shader "HoyoToon/StarRail"
         {
             Name "Outline"
             Tags{ "LightMode" = "ForwardBase" }
-            Cull Front
-            
             Blend SrcAlpha OneMinusSrcAlpha
             Cull Front
 			
@@ -444,5 +443,7 @@ Shader "HoyoToon/StarRail"
 
             ENDHLSL
         }
+
+        UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
 }
