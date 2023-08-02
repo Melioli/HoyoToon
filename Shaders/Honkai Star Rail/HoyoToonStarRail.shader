@@ -21,6 +21,8 @@ Shader "HoyoToon/StarRail"
         [Header(COMMON)]
         [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
         [Toggle]_IsTransparent ("use main texture alpha as transparency", float) = 0
+        [Toggle] _EnableAlphaCutoff ("Enable Alpha Cutoff", Float) = 0
+        _AlphaCutoff ("Alpha Cutoff value", Range(0.0, 1.0)) = 0.5
         _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
@@ -112,6 +114,7 @@ Shader "HoyoToon/StarRail"
         _RimIntensityTexIntensity ("Rim Texture Intensity", Range(1, -1)) = 0
         _RimWidth ("Rim Width", Float) = 1
         _RimOffset ("Rim Offset", Vector) = (0, 0, 0, 0)
+        _ES_RimLightOffset ("Global Rim Light Offset | XY", Vector) = (0.5, 0.0, 0.0, 0.0)
         _RimEdge ("Rim Edge Base", Range(0.01, 0.02)) = 0.015
         // --- Rim Color
         _RimColor0 (" Rim Light Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
@@ -238,6 +241,10 @@ Shader "HoyoToon/StarRail"
         float4 _EnvColor;
         float4 _AddColor;
 
+        // alpha cutoff 
+        bool _EnableAlphaCutoff;
+        float _AlphaCutoff;
+
         // face specific properties 
         float3 _headForwardVector;
         float3 _headRightVector;
@@ -300,6 +307,7 @@ Shader "HoyoToon/StarRail"
         float _RimIntensityTexIntensity;
         float _RimWidth;
         float4 _RimOffset;
+        float2 _ES_RimLightOffset; // only using the first two
         float _RimEdge;
         float4 _RimColor0;
         float4 _RimColor1;

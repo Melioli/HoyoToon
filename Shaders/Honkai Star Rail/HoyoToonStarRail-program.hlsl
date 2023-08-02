@@ -109,6 +109,7 @@ vs_out vs_edge(vs_in i)
     }
     o.uv = float4(i.uv_0, i.uv_1);
     o.v_col = i.v_col;    
+    o.ws_pos = mul(unity_ObjectToWorld, i.pos);
     return o;
 }
 
@@ -263,29 +264,34 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float4(_RimWidth7, _RimEdgeSoftness7, _RimType0, _RimDark7),
     };
 
+    if(_UseMaterialValuesLUT) 
+    {
+        
+        // rim_values[curr_region] = _MaterialValuesPackLUT.Load(lut_uv.xwww);
+    }
+
     // dear fucking god i hate this shit
     float2 screen_pos = i.ss_pos.xy / i.ss_pos.ww;
-    // float camera_depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos);
-
-    
     float camera_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screen_pos));    // camera_depth = _ZBufferParams.x * camera_depth.x + _ZBufferParams.y;
-    // camera_depth = 1.0 / camera_depth.x;
-    // camera_depth = LinearEyeDepth(camera_depth);
+   
     
-    float rim_width = lerp(1.0f, lightmap.x, _RimLightMode) *  rim_values[curr_region].x;
+    float rim_width = lerp(1.0f, lightmap.x, _RimLightMode) * (rim_values[curr_region].x - 0.01f);
     ndotl = ndotl * 0.5f + 0.5f;
-    float rim_shadow = dot(float2(rim_width, ndotl), float2(rim_width, ndotl));
+    float rim_shadow = dot(float2(rim_width, ndotl), float2(rim_width, ndotl)); 
 
     float3 vs_normal = normalize(mul((float3x3)UNITY_MATRIX_V, i.normal));
-    float rim_side = i.ws_pos.z * -normal.x - (i.ws_pos.x * -normal.z);
-    rim_side = (rim_side > 0.0f) ? -1.0f : 1.0f;
-    // rim_side = rim_side * normal;
+    float rim_side = i.ws_pos.z * -normal.x - (i.ws_pos.x * -normal.z); // in game they use the view space normals but thats causing some issues 
+    rim_side = (rim_side > 0.0f) ? -1.0f : 1.0f; 
     float rim_depth = camera_depth * _ZBufferParams.z + 3.0f;
     float rim_area = ((rim_side * rim_width) * 0.0055f) / rim_depth;
 
-    float2 rim_uv = screen_pos;
-    rim_uv.x = rim_uv.x + (0.25f * 0.01f + (rim_area / rim_depth));
-    rim_uv.y = rim_uv.y + (0.25f * 0.01f);
+    float2 rim_offset = _ES_RimLightOffset.xy - _RimOffset;
+    float distance_from_camera = saturate(1.0f /  distance(_WorldSpaceCameraPos.xyz, i.ws_pos));
+    rim_offset.x = (1.0f - rim_offset.x) * rim_side; // this isnt accurate to the game but i dont think unitys default depth stuff is accurate either
+    rim_offset = rim_offset * distance_from_camera; // multiply by camera distance to ensure a consistent thickness
+    float2 rim_uv = screen_pos; 
+    rim_uv.x = rim_uv.x + (rim_offset.x * 0.01f + (rim_area / rim_depth));
+    rim_uv.y = rim_uv.y + (rim_offset.y * 0.01f);
 
     float offset_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, rim_uv)); 
 
@@ -295,7 +301,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     
     rim_base = (rim_values[curr_region].y < rim_base) ? rim_base * vface : 0.0f;
     
-    float3 rim_light = rim_base * rim_color[curr_region].xyz;
+    float3 rim_light = rim_base * rim_color[curr_region] * distance_from_camera; // fade rim light as it gets further from the camera
     // ================================================================================================ //
     // FACE EXPRESSION MAP
     float3 nose_view = view;
@@ -312,9 +318,10 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
    
    
     out_color = out_color * diffuse;
-    out_color.xyz = out_color * shadow_color + specular; 
-    out_color.xyz = out_color.xyz + rim_light;
-    // out_color.xyz = camera_depth;
+    if(_EnableAlphaCutoff) clip(out_color.a - _AlphaCutoff);
+    out_color.xyz = out_color * shadow_color + (specular + rim_light); 
+    // out_color.xyz = out_color.xyz + rim_light;
+
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
     #ifdef is_stencil // so the hair and eyes dont lose their shading
@@ -333,6 +340,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         discard;
     }
     #endif
+
+    // out_color.xyz = 1.0f / distance_from_camera;
+
     return out_color;
 }
 
@@ -346,6 +356,10 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         uv.xy = i.uv.zw;
     }
     float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
+
+    float4 enviro_light = get_enviro_light(i.ws_pos);
+    enviro_light.xyz = lerp(1, enviro_light, _EnvironmentLightingStrength);
+    // out_color = out_color * enviro_light;
 
     int material_ID = floor(lightmap * 8.0f);
 
@@ -373,6 +387,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     float4 out_color = outline_color[material];
     if(_FaceMaterial) out_color = _OutlineColor;
+    out_color.xyz = out_color * enviro_light;
     out_color.a = 1.0f;
     if(i.v_col.w < 0.05f) discard; // discard all pixels with the a vertex color alpha value of less than 0.05f
     // this fixes double sided meshes for hsr having bad outlines
