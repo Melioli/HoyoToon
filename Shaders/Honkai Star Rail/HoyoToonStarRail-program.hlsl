@@ -228,6 +228,11 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         specular_color[curr_region] = lut_a;
         specular_values[curr_region] = lut_b.xyz;
     }
+    if(_FaceMaterial)
+    {
+        specular_color[curr_region] = (float4)0.0f;
+    }
+    specular_values[curr_region].z = max(0.0f, specular_values[curr_region].z); // why would there ever be a reason for a negative specular intensity
 
     float3 specular = specular_base(shadow_area, ndoth, lightmap.z, specular_color[curr_region], specular_values[curr_region], _ES_SPColor, _ES_SPIntensity);
     
