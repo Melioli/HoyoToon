@@ -91,7 +91,7 @@ float4 rim_light_calc(float3 normal)
 
 // Took this from primotoon because aint no way in hell im doing it myself if it already works in the genshin shader
 // environment lighting function
-fixed4 get_enviro_light(float3 ws_pos)
+float4 get_enviro_light(float3 ws_pos)
 {
     // get all the point light positions
     half3 firstPointLightPos = { unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x };
@@ -125,7 +125,7 @@ fixed4 get_enviro_light(float3 ws_pos)
     pointLightCalc = max(pointLightCalc, fourthPointLight);
 
     // get the color of whichever's greater between the light direction and the strongest nearby point light
-    fixed4 environmentLighting = max(_LightColor0, fixed4(pointLightCalc, 1));
+    float4 environmentLighting = max(_LightColor0, fixed4(pointLightCalc, 1));
     // now get whichever's greater than the result of the first and the nearest light probe
     half3 ShadeSH9Alternative = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + 
                                           half3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;

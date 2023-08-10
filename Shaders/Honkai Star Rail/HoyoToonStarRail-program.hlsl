@@ -108,7 +108,8 @@ vs_out vs_edge(vs_in i)
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
     o.uv = float4(i.uv_0, i.uv_1);
-    o.v_col = i.v_col;    
+    o.v_col = i.v_col; 
+    o.v_col.w = (i.v_col.w < 0.05f);   
     o.ws_pos = mul(unity_ObjectToWorld, i.pos);
     return o;
 }
@@ -116,10 +117,12 @@ vs_out vs_edge(vs_in i)
 float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
     // INITIALIZE VERTEX SHADER INPUTS : 
-    float3 normal = normalize(i.normal);
-    float3 view   = normalize(i.view);
-    float2 uv     = i.uv.xy;
-    float4 vcol   = i.v_col;
+    float3 normal    = normalize(i.normal);
+    float3 vs_normal = normalize(mul((float3x3)UNITY_MATRIX_V, normal));
+    float3 view      = normalize(i.view);
+    float3 vs_view   = normalize(mul((float3x3)UNITY_MATRIX_V, view));
+    float2 uv        = i.uv.xy;
+    float4 vcol      = i.v_col;
 
     // MATERIAL COLOR :
     float4 color = _Color;
@@ -225,7 +228,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     
     if(_UseMaterialValuesLUT)
     {
-        curr_region = 0;
         specular_color[curr_region] = lut_a;
         specular_values[curr_region] = lut_b.xyz;
     }
@@ -277,9 +279,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     
     float rim_width = lerp(1.0f, lightmap.x, _RimLightMode) * (rim_values[curr_region].x - 0.01f);
     ndotl = ndotl * 0.5f + 0.5f;
-    float rim_shadow = dot(float2(rim_width, ndotl), float2(rim_width, ndotl)); 
+    // float rim_shadow = dot(float2(rim_width, ndotl), float2(rim_width, ndotl)); 
 
-    float3 vs_normal = normalize(mul((float3x3)UNITY_MATRIX_V, i.normal));
+    // float3 vs_normal = normalize(mul((float3x3)UNITY_MATRIX_V, i.normal));
     float rim_side = i.ws_pos.z * -normal.x - (i.ws_pos.x * -normal.z); // in game they use the view space normals but thats causing some issues 
     rim_side = (rim_side > 0.0f) ? -1.0f : 1.0f; 
     float rim_depth = camera_depth * _ZBufferParams.z + 3.0f;
@@ -303,7 +305,50 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     
     float3 rim_light = rim_base * rim_color[curr_region] * distance_from_camera; // fade rim light as it gets further from the camera
     // ================================================================================================ //
-    // FACE EXPRESSION MAP
+    // rim shadow
+    // this is distinct from the rim light, whatever it does
+    
+    // first things first, create and populate the color and value arrays 
+    float4 rim_shadow_color[8] = 
+    {
+        _RimShadowColor0,
+        _RimShadowColor1,
+        _RimShadowColor2,
+        _RimShadowColor3,
+        _RimShadowColor4,
+        _RimShadowColor5,
+        _RimShadowColor6,
+        _RimShadowColor7
+    };
+
+    float2 rim_shadow_values[8] = 
+    {
+        float2(_RimShadowWidth0, _RimShadowFeather0),
+        float2(_RimShadowWidth1, _RimShadowFeather1),
+        float2(_RimShadowWidth2, _RimShadowFeather2),
+        float2(_RimShadowWidth3, _RimShadowFeather3),
+        float2(_RimShadowWidth4, _RimShadowFeather4),
+        float2(_RimShadowWidth5, _RimShadowFeather5),
+        float2(_RimShadowWidth6, _RimShadowFeather6),
+        float2(_RimShadowWidth7, _RimShadowFeather7)
+    };
+
+    
+    float3 rim_shadow_view = normalize(vs_view - _RimShadowOffset);
+    float shadow_ndotv = saturate(pow(max(1.0f - saturate(dot(vs_normal, rim_shadow_view)), 0.001f), _RimShadowCt) * rim_shadow_values[curr_region].x);
+    float shadow_t = saturate((shadow_ndotv - rim_shadow_values[curr_region].y) * (1.0f / (1.0f - rim_shadow_values[curr_region].y))) * -2.0f + 3.0f;
+    shadow_t = (shadow_t * shadow_t) * shadow_t;
+    shadow_t = shadow_t * 0.25f;
+    shadow_t = shadow_t * 0.1f;
+    float3 shadow_rim;
+
+    shadow_rim = rim_shadow_color[curr_region].xyz * (float3)2.0f + (float3)-1.0f;
+    shadow_rim = shadow_t * shadow_rim + (float3)1.0f;
+
+
+    // ================================================================================================ //
+    // FACE EXPRESSION MAP 
+    // nose line doesnt come from the expression map but whatever, it goes here
     float3 nose_view = view;
     nose_view.y = nose_view.y * 0.5f;
     float nose_ndotv = max(dot(nose_view, normal), 0.0001f);
@@ -312,7 +357,29 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     float nose_area = facemap.z * nose_ndotv;
     nose_area = (nose_area > 0.1f) ? 1.0f : 0.0f;
-    if(_FaceMaterial) diffuse.xyz = lerp(diffuse.xyz, _NoseLineColor, nose_area); 
+
+    float3 expressions = 1.0f;
+    
+    // cheek blush
+    float cheek_threshold = _ExMapThreshold < faceexp.x ? (faceexp.x - _ExMapThreshold) / (1.0f - _ExMapThreshold) : 0.0f;
+    expressions = lerp((float3)1.0f, _ExCheekColor, cheek_threshold * _ExCheekIntensity);
+    // shyness
+    float exp_shy = faceexp.y * _ExShyIntensity;
+    expressions = lerp(expressions, _ExShyColor, exp_shy);
+    // shadow
+    float3 exp_shadow = faceexp.z * _ExShadowIntensity;
+    expressions = lerp(expressions, _ExShadowColor, exp_shadow);
+
+
+    
+    
+    
+    if(_FaceMaterial)
+    {
+        diffuse.xyz = lerp(diffuse.xyz, _NoseLineColor, nose_area); 
+        diffuse.xyz = diffuse.xyz * expressions;
+    } 
+
     
     // ================================================================================================ //
    
@@ -322,13 +389,17 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     out_color.xyz = out_color * shadow_color + (specular + rim_light); 
     // out_color.xyz = out_color.xyz + rim_light;
 
+
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
+    // if(_FaceMaterial) out_color.xyz = faceexp.z;
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
     {
+        
         clip(saturate(facemap.y + diffuse.a) - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
         // but it looks weird if the eye shines are specifically omitted from the stencil
+        
     } 
     else if(_HairMaterial)
     {
@@ -342,6 +413,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     #endif
 
     // out_color.xyz = 1.0f / distance_from_camera;
+    
 
     return out_color;
 }
@@ -389,7 +461,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(_FaceMaterial) out_color = _OutlineColor;
     out_color.xyz = out_color * enviro_light;
     out_color.a = 1.0f;
-    if(i.v_col.w < 0.05f) discard; // discard all pixels with the a vertex color alpha value of less than 0.05f
+    if(i.v_col.w == 1.0f) discard; // discard all pixels with the a vertex color alpha value of less than 0.05f
     // this fixes double sided meshes for hsr having bad outlines
     return out_color;
 }

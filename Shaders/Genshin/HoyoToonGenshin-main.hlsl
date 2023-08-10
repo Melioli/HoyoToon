@@ -265,7 +265,6 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             modifiedNormalMap.xyz = bumpmapTex.xyz;
             normalCreationBuffer.xy = modifiedNormalMap.xy * 2 - 1;
             normalCreationBuffer.z = max(1 - min(_BumpScale, 0.95), 0.001);
-            // modifiedNormalMap.xyw = normalCreationBuffer * rsqrt(dot(normalCreationBuffer, normalCreationBuffer));
             modifiedNormalMap.xyw = normalize(normalCreationBuffer);
 
             /* because miHoYo stores outline directions in the tangents of the mesh,
@@ -280,12 +279,10 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             dhdy.z = dhdx.y; dhdx.z = dhdy.x;
             normalCreationBuffer = dot(dhdx.xz, dhdy.yz);
             vector<half, 3> recalcTangent = -(0 < normalCreationBuffer) + (normalCreationBuffer < 0);
-            dhdx.xy = vector<half, 2>(recalcTangent.xy) * dhdy.yz;
+            dhdx.xy = float2(recalcTangent.xy) * dhdy.yz;
             dpdy *= -dhdx.y;
             dpdx = dpdx * dhdx.x + dpdy;
-            // normalCreationBuffer = rsqrt(dot(dpdx, dpdx));
-            // dpdx *= normalCreationBuffer;
-            dpdx = normalize(normalCreationBuffer);
+            dpdx = normalize(dpdx);// normalize(normalCreationBuffer);
             normalCreationBuffer = rawNormalsWS;
             dpdy = normalCreationBuffer.zxy * dpdx.yzx;
             dpdy = normalCreationBuffer.yzx * dpdx.zxy - dpdy.xyz;

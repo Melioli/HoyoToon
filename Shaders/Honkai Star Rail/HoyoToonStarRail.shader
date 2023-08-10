@@ -39,7 +39,15 @@ Shader "HoyoToon/StarRail"
         [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
         _NoseLineColor ("Nose Line Color", Color) = (1,1,1,1)
         _NoseLinePower ("Nose Line Power", Range(0, 8)) = 1
-
+        _ExCheekColor ("Expression Cheek Color,", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ExMapThreshold ("Expression Map Threshold", Range(0.0, 1.0)) = 0.5
+        _ExSpecularIntensity ("Expression Specular Intensity", Range(0.0, 7.0)) = 0.0
+        _ExCheekIntensity ("Expression Cheek Intensity", Range(0, 1)) = 0
+        _ExShyColor ("Expression Shy Color", Color) = (1,1,1,1)
+        _ExShyIntensity ("Expression Shy Intensity", Range(0, 1)) = 0
+        _ExShadowColor ("Expression Shadow Color", Color) = (1,1,1,1)
+        _ExEyeColor ("Expression Eye Color", Color) = (1,1,1,1)
+        _ExShadowIntensity ("Expression Shadow Intensity", Range(0, 1)) = 0
         // -------------------------------------------
         // shadow 
         [Header(SHADOW)] 
@@ -162,6 +170,41 @@ Shader "HoyoToon/StarRail"
         _RimDark6 ("Rim Dark 6 | (RGB ID = 192)", Range(0.0, 1.0)) = 0.5
         _RimDark7 ("Rim Dark 7 | (RGB ID = 223)", Range(0.0, 1.0)) = 0.5
         // -------------------------------------------
+        // BACKLIGHT RIM
+        [Header(BACK LIGHT RIM)]
+        [Toggle] _EnableBackRimLight ("Enable Back Rim Light", Float) = 1
+        _RimShadowCt ("Rim Shadow Control", Float) = 1
+        _RimShadowIntensity ("Rim Shadow Intensity", Float) = 1
+        // --- Color
+        _RimShadowColor0 (" Rim Shadow Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
+        _RimShadowColor1 (" Rim Shadow Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
+        _RimShadowColor2 (" Rim Shadow Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
+        _RimShadowColor3 (" Rim Shadow Color 3 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
+        _RimShadowColor4 (" Rim Shadow Color 4 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
+        _RimShadowColor5 (" Rim Shadow Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
+        _RimShadowColor6 (" Rim Shadow Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
+        _RimShadowColor7 (" Rim Shadow Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
+        // --- Width
+        _RimShadowWidth0 ("Rim Shadow Width 0 | (RGB ID = 0)", Float) = 1
+        _RimShadowWidth1 ("Rim Shadow Width 1 | (RGB ID = 31)", Float) = 1
+        _RimShadowWidth2 ("Rim Shadow Width 2 | (RGB ID = 63)", Float) = 1
+        _RimShadowWidth3 ("Rim Shadow Width 3 | (RGB ID = 95)", Float) = 1
+        _RimShadowWidth4 ("Rim Shadow Width 4 | (RGB ID = 127)", Float) = 1
+        _RimShadowWidth5 ("Rim Shadow Width 5 | (RGB ID = 159)", Float) = 1
+        _RimShadowWidth6 ("Rim Shadow Width 6 | (RGB ID = 192)", Float) = 1
+        _RimShadowWidth7 ("Rim Shadow Width 7 | (RGB ID = 223)", Float) = 1
+        // --- Feather
+        _RimShadowFeather0 ("Rim Shadow Feather 0 | (RGB ID = 0)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather1 ("Rim Shadow Feather 1 | (RGB ID = 31)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather2 ("Rim Shadow Feather 2 | (RGB ID = 63)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather3 ("Rim Shadow Feather 3 | (RGB ID = 95)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather4 ("Rim Shadow Feather 4 | (RGB ID = 127)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather5 ("Rim Shadow Feather 5 | (RGB ID = 159)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather6 ("Rim Shadow Feather 6 | (RGB ID = 192)", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather7 ("Rim Shadow Feather 7 | (RGB ID = 223)", Range(0.01, 0.99)) = 0.01
+        // --- Offset 
+        _RimShadowOffset ("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
+        // -------------------------------------------
         // OUTLINE 
         // --- 
         [Header(OUTLINE)] _Outline ("Outline", Range(0, 1)) = 0
@@ -252,6 +295,15 @@ Shader "HoyoToon/StarRail"
         float3 _ShadowColor;
         float3 _NoseLineColor;
         float _NoseLinePower;
+        float4 _ExCheekColor;
+        float _ExMapThreshold;
+        float _ExSpecularIntensity;
+        float _ExCheekIntensity;
+        float4 _ExShyColor;
+        float _ExShyIntensity;
+        float4 _ExShadowColor;
+        float4 _ExEyeColor;
+        float _ExShadowIntensity;
 
         // shadow properties
         float _ShadowRamp;
@@ -349,6 +401,36 @@ Shader "HoyoToon/StarRail"
         float _RimDark5;
         float _RimDark6;
         float _RimDark7;
+
+        // rim shadow properties 
+        float _EnableBackRimLight;
+        float _RimShadowCt;
+        float _RimShadowIntensity;
+        float3 _RimShadowOffset;
+        float4 _RimShadowColor0;
+        float4 _RimShadowColor1;
+        float4 _RimShadowColor2;
+        float4 _RimShadowColor3;
+        float4 _RimShadowColor4;
+        float4 _RimShadowColor5;
+        float4 _RimShadowColor6;
+        float4 _RimShadowColor7;
+        float _RimShadowWidth0;
+        float _RimShadowWidth1;
+        float _RimShadowWidth2;
+        float _RimShadowWidth3;
+        float _RimShadowWidth4;
+        float _RimShadowWidth5;
+        float _RimShadowWidth6;
+        float _RimShadowWidth7;
+        float _RimShadowFeather0;
+        float _RimShadowFeather1;
+        float _RimShadowFeather2;
+        float _RimShadowFeather3;
+        float _RimShadowFeather4;
+        float _RimShadowFeather5;
+        float _RimShadowFeather6;
+        float _RimShadowFeather7;
 
         // outline properties 
         float _EnableFOVWidth;
