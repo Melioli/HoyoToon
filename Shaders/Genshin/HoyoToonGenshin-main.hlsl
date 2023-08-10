@@ -292,7 +292,7 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             modifiedNormalMap.xyw = modifiedNormalMap.www * normalCreationBuffer + dpdx;
             // recalcTangent = rsqrt(dot(modifiedNormalMap.xyw, modifiedNormalMap.xyw));
             // modifiedNormalMap.xyw *= recalcTangent;
-            modifiedNormalMap.xyw = normalize(modifiedNormalMap);
+            modifiedNormalMap.xyw = normalize(modifiedNormalMap.xyw);
             normalCreationBuffer = (0.99 >= modifiedNormalMap.w) ? modifiedNormalMap.xyw : normalCreationBuffer;
 
             // hope you understood any of that KEKW, finally switch between normal map and raw normals
