@@ -10,13 +10,14 @@ Shader "HoyoToon/StarRail"
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
         [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
-
+        // -------------------------------------------
         // material types
         [Header(Material Shaders)] [Space]
         [Toggle(BASE_MATERIAL)] _BaseMaterial ("Use Base Shader", Float) = 1 // on by default
         [Toggle(FACE_MATERIAL)] _FaceMaterial ("Use Face Shader", Float) = 0
         [Toggle(EYESHADOW_MATERIAL)] _EyeShadowMat ("Use EyeShadow Shader", Float) = 0
         [Toggle(HAIR_MATERIAL)] _HairMaterial ("Use Hair Shader", Float) = 0
+        // -------------------------------------------
         // main coloring 
         [Header(COMMON)]
         [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
@@ -30,24 +31,34 @@ Shader "HoyoToon/StarRail"
         _AddColor ("Env Color", Color) = (0, 0, 0, 0)
         [NoScaleOffset] _LightMap ("Light Map Texture", 2D) = "grey" {}
         _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
-
+        // -------------------------------------------
+        // face specific settings 
         [Header(FACE)]
+        _headUpVector ("Up Vector | XYZ", Vector) = (0, 1, 1, 0)
         _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
         _headRightVector ("Right Vector | XYZ ", Vector) = (1, 0, 0, 0)
         [NoScaleOffset] _FaceMap ("Face Map Texture", 2D) = "white" {}
         _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
         [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
-        _NoseLineColor ("Nose Line Color", Color) = (1,1,1,1)
+        _NoseLineColor ("Nose Line Color", Color) = (1, 1, 1, 1)
         _NoseLinePower ("Nose Line Power", Range(0, 8)) = 1
-        _ExCheekColor ("Expression Cheek Color,", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ExCheekColor ("Expression Cheek Color, ", Color) = (1.0, 1.0, 1.0, 1.0)
         _ExMapThreshold ("Expression Map Threshold", Range(0.0, 1.0)) = 0.5
         _ExSpecularIntensity ("Expression Specular Intensity", Range(0.0, 7.0)) = 0.0
         _ExCheekIntensity ("Expression Cheek Intensity", Range(0, 1)) = 0
-        _ExShyColor ("Expression Shy Color", Color) = (1,1,1,1)
+        _ExShyColor ("Expression Shy Color", Color) = (1, 1, 1, 1)
         _ExShyIntensity ("Expression Shy Intensity", Range(0, 1)) = 0
-        _ExShadowColor ("Expression Shadow Color", Color) = (1,1,1,1)
-        _ExEyeColor ("Expression Eye Color", Color) = (1,1,1,1)
+        _ExShadowColor ("Expression Shadow Color", Color) = (1, 1, 1, 1)
+        _ExEyeColor ("Expression Eye Color", Color) = (1, 1, 1, 1)
         _ExShadowIntensity ("Expression Shadow Intensity", Range(0, 1)) = 0
+        // -------------------------------------------
+        // stockings
+        [Header(STOCKING)] 
+        [Toggle] _EnableStocking ("Use Stocking Material", Float) = 0
+        _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
+        _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
+        _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
+
         // -------------------------------------------
         // shadow 
         [Header(SHADOW)] 
@@ -55,12 +66,12 @@ Shader "HoyoToon/StarRail"
         [NoScaleOffset]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
         _ShadowRamp ("Shadow Ramp", Range(0.01, 1)) = 1
         [Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
-        _ShadowBoostVal ("Shadow Boost Value", Range(0,1)) = 0
+        _ShadowBoostVal ("Shadow Boost Value", Range(0, 1)) = 0
 
-        _ShadowColor ("Shadow Color", Color) = (0.5,0.5,0.5,1)
-        _DarkColor   ("Dark Color", Color) = (0.85,0.85,0.85,1)
-        _EyeShadowColor ("Eye Shadow Color", Color) = (1,1,1,1)
-        _EyeBaseShadowColor ("EyeBase Shadow Color", Vector) = (1,1,1,1)
+        _ShadowColor ("Shadow Color", Color) = (0.5, 0.5, 0.5, 1)
+        _DarkColor   ("Dark Color", Color) = (0.85, 0.85, 0.85, 1)
+        _EyeShadowColor ("Eye Shadow Color", Color) = (1, 1, 1, 1)
+        _EyeBaseShadowColor ("EyeBase Shadow Color", Vector) = (1, 1, 1, 1)
 		_EyeShadowAngleMin ("EyeBase Shadow Min Angle", Range(0.36, 1.36)) = 0.85
 		_EyeShadowMaxAngle ("EyeBase Shadow Max Angle", Range(0, 1)) = 1
 		_ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
@@ -76,14 +87,14 @@ Shader "HoyoToon/StarRail"
         _ES_SPColor ("Global Specular Color", Color) = (0.5, 0.5, 0.5, 1)
         _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
         // --- specular color
-        _SpecularColor0 ("Specular Color 0 | (RGB ID = 0)", Color)   = (1,1,1,1)
-        _SpecularColor1 ("Specular Color 1 | (RGB ID = 31)", Color)  = (1,1,1,1)
-        _SpecularColor2 ("Specular Color 2 | (RGB ID = 63)", Color)  = (1,1,1,1)
-        _SpecularColor3 ("Specular Color 3 | (RGB ID = 95)", Color)  = (1,1,1,1)
-        _SpecularColor4 ("Specular Color 4 | (RGB ID = 127)", Color) = (1,1,1,1)
-        _SpecularColor5 ("Specular Color 5 | (RGB ID = 159)", Color) = (1,1,1,1)
-        _SpecularColor6 ("Specular Color 6 | (RGB ID = 192)", Color) = (1,1,1,1)
-        _SpecularColor7 ("Specular Color 7 | (RGB ID = 223)", Color) = (1,1,1,1)
+        _SpecularColor0 ("Specular Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
+        _SpecularColor1 ("Specular Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
+        _SpecularColor2 ("Specular Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
+        _SpecularColor3 ("Specular Color 3 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
+        _SpecularColor4 ("Specular Color 4 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
+        _SpecularColor5 ("Specular Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
+        _SpecularColor6 ("Specular Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
+        _SpecularColor7 ("Specular Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
         // --- specular shininess 
         _SpecularShininess0 ("Specular Shininess 0 (Power) | (RGB ID = 0)", Range(0.1, 500))   = 10
         _SpecularShininess1 ("Specular Shininess 1 (Power) | (RGB ID = 31)", Range(0.1, 500))  = 10
@@ -114,7 +125,7 @@ Shader "HoyoToon/StarRail"
         // -------------------------------------------
         // rim light
         [Header(RIM)]
-        _RimLightMode ("Rim Light Use LightMap.r", Range(0,1)) = 1
+        _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
         _RimCt ("Rim CT", Float) = 5
         _Rimintensity ("Rim Intensity", Float) = 1
         _RimWeight ("Rim Weight", Float) = 1
@@ -212,14 +223,14 @@ Shader "HoyoToon/StarRail"
         _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
         _OutlineScale ("Outline Scale", Range(0, 1)) = 0.1
         _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
-		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0,0,0,1)
-		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0,0,0,1)
-		_OutlineColor2 ("Outline Color 2 | (ID = 63)", Color) = (0,0,0,1)
-		_OutlineColor3 ("Outline Color 3 | (ID = 95)", Color) = (0,0,0,1)
-		_OutlineColor4 ("Outline Color 4 | (ID = 127)", Color) = (0,0,0,1)
-		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0,0,0,1)
-		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0,0,0,1)
-		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0,0,0,1)
+		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0, 0, 0, 1)
+		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0, 0, 0, 1)
+		_OutlineColor2 ("Outline Color 2 | (ID = 63)", Color) = (0, 0, 0, 1)
+		_OutlineColor3 ("Outline Color 3 | (ID = 95)", Color) = (0, 0, 0, 1)
+		_OutlineColor4 ("Outline Color 4 | (ID = 127)", Color) = (0, 0, 0, 1)
+		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0, 0, 0, 1)
+		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0, 0, 0, 1)
+		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0, 0, 0, 1)
         _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
         _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
         _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
@@ -289,6 +300,7 @@ Shader "HoyoToon/StarRail"
         float _AlphaCutoff;
 
         // face specific properties 
+        float3 _headUpVector;
         float3 _headForwardVector;
         float3 _headRightVector;
         float _HairBlendSilhouette;
@@ -521,6 +533,7 @@ Shader "HoyoToon/StarRail"
             Tags{ "LightMode" = "ForwardBase" }
             Blend SrcAlpha OneMinusSrcAlpha
             Cull Front
+            // Offset -1,-1
 			
             HLSLPROGRAM
 

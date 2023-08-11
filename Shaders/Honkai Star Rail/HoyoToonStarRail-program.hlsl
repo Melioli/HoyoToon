@@ -109,7 +109,7 @@ vs_out vs_edge(vs_in i)
     }
     o.uv = float4(i.uv_0, i.uv_1);
     o.v_col = i.v_col; 
-    o.v_col.w = (i.v_col.w < 0.05f);   
+    // o.v_col.w = (i.v_col.w < 0.05f);   
     o.ws_pos = mul(unity_ObjectToWorld, i.pos);
     return o;
 }
@@ -393,6 +393,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
     // if(_FaceMaterial) out_color.xyz = faceexp.z;
+
+
+   
+
+
+
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
     {
@@ -403,18 +409,27 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     } 
     else if(_HairMaterial)
     {
-        // out_color.a = saturate(smoothstep(0.0, 1.0, bangs));
-        out_color.a = 0.5f;
+        
+        float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
+        float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
+        float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
+
+        float3 view_xz = normalize(view - dot(view, up) * up);
+        float cosxz    = max(0.0f, dot(view_xz, forward));
+        float alpha_a  = saturate((1.0f - cosxz) / 0.658f);
+
+        float3 view_yz = normalize(view - dot(view, right) * right);
+        float cosyz    = max(0.0f, dot(view_yz, forward));
+        float alpha_b  = saturate((1.0f - cosyz) / 0.293f);
+        
+        float hair_alpha = max(alpha_a, alpha_b);
+        out_color.w      = max(hair_alpha, _HairBlendSilhouette);
     }
     else
     {
         discard;
     }
     #endif
-
-    // out_color.xyz = 1.0f / distance_from_camera;
-    
-
     return out_color;
 }
 
@@ -423,10 +438,10 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
     float2 uv      = i.uv.xy;
 
-    if(!vface) // use uv2 if vface is false
-    { // so basically if its a backfacing face
-        uv.xy = i.uv.zw;
-    }
+    // if(!vface) // use uv2 if vface is false
+    // { // so basically if its a backfacing face
+    //     uv.xy = i.uv.zw;
+    // }
     float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
 
     float4 enviro_light = get_enviro_light(i.ws_pos);
@@ -461,7 +476,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(_FaceMaterial) out_color = _OutlineColor;
     out_color.xyz = out_color * enviro_light;
     out_color.a = 1.0f;
-    if(i.v_col.w == 1.0f) discard; // discard all pixels with the a vertex color alpha value of less than 0.05f
+    if(i.v_col.w < 0.05f) clip(-1); // discard all pixels with the a vertex color alpha value of less than 0.05f
     // this fixes double sided meshes for hsr having bad outlines
     return out_color;
 }
