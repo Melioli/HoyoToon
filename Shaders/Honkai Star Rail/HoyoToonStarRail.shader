@@ -128,12 +128,13 @@ Shader "HoyoToon/StarRail"
         _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
         _RimCt ("Rim CT", Float) = 5
         _Rimintensity ("Rim Intensity", Float) = 1
+        _ES_Rimintensity ("Global Rim Intensity", Float) = 0.1
         _RimWeight ("Rim Weight", Float) = 1
         _RimFeatherWidth ("Rim Feather Width", Float) = 0.01
         _RimIntensityTexIntensity ("Rim Texture Intensity", Range(1, -1)) = 0
         _RimWidth ("Rim Width", Float) = 1
         _RimOffset ("Rim Offset", Vector) = (0, 0, 0, 0)
-        _ES_RimLightOffset ("Global Rim Light Offset | XY", Vector) = (0.5, 0.0, 0.0, 0.0)
+        _ES_RimLightOffset ("Global Rim Light Offset | XY", Vector) = (0.0, 0.0, 0.0, 0.0)
         _RimEdge ("Rim Edge Base", Range(0.01, 0.02)) = 0.015
         // --- Rim Color
         _RimColor0 (" Rim Light Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
@@ -366,6 +367,7 @@ Shader "HoyoToon/StarRail"
         float _RimLightMode;
         float _RimCt;
         float _Rimintensity;
+        float _ES_Rimintensity;
         float _RimWeight;
         float _RimFeatherWidth;
         float _RimIntensityTexIntensity;

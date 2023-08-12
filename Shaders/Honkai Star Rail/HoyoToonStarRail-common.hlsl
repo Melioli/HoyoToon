@@ -81,7 +81,7 @@ float3 specular_base(float shadow_area, float ndoth, float lightmap_spec, float3
 
 float4 rim_light_calc(float3 normal)
 {
-    
+     
 }
 
 // =============================================================================================================== //

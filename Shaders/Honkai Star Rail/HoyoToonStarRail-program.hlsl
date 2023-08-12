@@ -272,38 +272,36 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         // rim_values[curr_region] = _MaterialValuesPackLUT.Load(lut_uv.xwww);
     }
 
-    // dear fucking god i hate this shit
-    float2 screen_pos = i.ss_pos.xy / i.ss_pos.ww;
-    float camera_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, screen_pos));    // camera_depth = _ZBufferParams.x * camera_depth.x + _ZBufferParams.y;
+    float2 screen_pos = i.ss_pos.xy / i.ss_pos.w;
+    float3 wvp_pos = mul(UNITY_MATRIX_VP, i.ws_pos);
+    // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
+    float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, i.ws_pos));
+
+    // multiply the rim widht material values by the lightmap red channel
+    float rim_width = rim_values[curr_region].x * lerp(0.0f, lightmap.r, _RimLightMode);
+    
+    // sample depth texture, this will be the base
+    float org_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy));
+
+    float rim_side = (i.ws_pos.z * -vs_normal.x) - (i.ws_pos.x * -vs_normal.z);
+    rim_side = (rim_side > 0.0f) ? 0.0f : 1.0f;
+    
+
+    // create offset screen uv using rim width value and view space normals for offset depth texture
+    float2 offset_uv = _ES_RimLightOffset.xy - _RimOffset.xy;
+    offset_uv.x = lerp(offset_uv.x, -offset_uv.x, rim_side);
+    float2 offset = ((rim_width * vs_normal) * 0.0055f);
+    offset_uv.x = screen_pos.x + (offset_uv.x * 0.01f + offset.x);
+    offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f);
+    float offset_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy));
+
+    float rim_depth = (offset_depth - org_depth);
+    rim_depth = pow(rim_depth, rim_values[curr_region].w);
+    rim_depth = smoothstep(0.0f, rim_values[curr_region].x, rim_depth);
+
+    float3 rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * camera_dist;
+
    
-    
-    float rim_width = lerp(1.0f, lightmap.x, _RimLightMode) * (rim_values[curr_region].x - 0.01f);
-    ndotl = ndotl * 0.5f + 0.5f;
-    // float rim_shadow = dot(float2(rim_width, ndotl), float2(rim_width, ndotl)); 
-
-    // float3 vs_normal = normalize(mul((float3x3)UNITY_MATRIX_V, i.normal));
-    float rim_side = i.ws_pos.z * -normal.x - (i.ws_pos.x * -normal.z); // in game they use the view space normals but thats causing some issues 
-    rim_side = (rim_side > 0.0f) ? -1.0f : 1.0f; 
-    float rim_depth = camera_depth * _ZBufferParams.z + 3.0f;
-    float rim_area = ((rim_side * rim_width) * 0.0055f) / rim_depth;
-
-    float2 rim_offset = _ES_RimLightOffset.xy - _RimOffset;
-    float distance_from_camera = saturate(1.0f /  distance(_WorldSpaceCameraPos.xyz, i.ws_pos));
-    rim_offset.x = (1.0f - rim_offset.x) * rim_side; // this isnt accurate to the game but i dont think unitys default depth stuff is accurate either
-    rim_offset = rim_offset * distance_from_camera; // multiply by camera distance to ensure a consistent thickness
-    float2 rim_uv = screen_pos; 
-    rim_uv.x = rim_uv.x + (rim_offset.x * 0.01f + (rim_area / rim_depth));
-    rim_uv.y = rim_uv.y + (rim_offset.y * 0.01f);
-
-    float offset_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE( _CameraDepthTexture, rim_uv)); 
-
-    float rim_diff = pow(max(offset_depth - camera_depth, 0.0000001f), _RimEdge);
-    float rim_base = rim_diff - 0.82f;
-    rim_base = (saturate(rim_base * 12.5f) * -2.0f + 3.0f) * (rim_base * rim_base);
-    
-    rim_base = (rim_values[curr_region].y < rim_base) ? rim_base * vface : 0.0f;
-    
-    float3 rim_light = rim_base * rim_color[curr_region] * distance_from_camera; // fade rim light as it gets further from the camera
     // ================================================================================================ //
     // rim shadow
     // this is distinct from the rim light, whatever it does
@@ -333,7 +331,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float2(_RimShadowWidth7, _RimShadowFeather7)
     };
 
-    
     float3 rim_shadow_view = normalize(vs_view - _RimShadowOffset);
     float shadow_ndotv = saturate(pow(max(1.0f - saturate(dot(vs_normal, rim_shadow_view)), 0.001f), _RimShadowCt) * rim_shadow_values[curr_region].x);
     float shadow_t = saturate((shadow_ndotv - rim_shadow_values[curr_region].y) * (1.0f / (1.0f - rim_shadow_values[curr_region].y))) * -2.0f + 3.0f;
@@ -370,9 +367,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float3 exp_shadow = faceexp.z * _ExShadowIntensity;
     expressions = lerp(expressions, _ExShadowColor, exp_shadow);
 
-
-    
-    
     
     if(_FaceMaterial)
     {
@@ -386,18 +380,13 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
    
     out_color = out_color * diffuse;
     if(_EnableAlphaCutoff) clip(out_color.a - _AlphaCutoff);
-    out_color.xyz = out_color * shadow_color + (specular + rim_light); 
-    // out_color.xyz = out_color.xyz + rim_light;
-
-
+    out_color.xyz = out_color * shadow_color + (specular); 
+    if(!_FaceMaterial) out_color.xyz = lerp(out_color.xyz.xyz - rim_light.xyz, out_color.xyz + rim_light.xyz, rim_values[curr_region].z);
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
     // if(_FaceMaterial) out_color.xyz = faceexp.z;
 
-
-   
-
-
+    // out_color.xyz = rim_light;
 
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
