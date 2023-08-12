@@ -266,11 +266,11 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float4(_RimWidth7, _RimEdgeSoftness7, _RimType0, _RimDark7),
     };
 
-    if(_UseMaterialValuesLUT) 
-    {
+    // if(_UseMaterialValuesLUT) 
+    // {
         
-        // rim_values[curr_region] = _MaterialValuesPackLUT.Load(lut_uv.xwww);
-    }
+    //     rim_values[curr_region] = _MaterialValuesPackLUT.Load(lut_uv.xwww);
+    // }
 
     float2 screen_pos = i.ss_pos.xy / i.ss_pos.w;
     float3 wvp_pos = mul(UNITY_MATRIX_VP, i.ws_pos);
@@ -281,7 +281,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float rim_width = rim_values[curr_region].x * lerp(0.0f, lightmap.r, _RimLightMode);
     
     // sample depth texture, this will be the base
-    float org_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy));
+    float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
 
     float rim_side = (i.ws_pos.z * -vs_normal.x) - (i.ws_pos.x * -vs_normal.z);
     rim_side = (rim_side > 0.0f) ? 0.0f : 1.0f;
@@ -293,10 +293,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float2 offset = ((rim_width * vs_normal) * 0.0055f);
     offset_uv.x = screen_pos.x + (offset_uv.x * 0.01f + offset.x);
     offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f);
-    float offset_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy));
+
+    // sample depth texture using offset uv
+    float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
 
     float rim_depth = (offset_depth - org_depth);
-    rim_depth = pow(rim_depth, rim_values[curr_region].w);
+    rim_depth = pow(rim_depth, rim_values[curr_region].w); 
     rim_depth = smoothstep(0.0f, rim_values[curr_region].x, rim_depth);
 
     float3 rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * camera_dist;

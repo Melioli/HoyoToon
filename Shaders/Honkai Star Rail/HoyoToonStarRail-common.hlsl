@@ -1,3 +1,19 @@
+// from: https://github.com/cnlohr/shadertrixx/blob/main/README.md#best-practice-for-getting-depth-of-a-given-pixel-from-the-depth-texture
+float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV)
+{
+	#if defined(UNITY_REVERSED_Z)
+	zDepthFromMap = 1 - zDepthFromMap;
+			
+	// When using a mirror, the far plane is whack.  This just checks for it and aborts.
+	if( zDepthFromMap >= 1.0 ) return _ProjectionParams.z;
+	#endif
+
+	float4 clipPos = float4(screenUV.xy, zDepthFromMap, 1.0);
+	clipPos.xyz = 2.0f * clipPos.xyz - 1.0f;
+	float4 camPos = mul(unity_CameraInvProjection, clipPos);
+	return -camPos.z / camPos.w;
+}
+
 int material_region(float lightmap_alpha)
 {
     int material = 0;
