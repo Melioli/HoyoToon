@@ -158,7 +158,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     // get emissive area
     float emis_area = (diffuse.w - _EmissionThreshold) / max(0.001f, 1.0f - _EmissionThreshold);
-    emis_area = (_EmissionThreshold < diffuse.w) ? emis_area : 0.0f;
+    emis_area = (_EmissionThreshold < diffuse.w * emistex.w) ? emis_area : 0.0f;
     emis_area = saturate(emis_area) * _EnableEmission;
 
     // GET ENVIROMENTAL LIGHTING 
@@ -348,7 +348,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     float3 rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
 
-   
     // ================================================================================================ //
     // rim shadow
     // this is distinct from the rim light, whatever it does
@@ -428,7 +427,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     out_color = out_color * diffuse;
     if(_EnableAlphaCutoff) clip(out_color.a - _AlphaCutoff);
     out_color.xyz = out_color * shadow_color + (specular); 
-    if(_EnableEmission) out_color.xyz = emis_area * (out_color.xyz * _EmissionIntensity - diffuse.xyz) + out_color.xyz;
+    if(_EnableEmission) out_color.xyz = emis_area * (out_color.xyz * _EmissionIntensity - (diffuse.xyz * emistex.xyz * _EmissionTintColor.xyz)) + out_color.xyz;
     if(!_FaceMaterial) out_color.xyz = lerp(out_color.xyz.xyz - rim_light.xyz, out_color.xyz + rim_light.xyz, rim_values[curr_region].z);
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;

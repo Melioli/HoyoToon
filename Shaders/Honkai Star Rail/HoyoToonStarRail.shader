@@ -229,7 +229,7 @@ Shader "HoyoToon/StarRail"
         // EMISSION 
         [Header(EMISSION)] [Toggle] _EnableEmission ("Is Emissive", Float) = 0
         _EmissionTintColor ("Emission Color Tint", Color) = (1, 1, 1, 1)
-        _EmissionTex ("Emission Texture", 2D) = "black" {}
+        _EmissionTex ("Emission Texture", 2D) = "white" {}
         _EmissionThreshold ("Emission Threshold", Range(0,1)) = 0.5
         _EmissionIntensity ("Emission Intensity", Float) = 1
         
