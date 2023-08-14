@@ -159,7 +159,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // get emissive area
     float emis_area = (diffuse.w - _EmissionThreshold) / max(0.001f, 1.0f - _EmissionThreshold);
     emis_area = (_EmissionThreshold < diffuse.w) ? emis_area : 0.0f;
-    emis_area = saturate(emis_area);
+    emis_area = saturate(emis_area) * _EnableEmission;
 
     // GET ENVIROMENTAL LIGHTING 
     float4 enviro_light = get_enviro_light(i.ws_pos);
@@ -323,7 +323,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, i.ws_pos));
 
     // multiply the rim widht material values by the lightmap red channel
-    float rim_width = _RimWidth * lerp(0.0f, lightmap.r, _RimLightMode);
+    float rim_width = _RimWidth * lerp(1.0f, lightmap.r, _RimLightMode);
     
     // sample depth texture, this will be the base
     float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
@@ -337,7 +337,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     offset_uv.x = lerp(offset_uv.x, -offset_uv.x, rim_side);
     float2 offset = ((rim_width * vs_normal) * 0.0055f);
     offset_uv.x = screen_pos.x + ((offset_uv.x * 0.01f + offset.x) * max(0.5f, camera_dist));
-    offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f + offset.x);
+    offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f + offset.y);
 
     // sample depth texture using offset uv
     float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
