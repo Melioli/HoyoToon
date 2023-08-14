@@ -13,7 +13,8 @@ Shader "HoyoToon/StarRail"
         // -------------------------------------------
 
         [Toggle] _DebugRimLight ("Display only the rimlight", Float) = 0
-        // material types
+        [Toggle] _DebugCameraDepth ("display camera depth", Float) = 0
+         // material types
         [Header(Material Shaders)] [Space]
         [Toggle(BASE_MATERIAL)] _BaseMaterial ("Use Base Shader", Float) = 1 // on by default
         [Toggle(FACE_MATERIAL)] _FaceMaterial ("Use Face Shader", Float) = 0
@@ -311,6 +312,7 @@ Shader "HoyoToon/StarRail"
         bool _HairMaterial;
         bool _IsTransparent;
         bool _DebugRimLight;
+        bool _DebugCameraDepth;
 
         // COLORS
         float4 _Color;
