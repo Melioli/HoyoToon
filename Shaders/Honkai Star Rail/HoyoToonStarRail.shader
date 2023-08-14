@@ -11,6 +11,8 @@ Shader "HoyoToon/StarRail"
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
         [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
         // -------------------------------------------
+
+        [Toggle] _DebugRimLight ("Display only the rimlight", Float) = 0
         // material types
         [Header(Material Shaders)] [Space]
         [Toggle(BASE_MATERIAL)] _BaseMaterial ("Use Base Shader", Float) = 1 // on by default
@@ -308,6 +310,7 @@ Shader "HoyoToon/StarRail"
         bool _EyeShadowMat;
         bool _HairMaterial;
         bool _IsTransparent;
+        bool _DebugRimLight;
 
         // COLORS
         float4 _Color;

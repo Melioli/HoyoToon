@@ -346,6 +346,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     rim_depth = pow(rim_depth, rim_values[curr_region].w); 
     rim_depth = smoothstep(0.0f, _RimWidth, rim_depth);
 
+    if(_DebugRimLight) return float4(rim_depth.xxx, 1.0f);
+
+
     float3 rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
 
     // ================================================================================================ //
@@ -433,6 +436,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(_EyeShadowMat) out_color = _Color;
 
     // out_color.xyz = specular_values[curr_region].x;
+    // if(_DebugRimLight) out_color.xyz = 0.1f + rim_light;
 
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
