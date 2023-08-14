@@ -38,8 +38,9 @@ Shader "HoyoToon/StarRail"
         _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
         _headRightVector ("Right Vector | XYZ ", Vector) = (1, 0, 0, 0)
         [NoScaleOffset] _FaceMap ("Face Map Texture", 2D) = "white" {}
-        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
         [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
+        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
+        [Toggle]_UseHairSideFade ("Stencil Fade At Sides", Float) = 1
         _NoseLineColor ("Nose Line Color", Color) = (1, 1, 1, 1)
         _NoseLinePower ("Nose Line Power", Range(0, 8)) = 1
         _ExCheekColor ("Expression Cheek Color, ", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -51,14 +52,7 @@ Shader "HoyoToon/StarRail"
         _ExShadowColor ("Expression Shadow Color", Color) = (1, 1, 1, 1)
         _ExEyeColor ("Expression Eye Color", Color) = (1, 1, 1, 1)
         _ExShadowIntensity ("Expression Shadow Intensity", Range(0, 1)) = 0
-        // -------------------------------------------
-        // stockings
-        [Header(STOCKING)] 
-        [Toggle] _EnableStocking ("Use Stocking Material", Float) = 0
-        _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
-        _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
-        _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
-
+        
         // -------------------------------------------
         // shadow 
         [Header(SHADOW)] 
@@ -80,7 +74,7 @@ Shader "HoyoToon/StarRail"
         // -------------------------------------------
         // material lut 
         [Toggle]_UseMaterialValuesLUT ("Use Mat Lut", Float) = 0
-		_MaterialValuesPackLUT ("Mat Pack LUT", 2D) = "white" {}
+		[NoScaleOffset]_MaterialValuesPackLUT ("Mat Pack LUT", 2D) = "white" {}
         // specular 
         [Header(SPECULAR)]
         [Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
@@ -123,6 +117,20 @@ Shader "HoyoToon/StarRail"
         _SpecularIntensity6 ("Specular Intensity 6 | (RGB ID = 192)", Range(0, 50)) = 1
         _SpecularIntensity7 ("Specular Intensity 7 | (RGB ID = 223)", Range(0, 50)) = 1
         // -------------------------------------------
+        // stockings
+        [Header(STOCKING)] 
+        [Toggle] _EnableStocking ("Use Stocking Material", Float) = 0
+        _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
+        _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
+        _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
+        _StockTransparency ("Stockings Transparency", Range(0, 1)) = 0
+		_StockDarkWidth ("Stockings Rim Width", Range(0, 0.96)) = 0.5
+		_Stockpower ("Stockings Power", Range(0.04, 1)) = 1
+		_Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
+		_StockSP ("Stockings Lighted Intensity", Range(0, 1)) = 0.25
+		_StockRoughness ("Stockings Texture Intensity", Range(0, 1)) = 1
+		_Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
+        // -------------------------------------------
         // rim light
         [Header(RIM)]
         _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
@@ -145,15 +153,16 @@ Shader "HoyoToon/StarRail"
         _RimColor5 (" Rim Light Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
         _RimColor6 (" Rim Light Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
         _RimColor7 (" Rim Light Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
-        // --- Rim Width
-        _RimWidth0 ("Rim Width 0 | (RGB ID = 0)", Float) = 1
-        _RimWidth1 ("Rim Width 1 | (RGB ID = 31)", Float) = 1
-        _RimWidth2 ("Rim Width 2 | (RGB ID = 63)", Float) = 1
-        _RimWidth3 ("Rim Width 3 | (RGB ID = 95)", Float) = 1
-        _RimWidth4 ("Rim Width 4 | (RGB ID = 127)", Float) = 1
-        _RimWidth5 ("Rim Width 5 | (RGB ID = 159)", Float) = 1
-        _RimWidth6 ("Rim Width 6 | (RGB ID = 192)", Float) = 1
-        _RimWidth7 ("Rim Width 7 | (RGB ID = 223)", Float) = 1
+        // // --- Rim Width 
+        // _RimWidth0 ("Rim Width 0 | (RGB ID = 0)", Float) = 1
+        // _RimWidth1 ("Rim Width 1 | (RGB ID = 31)", Float) = 1
+        // _RimWidth2 ("Rim Width 2 | (RGB ID = 63)", Float) = 1
+        // _RimWidth3 ("Rim Width 3 | (RGB ID = 95)", Float) = 1
+        // _RimWidth4 ("Rim Width 4 | (RGB ID = 127)", Float) = 1
+        // _RimWidth5 ("Rim Width 5 | (RGB ID = 159)", Float) = 1
+        // _RimWidth6 ("Rim Width 6 | (RGB ID = 192)", Float) = 1
+        // _RimWidth7 ("Rim Width 7 | (RGB ID = 223)", Float) = 1
+        // these actually go unused so im disabling them, dont delete these in case they use them in the future
         // --- Rim Edge Softness 
         _RimEdgeSoftness0 ("Rim Edge Softness 0 | (RGB ID = 0)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness1 ("Rim Edge Softness 1 | (RGB ID = 31)", Range(0.01, 0.9)) = 0.1
@@ -217,6 +226,14 @@ Shader "HoyoToon/StarRail"
         // --- Offset 
         _RimShadowOffset ("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
         // -------------------------------------------
+        // EMISSION 
+        [Header(EMISSION)] [Toggle] _EnableEmission ("Is Emissive", Float) = 0
+        _EmissionTintColor ("Emission Color Tint", Color) = (1, 1, 1, 1)
+        _EmissionTex ("Emission Texture", 2D) = "black" {}
+        _EmissionThreshold ("Emission Threshold", Range(0,1)) = 0.5
+        _EmissionIntensity ("Emission Intensity", Float) = 1
+        
+        // -------------------------------------------
         // OUTLINE 
         // --- 
         [Header(OUTLINE)] _Outline ("Outline", Range(0, 1)) = 0
@@ -271,9 +288,11 @@ Shader "HoyoToon/StarRail"
         Texture2D _LightMap;
         Texture2D _DiffuseRampMultiTex;
         Texture2D _DiffuseCoolRampMultiTex;
+        Texture2D _StockRangeTex;
         Texture2D _FaceMap;
         Texture2D _FaceExpression;
         Texture2D _MaterialValuesPackLUT;
+        Texture2D _EmissionTex; 
         SamplerState sampler_MaterialValuesPackLUT;
         SamplerState sampler_MainTex;
         SamplerState sampler_LightMap;
@@ -305,6 +324,7 @@ Shader "HoyoToon/StarRail"
         float3 _headForwardVector;
         float3 _headRightVector;
         float _HairBlendSilhouette;
+        bool _UseHairSideFade;
         float3 _ShadowColor;
         float3 _NoseLineColor;
         float _NoseLinePower;
@@ -317,6 +337,19 @@ Shader "HoyoToon/StarRail"
         float4 _ExShadowColor;
         float4 _ExEyeColor;
         float _ExShadowIntensity;
+        
+        // stocking proprties
+        bool _EnableStocking;
+        float4 _StockRangeTex_ST;
+        float4 _Stockcolor;
+        float4 _StockDarkcolor;
+        float _StockTransparency;
+        float _StockDarkWidth;
+        float _Stockpower;
+        float _Stockpower1;
+        float _StockSP;
+        float _StockRoughness;
+        float _Stockthickness;
 
         // shadow properties
         float _ShadowRamp;
@@ -445,6 +478,12 @@ Shader "HoyoToon/StarRail"
         float _RimShadowFeather5;
         float _RimShadowFeather6;
         float _RimShadowFeather7;
+
+        // emission properties
+        bool _EnableEmission;
+        float4 _EmissionTintColor;
+        float _EmissionThreshold;
+        float _EmissionIntensity;
 
         // outline properties 
         float _EnableFOVWidth;
