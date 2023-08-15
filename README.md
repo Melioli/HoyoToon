@@ -43,9 +43,9 @@ The *sRGB* property should be turned on for diffuse textures, shadow ramps, and 
 | Specular Ramps | Off | Leave as is | Off | Clamp | Off | 
 | Normal Maps | Off | Leave as is | Off | Repeat | Off | 
 | MaterialIDValuesLUT | Off | None | Off | Repeat | Off | 
-| Weapon Pattern | Off | Leave as is | Off | Clamp | Off |
-| Weapon Dissolve | Off | Leave as is | Off | Repeat | Off |
-| Scan Pattern | Off | Leave as is | Off | Clamp | Off |
+| Weapon Pattern (**Eff_WeaponsTotem_Grain_00.png**) | Off | Leave as is | Off | Repeat | Off |
+| Weapon Dissolve (**Eff_WeaponsTotem_Dissolve_00.png**) | Off | Leave as is | Off | Clamp | Off |
+| Scan Pattern (**Eff_Gradient_Repeat_01.png**) | Off | Leave as is | Off | Repeat | Off |
 
 
 ## Custom Tangents
@@ -54,7 +54,7 @@ If you're working with Genshin Impact models, you may need to generate custom ta
 Using these scripts will generate a new mesh in a folder named `Tangent Mesh`, which will automatically be assigned to the model in the scene for you. This will ensure that your models work properly with HoyoToon and look their best.
 
 ## Materials / Jsons
-e understand that copying over the settings from the in-game models to the HoyoToon materials can be a tedious and time-consuming task. To make this process easier, we have created custom tools that can automatically generate materials for you.
+We understand that copying over the settings from the in-game models to the HoyoToon materials can be a tedious and time-consuming task. To make this process easier, we have created custom tools that can automatically generate materials for you.
 
 All you need to do is right-click on a JSON file and select either the **Generate HSR Materials** or **Generate GI Materials** option under the HoyoToon tab. This will automatically generate the materials you need to use HoyoToon with your models, saving you time and effort.
 
