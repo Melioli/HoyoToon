@@ -4,10 +4,13 @@
 </p><br>
 
 <p align="center">
-    <a href="https://github.com/Melioli/HoyoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Melioli/HoyoToon?style=for-the-badge"></a><br>
-    <a href="https://github.com/Melioli/HoyoToon/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Melioli/HoyoToon?style=for-the-badge"></a>
-    <a href="https://discord.gg/VDzZERg6U4"><img alt="Discord" src="https://img.shields.io/discord/894925535870865498?style=for-the-badge"></a>
-    <a href="https://github.com/Melioli/HoyoToon/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Melioli/HoyoToon?style=for-the-badge"></a>
+    <a href="https://github.com/Melioli/HoyoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/License-GPL--3.0-702963?style=for-the-badge"></a><br>
+    <a href="https://github.com/Melioli/HoyoToon/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Melioli/HoyoToon?style=for-the-badge&color=702963
+"></a>
+    <a href="https://discord.gg/VDzZERg6U4"><img alt="Discord" src="https://img.shields.io/discord/1129811149416824934?style=for-the-badge&logoColor=Byzantium&labelColor=Byzantium&color=Byzantium
+"></a>
+    <a href="https://github.com/Melioli/HoyoToon/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Melioli/HoyoToon?style=for-the-badge&logoColor=Byzantium&labelColor=Byzantium&color=Byzantium
+"></a>
 </p>
 
 
