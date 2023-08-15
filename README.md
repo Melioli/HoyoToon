@@ -36,9 +36,9 @@ The *sRGB* property should be turned on for diffuse textures, shadow ramps, and 
 
 | Texture | sRGB | Non-Power of 2 Scaling | Generate Mip Maps | Wrap Mode | Compression |
 | ------- | ---- | ---------------------- | ----------------- | --------- | ----------- |
-| Diffuse | On | Leave as is | Off | Wrap | Off |
-| Light Maps | Off | Leave as is | Off | Wrap | Off | 
-| Stockings | Off | Leave as is | Off | Wrap | Off | 
+| Diffuse | On | Leave as is | Off | Repeat | Off |
+| Light Maps | Off | Leave as is | Off | Repeat | Off | 
+| Stockings | Off | Leave as is | Off | Repeat | Off | 
 | Shadow Ramps | On | Leave as is | Off | Clamp | Off | 
 | Specular Ramps | Off | Leave as is | Off | Clamp | Off | 
 | Normal Maps | Off | Leave as is | Off | Repeat | Off | 
