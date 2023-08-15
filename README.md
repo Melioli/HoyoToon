@@ -35,14 +35,14 @@
 The *sRGB* property should be turned on for diffuse textures, shadow ramps, and specular ramps, but turned off for all other textures. Additionally, the *Wrap Mode* property should be set to *Clamp* for shadow ramps, weapon pattern, and scan pattern textures, but set to *Repeat* for normal maps and the MaterialIDValuesLUT texture. Finally, the *Compression* property should be turned off for all textures except for light maps, stockings, and the MaterialIDValuesLUT texture, which should have no compression.
 
 | Texture | sRGB | Non-Power of 2 Scaling | Generate Mip Maps | Wrap Mode | Compression |
-| ------- | ---- | ---------------------- | ----------------- | --------- | ----------- |
-| Diffuse | On | Leave as is | Off | Repeat | Off |
-| Light Maps | Off | Leave as is | Off | Repeat | Off | 
-| Stockings | Off | Leave as is | Off | Repeat | Off | 
-| Shadow Ramps | On | Leave as is | Off | Clamp | Off | 
-| Specular Ramps | Off | Leave as is | Off | Clamp | Off | 
-| Normal Maps | Off | Leave as is | Off | Repeat | Off | 
-| MaterialIDValuesLUT | Off | None | Off | Repeat | Off | 
+| :-----: | :--: | :--------------------: | :---------------: | :-------: | :---------: |
+| Diffuse |  On  |       Leave as is      |        Off        |  Repeat   |     Off     |
+| Light Maps | Off |       Leave as is      |        Off        |  Repeat   |     Off     | 
+| Stockings | Off |       Leave as is      |        Off        |  Repeat   |     Off     | 
+| Shadow Ramps | On |     Leave as is      |        Off        |   Clamp   |     Off     | 
+| Specular Ramps | Off |  Leave as is      |        Off        |   Clamp   |     Off     | 
+| Normal Maps | Off |     Leave as is      |        Off        |  Repeat   |     Off     | 
+| MaterialIDValuesLUT | Off | None |        Off        |  Repeat   |     Off     | 
 | Weapon Pattern <br>(**Eff_WeaponsTotem_Grain_00.png**)</br> | Off | Leave as is | Off | Repeat | Off |
 | Weapon Dissolve <br>(**Eff_WeaponsTotem_Dissolve_00.png**)</br> | Off | Leave as is | Off | Clamp | Off |
 | Scan Pattern <br>(**Eff_Gradient_Repeat_01.png**)</br> | Off | Leave as is | Off | Repeat | Off |
