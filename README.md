@@ -21,6 +21,10 @@ https://user-images.githubusercontent.com/77230051/192085179-8b7fde87-57d5-4c5f-
 ## Video guide
 [![Video guide](https://pbs.twimg.com/media/FkrhGJ7UUAIcV2w?format=jpg)](https://youtu.be/KFkJuNbt6yo)
 
+## Unity prerequisites 
+> [!IMPORTANT]
+> The Built-in Rendering Pipeline in Unity projects uses the Gamma option for color management by default, which is **different** from what Hoyoverse uses. To ensure that colors are accurate, it is recommended to **set the Color Space to Linear** in the Project Settings. *Edit > Project Settings > Player > Color Space* 
+
 ## Temporary text guide
 Make sure **ALL** your textures <u>**EXCEPT**</u> the ramp textures have *Texture Type* set to **Default**, *Compression* set to **High Quality**, and *Generate Mip Maps* **ticked**. The ramp textures should have no compression and mip mapping to prevent artifacting and precision issues.
 
