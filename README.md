@@ -21,7 +21,7 @@
 > **WIP**
 
 
-## Unity prerequisites 
+## Unity Prerequisites 
 > [!IMPORTANT]
 > The Built-in Rendering Pipeline in Unity projects uses the Gamma option for color management by default, which is **different** from what Hoyoverse uses. To ensure that colors are accurate, it is recommended to **set the Color Space to Linear** in the Project Settings. **Edit > Project Settings > Player > Other Settings > Color Space** You can find more information on how to do this in the [Unity documentation.](https://docs.unity3d.com/Manual/LinearRendering-LinearOrGammaWorkflow.html#:~:text=To%20do%20this%2C%20set%20Color,in%20the%20gamma%20color%20space.
 )
@@ -29,7 +29,7 @@
 
 
 
-## Texture prerequisites
+## Texture Prerequisites
 > [!IMPORTANT]
 > For best results, ensure that your texture import settings match the table below:
 The *sRGB* property should be turned on for diffuse textures, shadow ramps, and specular ramps, but turned off for all other textures. Additionally, the *Wrap Mode* property should be set to *Clamp* for shadow ramps, weapon pattern, and scan pattern textures, but set to *Repeat* for normal maps and the MaterialIDValuesLUT texture. Finally, the *Compression* property should be turned off for all textures except for light maps, stockings, and the MaterialIDValuesLUT texture, which should have no compression.
