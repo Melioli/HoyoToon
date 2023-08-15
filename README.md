@@ -43,9 +43,9 @@ The *sRGB* property should be turned on for diffuse textures, shadow ramps, and 
 | Specular Ramps | Off | Leave as is | Off | Clamp | Off | 
 | Normal Maps | Off | Leave as is | Off | Repeat | Off | 
 | MaterialIDValuesLUT | Off | None | Off | Repeat | Off | 
-| Weapon Pattern (**Eff_WeaponsTotem_Grain_00.png**) | Off | Leave as is | Off | Repeat | Off |
-| Weapon Dissolve (**Eff_WeaponsTotem_Dissolve_00.png**) | Off | Leave as is | Off | Clamp | Off |
-| Scan Pattern (**Eff_Gradient_Repeat_01.png**) | Off | Leave as is | Off | Repeat | Off |
+| Weapon Pattern <br>(**Eff_WeaponsTotem_Grain_00.png**)</br> | Off | Leave as is | Off | Repeat | Off |
+| Weapon Dissolve <br>(**Eff_WeaponsTotem_Dissolve_00.png**)</br> | Off | Leave as is | Off | Clamp | Off |
+| Scan Pattern <br>(**Eff_Gradient_Repeat_01.png**)</br> | Off | Leave as is | Off | Repeat | Off |
 
 
 ## Custom Tangents
