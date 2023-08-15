@@ -4,8 +4,8 @@
         //Header
         [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Genshin Impact</color></i></b>✧", Float) = 0
 		[HideInInspector] shader_is_using_thry_editor ("", Float) = 0
-		[HideInInspector] footer_github ("{texture:{name:github},action:{type:URL,data:https://github.com/festivities/HoyoToon},hover:GITHUB}", Float) = 0
-		[HideInInspector] footer_discord ("{texture:{name:discord},action:{type:URL,data:https://discord.gg/85rP9SpAkF},hover:GITHUB}", Float) = 0
+		[HideInInspector] footer_github ("{texture:{name:github},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
+		[HideInInspector] footer_discord ("{texture:{name:discord},action:{type:URL,data:https://discord.gg/VDzZERg6U4},hover:Discord}", Float) = 0
         //Header End
         
 
@@ -20,7 +20,7 @@
 
         //Main
         [HideInInspector] m_start_main ("Main", Float) = 0
-        [SmallTexture]_MainTex("Main Texture",2D)= "white" { }
+        [SmallTexture]_MainTex("Diffuse Texture",2D)= "white" { }
         [SmallTexture]_LightMapTex("Lightmap",2D)= "white" { }
         [Enum(UV0, 0, UV1, 1)] _UseBackFaceUV2("Backface UV", int) = 1.0
         [Toggle] _VertexColorLinear ("Enable Linear Vertex Colors", Range(0.0, 1.0)) = 0.0

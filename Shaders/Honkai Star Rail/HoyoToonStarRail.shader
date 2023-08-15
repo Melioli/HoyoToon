@@ -2,50 +2,74 @@ Shader "HoyoToon/StarRail"
 {
     Properties
     {
-        [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
-		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
-        [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
+        
+        //Header
+        [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Star Rail</color></i></b>✧", Float) = 0
+		[HideInInspector] shader_is_using_thry_editor ("", Float) = 0
+		[HideInInspector] footer_github ("{texture:{name:github},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
+		[HideInInspector] footer_discord ("{texture:{name:discord},action:{type:URL,data:https://discord.gg/VDzZERg6U4},hover:Discord}", Float) = 0
+        //Header End
+
+        //Material Type
+        [ThryWideEnum(Base, 0, Face, 1, EyeShadow, 2, Hair, 3)]variant_selector("Material Type--{on_value_actions:[
+		{value:0,actions:[{type:SET_PROPERTY,data:_BaseMaterial=1.0}, {type:SET_PROPERTY,data:_FaceMaterial=0.0}, {type:SET_PROPERTY,data:_EyeShadowMat=0.0}, {type:SET_PROPERTY,data:_HairMaterial=0.0}]},
+        {value:0,actions:[{type:SET_PROPERTY,data:_CullMode=0}, {type:SET_PROPERTY,data:_SrcBlend=5}, {type:SET_PROPERTY,data:_DstBlend=10}]},
+        {value:0,actions:[{type:SET_PROPERTY,data:_StencilPassA=2}, {type:SET_PROPERTY,data:_StencilPassB=0}, {type:SET_PROPERTY,data:_StencilCompA=0}]},
+        {value:0,actions:[{type:SET_PROPERTY,data:_StencilCompB=0}, {type:SET_PROPERTY,data:_StencilRef=0}, {type:SET_PROPERTY,data:render_queue=2040}, {type:SET_PROPERTY,data:render_type=Opaque}]},
+
+        {value:1,actions:[{type:SET_PROPERTY,data:_BaseMaterial=0.0}, {type:SET_PROPERTY,data:_FaceMaterial=1.0}, {type:SET_PROPERTY,data:_EyeShadowMat=0.0}, {type:SET_PROPERTY,data:_HairMaterial=0.0}]},
+        {value:1,actions:[{type:SET_PROPERTY,data:_CullMode=2}, {type:SET_PROPERTY,data:_SrcBlend=1}, {type:SET_PROPERTY,data:_DstBlend=0}]},
+        {value:1,actions:[{type:SET_PROPERTY,data:_StencilPassA=0}, {type:SET_PROPERTY,data:_StencilPassB=2}, {type:SET_PROPERTY,data:_StencilCompA=5}]},
+        {value:1,actions:[{type:SET_PROPERTY,data:_StencilCompB=5}, {type:SET_PROPERTY,data:_StencilRef=100}, {type:SET_PROPERTY,data:render_queue=2010}, {type:SET_PROPERTY,data:render_type=Opaque}]},
+
+        {value:2,actions:[{type:SET_PROPERTY,data:_BaseMaterial=0.0}, {type:SET_PROPERTY,data:_FaceMaterial=0.0}, {type:SET_PROPERTY,data:_EyeShadowMat=1.0}, {type:SET_PROPERTY,data:_HairMaterial=0.0}]},
+        {value:2,actions:[{type:SET_PROPERTY,data:_CullMode=0}, {type:SET_PROPERTY,data:_SrcBlend=2}, {type:SET_PROPERTY,data:_DstBlend=0}]},
+        {value:2,actions:[{type:SET_PROPERTY,data:_StencilPassA=0}, {type:SET_PROPERTY,data:_StencilPassB=2}, {type:SET_PROPERTY,data:_StencilCompA=0}]},
+        {value:2,actions:[{type:SET_PROPERTY,data:_StencilCompB=8}, {type:SET_PROPERTY,data:_StencilRef=0}, {type:SET_PROPERTY,data:render_queue=2015}, {type:SET_PROPERTY,data:render_type=Opaque}]},
+
+        {value:3,actions:[{type:SET_PROPERTY,data:_BaseMaterial=0.0}, {type:SET_PROPERTY,data:_FaceMaterial=0.0}, {type:SET_PROPERTY,data:_EyeShadowMat=0.0}, {type:SET_PROPERTY,data:_HairMaterial=1.0}]},
+        {value:3,actions:[{type:SET_PROPERTY,data:_CullMode=0}, {type:SET_PROPERTY,data:_SrcBlend=1}, {type:SET_PROPERTY,data:_DstBlend=0}]},
+        {value:3,actions:[{type:SET_PROPERTY,data:_StencilPassA=0}, {type:SET_PROPERTY,data:_StencilPassB=0}, {type:SET_PROPERTY,data:_StencilCompA=5}]},
+        {value:3,actions:[{type:SET_PROPERTY,data:_StencilCompB=8}, {type:SET_PROPERTY,data:_StencilRef=100}, {type:SET_PROPERTY,data:render_queue=2020}, {type:SET_PROPERTY,data:render_type=Opaque}]}]}", Int) = 0
+
+        //Material Type End
+
+        // material types
+        [HideInInspector] [Toggle] _BaseMaterial ("Use Base Shader", Float) = 1 // on by default
+        [HideInInspector] [Toggle] _FaceMaterial ("Use Face Shader", Float) = 0
+        [HideInInspector] [Toggle] _EyeShadowMat ("Use EyeShadow Shader", Float) = 0
+        [HideInInspector] [Toggle] _HairMaterial ("Use Hair Shader", Float) = 0
         // -------------------------------------------
 
-        [Toggle] _DebugRimLight ("Display only the rimlight", Float) = 0
-        [Toggle] _DebugCameraDepth ("display camera depth", Float) = 0
-         // material types
-        [Header(Material Shaders)] [Space]
-        [Toggle(BASE_MATERIAL)] _BaseMaterial ("Use Base Shader", Float) = 1 // on by default
-        [Toggle(FACE_MATERIAL)] _FaceMaterial ("Use Face Shader", Float) = 0
-        [Toggle(EYESHADOW_MATERIAL)] _EyeShadowMat ("Use EyeShadow Shader", Float) = 0
-        [Toggle(HAIR_MATERIAL)] _HairMaterial ("Use Hair Shader", Float) = 0
-        // -------------------------------------------
         // main coloring 
-        [Header(COMMON)]
-        [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
-        [Toggle]_IsTransparent ("use main texture alpha as transparency", float) = 0
+        [HideInInspector] m_start_main ("Main", Float) = 0
+        [SmallTexture]_MainTex ("Diffuse Texture", 2D) = "white" {}
+        [SmallTexture]_LightMap ("Light Map Texture", 2D) = "grey" {}
+        [Toggle]_UseMaterialValuesLUT ("Use Mat Lut", Float) = 0
+        [SmallTexture]_MaterialValuesPackLUT ("Mat Pack LUT--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialValuesLUT==1.0}}", 2D) = "white" {}
+        _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
+        [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
+        [Toggle]_IsTransparent ("Enable Transparency", float) = 0
         [Toggle] _EnableAlphaCutoff ("Enable Alpha Cutoff", Float) = 0
         _AlphaCutoff ("Alpha Cutoff value", Range(0.0, 1.0)) = 0.5
+        [HideInInspector] m_end_mainalpha ("", Float) = 0
+        [HideInInspector] m_start_maincolor ("Color Options", Float) = 0
         _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
         _EnvColor ("Env Color", Color) = (1, 1, 1, 1)
         _AddColor ("Env Color", Color) = (0, 0, 0, 0)
-        [NoScaleOffset] _LightMap ("Light Map Texture", 2D) = "grey" {}
-        _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
+        [HideInInspector] m_end_maincolor ("", Float) = 0
+        [HideInInspector] m_end_main ("", Float) = 0
         // -------------------------------------------
+
         // face specific settings 
-        [Header(FACE)]
-        _headUpVector ("Up Vector | XYZ", Vector) = (0, 1, 1, 0)
-        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
-        _headRightVector ("Right Vector | XYZ ", Vector) = (1, 0, 0, 0)
-        [NoScaleOffset] _FaceMap ("Face Map Texture", 2D) = "white" {}
-        [NoScaleOffset] _FaceExpression ("Face Expression map", 2D) = "black" {}
-        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
-        [Toggle]_UseHairSideFade ("Stencil Fade At Sides", Float) = 1
+        [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_FaceMaterial==1.0}}", Float) = 0
+        [SmallTexture] _FaceMap ("Face Map Texture", 2D) = "white" {}
+        [SmallTexture] _FaceExpression ("Face Expression map", 2D) = "black" {}
         _NoseLineColor ("Nose Line Color", Color) = (1, 1, 1, 1)
         _NoseLinePower ("Nose Line Power", Range(0, 8)) = 1
+        [HideInInspector] m_start_faceexpression("Face Expression", Float) = 0
         _ExCheekColor ("Expression Cheek Color, ", Color) = (1.0, 1.0, 1.0, 1.0)
         _ExMapThreshold ("Expression Map Threshold", Range(0.0, 1.0)) = 0.5
         _ExSpecularIntensity ("Expression Specular Intensity", Range(0.0, 7.0)) = 0.0
@@ -55,99 +79,50 @@ Shader "HoyoToon/StarRail"
         _ExShadowColor ("Expression Shadow Color", Color) = (1, 1, 1, 1)
         _ExEyeColor ("Expression Eye Color", Color) = (1, 1, 1, 1)
         _ExShadowIntensity ("Expression Shadow Intensity", Range(0, 1)) = 0
-        
-        // -------------------------------------------
-        // shadow 
-        [Header(SHADOW)] 
-        [NoScaleOffset]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
-        [NoScaleOffset]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
-        _ShadowRamp ("Shadow Ramp", Range(0.01, 1)) = 1
-        [Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
-        _ShadowBoostVal ("Shadow Boost Value", Range(0, 1)) = 0
+        _headUpVector ("Up Vector | XYZ", Vector) = (0, 1, 1, 0)
+        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
+        _headRightVector ("Right Vector | XYZ ", Vector) = (1, 0, 0, 0)
+        [HideInInspector] m_end_faceexpression("", Float) = 0
+        [HideInInspector] m_end_faceshading("", Float) = 0
 
+        // Hair Settings
+        [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0}}", Float) = 0
+        [Toggle]_UseHairSideFade ("Stencil Fade At Sides", Float) = 1
+        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
+        [HideInInspector] m_end_hair("", Float) = 0
+
+        // Lighting Options
+        // -------------------------------------------
+        [HideInInspector] m_start_lighting("Lighting Options", Float) = 0
+        [HideInInspector] m_start_lightandshadow("Shadow", Float) = 0
+        [SmallTexture]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
+        [SmallTexture]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
+        //[Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
+        _ShadowRamp ("Shadow Ramp", Range(0.01, 1)) = 1
+        //_ShadowBoostVal ("Shadow Boost Value", Range(0, 1)) = 0
         _ShadowColor ("Shadow Color", Color) = (0.5, 0.5, 0.5, 1)
-        _DarkColor   ("Dark Color", Color) = (0.85, 0.85, 0.85, 1)
-        _EyeShadowColor ("Eye Shadow Color", Color) = (1, 1, 1, 1)
-        _EyeBaseShadowColor ("EyeBase Shadow Color", Vector) = (1, 1, 1, 1)
-		_EyeShadowAngleMin ("EyeBase Shadow Min Angle", Range(0.36, 1.36)) = 0.85
-		_EyeShadowMaxAngle ("EyeBase Shadow Max Angle", Range(0, 1)) = 1
-		_ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
-		_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
-		_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
-        // -------------------------------------------
-        // material lut 
-        [Toggle]_UseMaterialValuesLUT ("Use Mat Lut", Float) = 0
-		[NoScaleOffset]_MaterialValuesPackLUT ("Mat Pack LUT", 2D) = "white" {}
-        // specular 
-        [Header(SPECULAR)]
-        [Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
-        _ES_SPColor ("Global Specular Color", Color) = (0.5, 0.5, 0.5, 1)
-        _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
-        // --- specular color
-        _SpecularColor0 ("Specular Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
-        _SpecularColor1 ("Specular Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
-        _SpecularColor2 ("Specular Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
-        _SpecularColor3 ("Specular Color 3 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
-        _SpecularColor4 ("Specular Color 4 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
-        _SpecularColor5 ("Specular Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
-        _SpecularColor6 ("Specular Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
-        _SpecularColor7 ("Specular Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
-        // --- specular shininess 
-        _SpecularShininess0 ("Specular Shininess 0 (Power) | (RGB ID = 0)", Range(0.1, 500))   = 10
-        _SpecularShininess1 ("Specular Shininess 1 (Power) | (RGB ID = 31)", Range(0.1, 500))  = 10
-        _SpecularShininess2 ("Specular Shininess 2 (Power) | (RGB ID = 63)", Range(0.1, 500))  = 10
-        _SpecularShininess3 ("Specular Shininess 3 (Power) | (RGB ID = 95)", Range(0.1, 500))  = 10
-        _SpecularShininess4 ("Specular Shininess 4 (Power) | (RGB ID = 127)", Range(0.1, 500)) = 10
-        _SpecularShininess5 ("Specular Shininess 5 (Power) | (RGB ID = 159)", Range(0.1, 500)) = 10
-        _SpecularShininess6 ("Specular Shininess 6 (Power) | (RGB ID = 192)", Range(0.1, 500)) = 10
-        _SpecularShininess7 ("Specular Shininess 7 (Power) | (RGB ID = 223)", Range(0.1, 500)) = 10
-        // --- specular Roughness 
-        _SpecularRoughness0 ("Specular Roughness 0 | (RGB ID = 0)", Range(0, 1))   = 0.02
-        _SpecularRoughness1 ("Specular Roughness 1 | (RGB ID = 31)", Range(0, 1))  = 0.02
-        _SpecularRoughness2 ("Specular Roughness 2 | (RGB ID = 63)", Range(0, 1))  = 0.02
-        _SpecularRoughness3 ("Specular Roughness 3 | (RGB ID = 95)", Range(0, 1))  = 0.02
-        _SpecularRoughness4 ("Specular Roughness 4 | (RGB ID = 127)", Range(0, 1)) = 0.02
-        _SpecularRoughness5 ("Specular Roughness 5 | (RGB ID = 159)", Range(0, 1)) = 0.02
-        _SpecularRoughness6 ("Specular Roughness 6 | (RGB ID = 192)", Range(0, 1)) = 0.02
-        _SpecularRoughness7 ("Specular Roughness 7 | (RGB ID = 223)", Range(0, 1)) = 0.02
-        // --- specular Intensity 
-        _SpecularIntensity0 ("Specular Intensity 0 | (RGB ID = 0)", Range(0, 50))   = 1
-        _SpecularIntensity1 ("Specular Intensity 1 | (RGB ID = 31)", Range(0, 50))  = 1
-        _SpecularIntensity2 ("Specular Intensity 2 | (RGB ID = 63)", Range(0, 50))  = 1
-        _SpecularIntensity3 ("Specular Intensity 3 | (RGB ID = 95)", Range(0, 50))  = 1
-        _SpecularIntensity4 ("Specular Intensity 4 | (RGB ID = 127)", Range(0, 50)) = 1
-        _SpecularIntensity5 ("Specular Intensity 5 | (RGB ID = 159)", Range(0, 50)) = 1
-        _SpecularIntensity6 ("Specular Intensity 6 | (RGB ID = 192)", Range(0, 50)) = 1
-        _SpecularIntensity7 ("Specular Intensity 7 | (RGB ID = 223)", Range(0, 50)) = 1
-        // -------------------------------------------
-        // stockings
-        [Header(STOCKING)] 
-        [Toggle] _EnableStocking ("Use Stocking Material", Float) = 0
-        _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
-        _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
-        _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
-        _StockTransparency ("Stockings Transparency", Range(0, 1)) = 0
-		_StockDarkWidth ("Stockings Rim Width", Range(0, 0.96)) = 0.5
-		_Stockpower ("Stockings Power", Range(0.04, 1)) = 1
-		_Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
-		_StockSP ("Stockings Lighted Intensity", Range(0, 1)) = 0.25
-		_StockRoughness ("Stockings Texture Intensity", Range(0, 1)) = 1
-		_Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
-        // -------------------------------------------
-        // rim light
-        [Header(RIM)]
+        //_DarkColor   ("Dark Color", Color) = (0.85, 0.85, 0.85, 1)
+        //_EyeShadowColor ("Eye Shadow Color", Color) = (1, 1, 1, 1)
+        //_EyeBaseShadowColor ("EyeBase Shadow Color", Vector) = (1, 1, 1, 1)
+		//_EyeShadowAngleMin ("EyeBase Shadow Min Angle", Range(0.36, 1.36)) = 0.85
+		//_EyeShadowMaxAngle ("EyeBase Shadow Max Angle", Range(0, 1)) = 1
+		//_ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
+		//_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
+		//_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
+        [HideInInspector] m_end_lightandshadow("", Float) = 0
+        [HideInInspector] m_start_lightingrim("Rim Light", Float) = 0
         _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
-        _RimCt ("Rim CT", Float) = 5
+        //_RimCt ("Rim CT", Float) = 5
         _Rimintensity ("Rim Intensity", Float) = 1
         _ES_Rimintensity ("Global Rim Intensity", Float) = 0.1
-        _RimWeight ("Rim Weight", Float) = 1
-        _RimFeatherWidth ("Rim Feather Width", Float) = 0.01
-        _RimIntensityTexIntensity ("Rim Texture Intensity", Range(1, -1)) = 0
+        //_RimWeight ("Rim Weight", Float) = 1
+        //_RimFeatherWidth ("Rim Feather Width", Float) = 0.01
+        //_RimIntensityTexIntensity ("Rim Texture Intensity", Range(1, -1)) = 0
         _RimWidth ("Rim Width", Float) = 1
         _RimOffset ("Rim Offset", Vector) = (0, 0, 0, 0)
         _ES_RimLightOffset ("Global Rim Light Offset | XY", Vector) = (0.0, 0.0, 0.0, 0.0)
-        _RimEdge ("Rim Edge Base", Range(0.01, 0.02)) = 0.015
-        // --- Rim Color
+        //_RimEdge ("Rim Edge Base", Range(0.01, 0.02)) = 0.015
+        [HideInInspector] m_start_lightingrimcolor("Rimlight Color", Float) = 0
         _RimColor0 (" Rim Light Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
         _RimColor1 (" Rim Light Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
         _RimColor2 (" Rim Light Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
@@ -156,6 +131,7 @@ Shader "HoyoToon/StarRail"
         _RimColor5 (" Rim Light Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
         _RimColor6 (" Rim Light Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
         _RimColor7 (" Rim Light Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
+        [HideInInspector] m_end_lightingrimcolor("", Float) = 0
         // // --- Rim Width 
         // _RimWidth0 ("Rim Width 0 | (RGB ID = 0)", Float) = 1
         // _RimWidth1 ("Rim Width 1 | (RGB ID = 31)", Float) = 1
@@ -167,6 +143,7 @@ Shader "HoyoToon/StarRail"
         // _RimWidth7 ("Rim Width 7 | (RGB ID = 223)", Float) = 1
         // these actually go unused so im disabling them, dont delete these in case they use them in the future
         // --- Rim Edge Softness 
+        [HideInInspector] m_start_lightingrimsoftness("Rimlight Softness", Float) = 0
         _RimEdgeSoftness0 ("Rim Edge Softness 0 | (RGB ID = 0)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness1 ("Rim Edge Softness 1 | (RGB ID = 31)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness2 ("Rim Edge Softness 2 | (RGB ID = 63)", Range(0.01, 0.9)) = 0.1
@@ -175,7 +152,8 @@ Shader "HoyoToon/StarRail"
         _RimEdgeSoftness5 ("Rim Edge Softness 5 | (RGB ID = 159)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness6 ("Rim Edge Softness 6 | (RGB ID = 192)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness7 ("Rim Edge Softness 7 | (RGB ID = 223)", Range(0.01, 0.9)) = 0.1
-        // --- Rim Type
+        [HideInInspector] m_end_lightingrimsoftness("", Float) = 0
+        [HideInInspector] m_start_lightingrimtype("Rimlight Type", Float) = 0
         _RimType0 ("Rim Type 0 | (RGB ID = 0)", Range(0.0, 1.0)) = 1.0
         _RimType1 ("Rim Type 1 | (RGB ID = 31)", Range(0.0, 1.0)) = 1.0
         _RimType2 ("Rim Type 2 | (RGB ID = 63)", Range(0.0, 1.0)) = 1.0
@@ -184,7 +162,8 @@ Shader "HoyoToon/StarRail"
         _RimType5 ("Rim Type 5 | (RGB ID = 159)", Range(0.0, 1.0)) = 1.0
         _RimType6 ("Rim Type 6 | (RGB ID = 192)", Range(0.0, 1.0)) = 1.0
         _RimType7 ("Rim Type 7 | (RGB ID = 223)", Range(0.0, 1.0)) = 1.0
-        // --- Rim Dark 
+        [HideInInspector] m_end_lightingrimtype("", Float) = 0
+        [HideInInspector] m_start_lightingrimdark("Rimlight Dark", Float) = 0
         _RimDark0 ("Rim Dark 0 | (RGB ID = 0)", Range(0.0, 1.0)) = 0.5
         _RimDark1 ("Rim Dark 1 | (RGB ID = 31)", Range(0.0, 1.0)) = 0.5
         _RimDark2 ("Rim Dark 2 | (RGB ID = 63)", Range(0.0, 1.0)) = 0.5
@@ -193,56 +172,128 @@ Shader "HoyoToon/StarRail"
         _RimDark5 ("Rim Dark 5 | (RGB ID = 159)", Range(0.0, 1.0)) = 0.5
         _RimDark6 ("Rim Dark 6 | (RGB ID = 192)", Range(0.0, 1.0)) = 0.5
         _RimDark7 ("Rim Dark 7 | (RGB ID = 223)", Range(0.0, 1.0)) = 0.5
-        // -------------------------------------------
+        [HideInInspector] m_end_lightingrimdark("", Float) = 0
         // BACKLIGHT RIM
-        [Header(BACK LIGHT RIM)]
-        [Toggle] _EnableBackRimLight ("Enable Back Rim Light", Float) = 1
-        _RimShadowCt ("Rim Shadow Control", Float) = 1
-        _RimShadowIntensity ("Rim Shadow Intensity", Float) = 1
-        // --- Color
-        _RimShadowColor0 (" Rim Shadow Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
-        _RimShadowColor1 (" Rim Shadow Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
-        _RimShadowColor2 (" Rim Shadow Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
-        _RimShadowColor3 (" Rim Shadow Color 3 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
-        _RimShadowColor4 (" Rim Shadow Color 4 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
-        _RimShadowColor5 (" Rim Shadow Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
-        _RimShadowColor6 (" Rim Shadow Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
-        _RimShadowColor7 (" Rim Shadow Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
-        // --- Width
-        _RimShadowWidth0 ("Rim Shadow Width 0 | (RGB ID = 0)", Float) = 1
-        _RimShadowWidth1 ("Rim Shadow Width 1 | (RGB ID = 31)", Float) = 1
-        _RimShadowWidth2 ("Rim Shadow Width 2 | (RGB ID = 63)", Float) = 1
-        _RimShadowWidth3 ("Rim Shadow Width 3 | (RGB ID = 95)", Float) = 1
-        _RimShadowWidth4 ("Rim Shadow Width 4 | (RGB ID = 127)", Float) = 1
-        _RimShadowWidth5 ("Rim Shadow Width 5 | (RGB ID = 159)", Float) = 1
-        _RimShadowWidth6 ("Rim Shadow Width 6 | (RGB ID = 192)", Float) = 1
-        _RimShadowWidth7 ("Rim Shadow Width 7 | (RGB ID = 223)", Float) = 1
-        // --- Feather
-        _RimShadowFeather0 ("Rim Shadow Feather 0 | (RGB ID = 0)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather1 ("Rim Shadow Feather 1 | (RGB ID = 31)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather2 ("Rim Shadow Feather 2 | (RGB ID = 63)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather3 ("Rim Shadow Feather 3 | (RGB ID = 95)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather4 ("Rim Shadow Feather 4 | (RGB ID = 127)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather5 ("Rim Shadow Feather 5 | (RGB ID = 159)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather6 ("Rim Shadow Feather 6 | (RGB ID = 192)", Range(0.01, 0.99)) = 0.01
-        _RimShadowFeather7 ("Rim Shadow Feather 7 | (RGB ID = 223)", Range(0.01, 0.99)) = 0.01
-        // --- Offset 
-        _RimShadowOffset ("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
+        // [Toggle] _EnableBackRimLight ("Enable Back Rim Light", Float) = 1
+        // _RimShadowCt ("Rim Shadow Control", Float) = 1
+        // _RimShadowIntensity ("Rim Shadow Intensity", Float) = 1
+        // // --- Color
+        // _RimShadowColor0 (" Rim Shadow Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
+        // _RimShadowColor1 (" Rim Shadow Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
+        // _RimShadowColor2 (" Rim Shadow Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
+        // _RimShadowColor3 (" Rim Shadow Color 3 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
+        // _RimShadowColor4 (" Rim Shadow Color 4 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
+        // _RimShadowColor5 (" Rim Shadow Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
+        // _RimShadowColor6 (" Rim Shadow Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
+        // _RimShadowColor7 (" Rim Shadow Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
+        // // --- Width
+        // _RimShadowWidth0 ("Rim Shadow Width 0 | (RGB ID = 0)", Float) = 1
+        // _RimShadowWidth1 ("Rim Shadow Width 1 | (RGB ID = 31)", Float) = 1
+        // _RimShadowWidth2 ("Rim Shadow Width 2 | (RGB ID = 63)", Float) = 1
+        // _RimShadowWidth3 ("Rim Shadow Width 3 | (RGB ID = 95)", Float) = 1
+        // _RimShadowWidth4 ("Rim Shadow Width 4 | (RGB ID = 127)", Float) = 1
+        // _RimShadowWidth5 ("Rim Shadow Width 5 | (RGB ID = 159)", Float) = 1
+        // _RimShadowWidth6 ("Rim Shadow Width 6 | (RGB ID = 192)", Float) = 1
+        // _RimShadowWidth7 ("Rim Shadow Width 7 | (RGB ID = 223)", Float) = 1
+        // // --- Feather
+        // _RimShadowFeather0 ("Rim Shadow Feather 0 | (RGB ID = 0)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather1 ("Rim Shadow Feather 1 | (RGB ID = 31)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather2 ("Rim Shadow Feather 2 | (RGB ID = 63)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather3 ("Rim Shadow Feather 3 | (RGB ID = 95)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather4 ("Rim Shadow Feather 4 | (RGB ID = 127)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather5 ("Rim Shadow Feather 5 | (RGB ID = 159)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather6 ("Rim Shadow Feather 6 | (RGB ID = 192)", Range(0.01, 0.99)) = 0.01
+        // _RimShadowFeather7 ("Rim Shadow Feather 7 | (RGB ID = 223)", Range(0.01, 0.99)) = 0.01
+        // // --- Offset 
+        // _RimShadowOffset ("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
+        [HideInInspector] m_end_lightingrim("", Float) = 0
+        [HideInInspector] m_end_lighting("", Int) = 0
         // -------------------------------------------
-        // EMISSION 
-        [Header(EMISSION)] [Toggle] _EnableEmission ("Is Emissive", Float) = 0
-        _EmissionTintColor ("Emission Color Tint", Color) = (1, 1, 1, 1)
-        _EmissionTex ("Emission Texture", 2D) = "white" {}
-        _EmissionThreshold ("Emission Threshold", Range(0,1)) = 0.5
-        _EmissionIntensity ("Emission Intensity", Float) = 1
+
+
+        // specular 
+        [HideInInspector] m_start_specular("Specular", Float) = 0
+        [Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
+        _ES_SPColor ("Global Specular Color", Color) = (0.5, 0.5, 0.5, 1)
+        _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
+        [HideInInspector] m_start_specularcolor("Specular Color", Float) = 0
+        _SpecularColor0 ("Specular Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
+        _SpecularColor1 ("Specular Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
+        _SpecularColor2 ("Specular Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
+        _SpecularColor3 ("Specular Color 3 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
+        _SpecularColor4 ("Specular Color 4 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
+        _SpecularColor5 ("Specular Color 5 | (RGB ID = 159)", Color) = (1, 1, 1, 1)
+        _SpecularColor6 ("Specular Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
+        _SpecularColor7 ("Specular Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
+        [HideInInspector] m_end_specularcolor("", Float) = 0
+
+        [HideInInspector] m_start_specularshininess("Specular Shininess", Float) = 0
+        _SpecularShininess0 ("Specular Shininess 0 (Power) | (RGB ID = 0)", Range(0.1, 500))   = 10
+        _SpecularShininess1 ("Specular Shininess 1 (Power) | (RGB ID = 31)", Range(0.1, 500))  = 10
+        _SpecularShininess2 ("Specular Shininess 2 (Power) | (RGB ID = 63)", Range(0.1, 500))  = 10
+        _SpecularShininess3 ("Specular Shininess 3 (Power) | (RGB ID = 95)", Range(0.1, 500))  = 10
+        _SpecularShininess4 ("Specular Shininess 4 (Power) | (RGB ID = 127)", Range(0.1, 500)) = 10
+        _SpecularShininess5 ("Specular Shininess 5 (Power) | (RGB ID = 159)", Range(0.1, 500)) = 10
+        _SpecularShininess6 ("Specular Shininess 6 (Power) | (RGB ID = 192)", Range(0.1, 500)) = 10
+        _SpecularShininess7 ("Specular Shininess 7 (Power) | (RGB ID = 223)", Range(0.1, 500)) = 10
+        [HideInInspector] m_end_specularshininess("", Float) = 0
         
-        // -------------------------------------------
-        // OUTLINE 
-        // --- 
-        [Header(OUTLINE)] _Outline ("Outline", Range(0, 1)) = 0
-        [Toggle]_EnableFOVWidth ("Use camera perspective FOV to scale outlines", Float) = 1
+        [HideInInspector] m_start_specularroughness("Specular Roughness", Float) = 0
+        _SpecularRoughness0 ("Specular Roughness 0 | (RGB ID = 0)", Range(0, 1))   = 0.02
+        _SpecularRoughness1 ("Specular Roughness 1 | (RGB ID = 31)", Range(0, 1))  = 0.02
+        _SpecularRoughness2 ("Specular Roughness 2 | (RGB ID = 63)", Range(0, 1))  = 0.02
+        _SpecularRoughness3 ("Specular Roughness 3 | (RGB ID = 95)", Range(0, 1))  = 0.02
+        _SpecularRoughness4 ("Specular Roughness 4 | (RGB ID = 127)", Range(0, 1)) = 0.02
+        _SpecularRoughness5 ("Specular Roughness 5 | (RGB ID = 159)", Range(0, 1)) = 0.02
+        _SpecularRoughness6 ("Specular Roughness 6 | (RGB ID = 192)", Range(0, 1)) = 0.02
+        _SpecularRoughness7 ("Specular Roughness 7 | (RGB ID = 223)", Range(0, 1)) = 0.02
+        [HideInInspector] m_end_specularroughness("", Float) = 0
+        
+        [HideInInspector] m_start_specularintensity("Specular Intensity", Float) = 0
+        _SpecularIntensity0 ("Specular Intensity 0 | (RGB ID = 0)", Range(0, 50))   = 1
+        _SpecularIntensity1 ("Specular Intensity 1 | (RGB ID = 31)", Range(0, 50))  = 1
+        _SpecularIntensity2 ("Specular Intensity 2 | (RGB ID = 63)", Range(0, 50))  = 1
+        _SpecularIntensity3 ("Specular Intensity 3 | (RGB ID = 95)", Range(0, 50))  = 1
+        _SpecularIntensity4 ("Specular Intensity 4 | (RGB ID = 127)", Range(0, 50)) = 1
+        _SpecularIntensity5 ("Specular Intensity 5 | (RGB ID = 159)", Range(0, 50)) = 1
+        _SpecularIntensity6 ("Specular Intensity 6 | (RGB ID = 192)", Range(0, 50)) = 1
+        _SpecularIntensity7 ("Specular Intensity 7 | (RGB ID = 223)", Range(0, 50)) = 1
+        [HideInInspector] m_end_specularintensity("", Float) = 0
+        [HideInInspector] m_end_specular("", Float) = 0
+
+
+        [HideInInspector] m_start_stockings("Stockings", Float) = 0
+        [Toggle] _EnableStocking ("Use Stocking Material", Float) = 0
+        _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
+        _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
+        _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
+        _Stockpower ("Stockings Power", Range(0.04, 1)) = 1
+        _StockDarkWidth ("Stockings Rim Width", Range(0, 0.96)) = 0.5
+        _StockSP ("Stockings Lighted Intensity", Range(0, 1)) = 0.25
+        //_StockTransparency ("Stockings Transparency", Range(0, 1)) = 0
+        _StockRoughness ("Stockings Texture Intensity", Range(0, 1)) = 1
+		_Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
+		_Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
+        [HideInInspector] m_end_stockings("", Float) = 0
+         
+        [HideInInspector] m_start_specialeffects("Special Effects", Float) = 0
+        [HideInInspector] m_start_specialeffectsemission("Emission", Float) = 0
+        [Enum(Off, 0, Ingame, 1, Custom, 2)] _EnableEmission ("Enable Emission", Float) = 0
+        _EmissionTex ("Emission Texture--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission==2}}", 2D) = "white" {}
+        _EmissionTintColor ("Emission Color Tint--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Color) = (1, 1, 1, 1)
+        _EmissionThreshold ("Emission Threshold--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Range(0,1)) = 0.5
+        _EmissionIntensity ("Emission Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Float) = 1
+        [HideInInspector] m_end_specialeffectsemission("", Float) = 0
+        [HideInInspector] m_end_specialeffects("", Float) = 0
+
+
+        [HideInInspector] m_start_outlines("Outlines", Float) = 0
+        //_Outline ("Outline", Range(0, 1)) = 0
+        //[KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalFrom ("Outline Type", Float) = 0 
+        [Toggle]_EnableFOVWidth ("Enable FOV Scaling", Float) = 1
         _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
         _OutlineScale ("Outline Scale", Range(0, 1)) = 0.1
+        [HideInInspector] m_start_outlinecolor("Outline Color", Float) = 0
         _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
 		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0, 0, 0, 1)
 		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0, 0, 0, 1)
@@ -252,6 +303,8 @@ Shader "HoyoToon/StarRail"
 		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0, 0, 0, 1)
 		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0, 0, 0, 1)
 		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0, 0, 0, 1)
+        [HideInInspector] m_end_outlinecolor("", Float) = 0
+        [HideInInspector] m_start_outlinelip("Lip Outlines", Float) = 0
         _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
         _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
         _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
@@ -259,11 +312,22 @@ Shader "HoyoToon/StarRail"
         _OutlineFixSide ("Outline Fix Star Side", Range(0, 1)) = 0.6
 		_OutlineFixFront ("Outline Fix Star Front", Range(0, 1)) = 0.05
         _FixLipOutline ("TurnOn Temp Lip Outline", Range(0, 1)) = 0
+        [HideInInspector] m_end_outlinelip("", Float) = 0
 		// _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
-		[KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalFrom ("Outline Normal From", Float) = 0 
+        [HideInInspector] m_end_outlines("", Float) = 0
 
-
-        // _LightMap
+        //Rendering Options
+        [HideInInspector] m_start_renderingOptions("Rendering Options", Float) = 0
+        [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
+		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
+        [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
+        [HideInInspector] m_end_renderingOptions("Rendering Options", Float) = 0
+        //Rendering Options End
     }
     SubShader
     {
@@ -311,8 +375,6 @@ Shader "HoyoToon/StarRail"
         bool _EyeShadowMat;
         bool _HairMaterial;
         bool _IsTransparent;
-        bool _DebugRimLight;
-        bool _DebugCameraDepth;
 
         // COLORS
         float4 _Color;
@@ -595,4 +657,5 @@ Shader "HoyoToon/StarRail"
 
         UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
+        CustomEditor "Thry.ShaderEditor"
 }
