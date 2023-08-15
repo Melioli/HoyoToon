@@ -1,82 +1,85 @@
-https://user-images.githubusercontent.com/77230051/192085179-8b7fde87-57d5-4c5f-ad3e-adda61d22ea6.mp4
-
 <br>
 <p align="center">
-    <a href="https://github.com/festivize/PrimoToon"><img src="https://user-images.githubusercontent.com/77230051/209431459-32fcd906-57c3-4bba-ba4e-5092ab36a964.png" alt="PrimoToon"/></a>
+    <a href="https://github.com/Melioli/HoyoToon"><img src="https://melioli.moe/0v2cx.png" alt="HoyoToon"/></a>
 </p><br>
 
 <p align="center">
-    <a href="https://github.com/festivize/PrimoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/festivize/PrimoToon?style=for-the-badge"></a><br>
-    <a href="https://github.com/festivize/PrimoToon/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/festivize/PrimoToon?style=for-the-badge"></a>
-    <a href="https://discord.gg/85rP9SpAkF"><img alt="Discord" src="https://img.shields.io/discord/894925535870865498?style=for-the-badge"></a>
-    <a href="https://github.com/festivize/PrimoToon/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/festivize/PrimoToon?style=for-the-badge"></a>
+    <a href="https://github.com/Melioli/HoyoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Melioli/HoyoToon?style=for-the-badge"></a><br>
+    <a href="https://github.com/Melioli/HoyoToon/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Melioli/HoyoToon?style=for-the-badge"></a>
+    <a href="https://discord.gg/VDzZERg6U4"><img alt="Discord" src="https://img.shields.io/discord/894925535870865498?style=for-the-badge"></a>
+    <a href="https://github.com/Melioli/HoyoToon/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Melioli/HoyoToon?style=for-the-badge"></a>
 </p>
 
+
+
+<h2 align="center">This README.md is very WIP</h2>
+
 ---
 
-<h2 align="center">This README.md is WIP</h2>
+## Wiki
+> [!WARNING]
+> **WIP**
 
----
-
-## Video guide
-[![Video guide](https://pbs.twimg.com/media/FkrhGJ7UUAIcV2w?format=jpg)](https://youtu.be/KFkJuNbt6yo)
 
 ## Unity prerequisites 
 > [!IMPORTANT]
-> The Built-in Rendering Pipeline in Unity projects uses the Gamma option for color management by default, which is **different** from what Hoyoverse uses. To ensure that colors are accurate, it is recommended to **set the Color Space to Linear** in the Project Settings. *Edit > Project Settings > Player > Color Space* 
+> The Built-in Rendering Pipeline in Unity projects uses the Gamma option for color management by default, which is **different** from what Hoyoverse uses. To ensure that colors are accurate, it is recommended to **set the Color Space to Linear** in the Project Settings. **Edit > Project Settings > Player > Other Settings > Color Space** You can find more information on how to do this in the [Unity documentation.](https://docs.unity3d.com/Manual/LinearRendering-LinearOrGammaWorkflow.html#:~:text=To%20do%20this%2C%20set%20Color,in%20the%20gamma%20color%20space.
+)
 
-## Temporary text guide
-Make sure **ALL** your textures <u>**EXCEPT**</u> the ramp textures have *Texture Type* set to **Default**, *Compression* set to **High Quality**, and *Generate Mip Maps* **ticked**. The ramp textures should have no compression and mip mapping to prevent artifacting and precision issues.
+> These shaders are designed to work with the datamined models only. MMD or other sources may not work properly with these shaders. However, we do not condone datamining and encourage users to respect the intellectual property rig
 
-All ramp textures should have *Wrap Mode* changed from Repeat to **Clamp**. The specular ramp texture must have the *sRGB (Color Texture)* property **unticked**.
 
-All lightmaps, normal maps, and the face shadow texture should have their *sRGB (Color Texture)* property **unticked**. Keep in mind with what I've said earlier, the normal map should have the *Texture Type* set to **Default**. **IGNORE THE NORMAL MAP TEXTURE TYPE!**
 
-For weapon dissolve/VFX, you must have these common textures:
-- *Eff_WeaponsTotem_Grain_00.png* ---> **Weapon Pattern**
-- *Eff_WeaponsTotem_Dissolve_00.png* ---> **Weapon Dissolve**
-- *Eff_Gradient_Repeat_01.png* ---> **Scan Pattern**
+## Texture prerequisites
+> [!IMPORTANT]
+> For best results, ensure that your texture import settings match the table below:
 
-All of the above textures should have *sRGB (Color Texture)* **unticked** and the dissolve texture's *Wrap Mode* set to **Clamp**. Both the dissolve and scan line *(Eff_Gradient_Repeat_01.png)* textures should have no compression and mip mapping.
+| Texture | sRGB | Non-Power of 2 Scaling | Generate Mip Maps | Wrap Mode | Compression |
+| ------- | ---- | ---------------------- | ----------------- | --------- | ----------- |
+| Diffuse | On | Leave as is | Off | Wrap | Off |
+| Light Maps | Off | Leave as is | Off | Wrap | Off | 
+| Stockings | Off | Leave as is | Off | Wrap | Off | 
+| Shadow Ramps | On | Leave as is | Off | Clamp | Off | 
+| Specular Ramps | Off | Leave as is | Off | Clamp | Off | 
+| Normal Maps | Off | Leave as is | Off | Repeat | Off | 
+| MaterialIDValuesLUT | Off | None | Off | Repeat | Off | 
+| Weapon Pattern | Off | Leave as is | Off | Clamp | Off |
+| Weapon Dissolve | Off | Leave as is | Off | Repeat | Off |
+| Scan Pattern | Off | Leave as is | Off | Clamp | Off |
 
-Unity projects in the Built-in Rendering Pipeline default to the Gamma option for color management. This is **not** what Genshin Impact uses. To avoid color inaccuracy, make sure that the *Color Space* is set to **Linear** in the [*Project Settings*](https://docs.unity3d.com/Manual/LinearRendering-LinearOrGammaWorkflow.html).
+> For best results, ensure that your texture import settings match the table above. The *sRGB* property should be turned on for diffuse textures, shadow ramps, and specular ramps, but turned off for all other textures. Additionally, the *Wrap Mode* property should be set to *Clamp* for shadow ramps, weapon pattern, and scan pattern textures, but set to *Repeat* for normal maps and the MaterialIDValuesLUT texture. Finally, the *Compression* property should be turned off for all textures except for light maps, stockings, and the MaterialIDValuesLUT texture, which should have no compression.
 
-Genshin Impact models have custom tangents within them. If your model is properly ripped, you'll want to make sure that the *Tangents* property is set to **Import** instead of the default Calculate Mikktspace. If your model does not have the custom tangents, you can easily regenerate them with this [script](https://github.com/festivize/PrimoToon/blob/main/Assets/Scripts/AverageNormals.cs).
+## Custom Tangents
+If you're working with Genshin Impact models, you may need to generate custom tangents for your models to work properly with HoyoToon. To make this process easier, we have included built-in scripts that you can access through the HoyoToon option at the top of the screen or by right-clicking on an FBX or a game object that contains a mesh.
 
-## Contact / Issues
-- [Discord server](https://discord.gg/85rP9SpAkF)
-- [Twitter](https://twitter.com/festivizing)
-- Either contact me or [create an issue](https://github.com/festivize/PrimoToon/issues/new/choose) for any problems that may arise.
-- Please don't bother me for assets.
+Using these scripts will generate a new mesh in a folder named `Tangent Mesh`, which will automatically be assigned to the model in the scene for you. This will ensure that your models work properly with HoyoToon and look their best.
+
+## Materials / Jsons
+e understand that copying over the settings from the in-game models to the HoyoToon materials can be a tedious and time-consuming task. To make this process easier, we have created custom tools that can automatically generate materials for you.
+
+All you need to do is right-click on a JSON file and select either the **Generate HSR Materials** or **Generate GI Materials** option under the HoyoToon tab. This will automatically generate the materials you need to use HoyoToon with your models, saving you time and effort.
+
+## Contact
+- [Discord server](https://discord.gg/VDzZERg6U4)
+- [Meliodas's Twitter](https://twitter.com/Meliodas7DL)
+- [Manashiku's Twitter](https://twitter.com/Manashiku)
+
+## Issues
+- If you encounter any issues while using HoyoToon, please don't hesitate to reach out to us. You can contact us directly on Discord, or you can [create an issue](https://github.com/Melioli/HoyoToon/issues/new/choose) on our GitHub repository. We are always happy to help and will do our best to resolve any problems you may have.
 
 ## Rules
-- The [GPL-3.0 License](https://github.com/festivize/Cheddar/blob/main/LICENSE) applies.
-- If you use this shader as is in avatars for VRChat, renders, animations or any form of medium that does not directly modify the shader, I'd appreciate being credited - **you don't have to do it though.**
-- If you use this shader as the main reference for your own shader, please give credit where it's due.
+- The [GPL-3.0 License](https://github.com/Melioli/HoyoToon/blob/main/LICENSE) applies.
+- If you decide to use this shader in its original form for VRChat avatars, renders, animations, or any other medium that does not involve modifying the shader, please give credit to the original creator.
+- If you use this shader as a basis for creating your own shader, please be sure to give credit to the us.
 - In compliance with the license, you are free to redistribute the files as long as you attach a link to the source repository.
 
 ## Contributing
-My code is most likely horrible given that this is my first programming project so I'd appreciate any help! Just create a pull request and I'll do my best to get to it ^^
+We welcome contributions to the HoyoToon project! If you notice any issues or have ideas for new features, please feel free to create a pull request. We appreciate any help we can get, and we will do our best to review and merge your contributions as soon as possible.
 
 ## Special thanks
 All of this wouldn't be possible if it weren't for:
-- Arc System Works
-- miHoYo
-- [Aerthas Veras](https://github.com/Aerthas/) 
-- [Manashiku](https://github.com/Manashiku/)
-- The folks over at [知乎专栏](https://zhuanlan.zhihu.com/)
-- JTAOO
-- [Unari](https://twitter.com/UnariVR/)
-- The VRC Shader Development Discord
-- [Razmoth](https://github.com/Razmoth/)
-- [radioegor146](https://github.com/radioegor146/)
-- [Mero](https://github.com/GrownNed/)
-- [Lunatic](https://github.com/lunaticwhat/)
+- [Meliodas](https://github.com/Melioli)
+- [Manashiku](https://github.com/Manashiku)
+- [Chips](https://github.com/Elysia-simp)
+- [Razmoth](https://github.com/Razmoth)
 
-## Disclaimer
-This shader isn't meant to be 100% accurate - what I only aim for is to replicate the in-game looks to the best of my ability. Some calculations are exactly how the game does things, some are my own thrown into the mix.
-
-While the shader is developed primarily for datamined assets, this repository does not endorse datamining in any way whatsoever and will never directly provide the assets nor tools in extracting from game files.
-
-## Since you've read this far...
-Using this shader is completely **free** if it's not already evident from the license BUT - if and only if you have something to spare and would like to support me, then you can do so on my Ko-fi [here](https://ko-fi.com/festivity). I appreciate every tip and each one motivates me to keep on improving the shader.
