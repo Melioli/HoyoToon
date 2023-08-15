@@ -7,15 +7,15 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GI
+  m_Name: New Material
   m_Shader: {fileID: 4800000, guid: 59129928dcb595f4baa68b8f30938b54, type: 3}
-  m_ShaderKeywords: _CLIPPLANEWORLD_ON _FALLBACKOUTLINES_ON _METALMATERIAL_ON _TOGGLEEYEGLOW_ON
-    _USEFRESNEL_ON _USELIGHTMAPCOLORAO_ON _USEMATERIAL2_ON _USEMATERIAL3_ON _USEMATERIAL4_ON
-    _USEMATERIAL5_ON _USEPATTERN_ON _USESHADOWRAMP_ON _USEVERTEXCOLORAO_ON
+  m_ShaderKeywords: _CLIPPLANEWORLD_ON _FALLBACKOUTLINES_ON _METALMATERIAL_ON _STARCLOAKENABLE_ON
+    _TOGGLEEYEGLOW_ON _USEFRESNEL_ON _USELIGHTMAPCOLORAO_ON _USEMATERIAL2_ON _USEMATERIAL3_ON
+    _USEMATERIAL4_ON _USEMATERIAL5_ON _USEPATTERN_ON _USESHADOWRAMP_ON _USEVERTEXCOLORAO_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: 2040
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -156,7 +156,6 @@ Material:
     m_Floats:
     - _AlphaCutoff: 0.5
     - _AnisotropySpecular: 0
-    - _BackShadowRange: 0
     - _BaseMaterial: 1
     - _BumpScale: 1
     - _ClipAlphaThreshold: 1
@@ -167,12 +166,12 @@ Material:
     - _ConstellationBrightness: 5
     - _ConstellationHeight: 1.2
     - _Cull: 0
-    - _CullMode: 2
+    - _CullMode: 0
     - _Cutoff: 0.5
     - _DayOrNight: 0
     - _DetailNormalMapScale: 1
     - _DissolveDirection_Toggle: 0
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _ES_Rimintensity: 0.1
     - _ES_SPIntensity: 0.5
     - _EmissionIntensity: 1
@@ -180,7 +179,6 @@ Material:
     - _EmissionThreshold: 0.5
     - _EmissionType: 0
     - _EnableAlphaCutoff: 0
-    - _EnableBackRimLight: 1
     - _EnableEmission: 0
     - _EnableFOVWidth: 1
     - _EnableStocking: 0
@@ -191,9 +189,7 @@ Material:
     - _ExShyIntensity: 0
     - _ExSpecularIntensity: 0
     - _EyeGlowStrength: 1
-    - _EyeShadowAngleMin: 0.85
     - _EyeShadowMat: 0
-    - _EyeShadowMaxAngle: 1
     - _FaceBlushStrength: 0
     - _FaceMapSoftness: 0.001
     - _FaceMaterial: 0
@@ -228,14 +224,12 @@ Material:
     - _NoseBlushStrength: 0
     - _NoseLinePower: 1
     - _OcclusionStrength: 1
-    - _Outline: 0
     - _OutlineFixFront: 0.05
     - _OutlineFixRange1: 0.1
     - _OutlineFixRange2: 0.1
     - _OutlineFixRange3: 0.1
     - _OutlineFixRange4: 0.1
     - _OutlineFixSide: 0.6
-    - _OutlineNormalFrom: 0
     - _OutlineScale: 0.1
     - _OutlineType: 1
     - _OutlineWidth: 0.1
@@ -266,7 +260,6 @@ Material:
     - _ReturnVertexColorB: 0
     - _ReturnVertexColorG: 0
     - _ReturnVertexColorR: 0
-    - _RimCt: 5
     - _RimDark0: 0.5
     - _RimDark1: 0.5
     - _RimDark2: 0.5
@@ -275,7 +268,6 @@ Material:
     - _RimDark5: 0.5
     - _RimDark6: 0.5
     - _RimDark7: 0.5
-    - _RimEdge: 0.015
     - _RimEdgeSoftness0: 0.1
     - _RimEdgeSoftness1: 0.1
     - _RimEdgeSoftness2: 0.1
@@ -284,30 +276,10 @@ Material:
     - _RimEdgeSoftness5: 0.1
     - _RimEdgeSoftness6: 0.1
     - _RimEdgeSoftness7: 0.1
-    - _RimFeatherWidth: 0.01
-    - _RimIntensityTexIntensity: 0
     - _RimLightIntensity: 1
     - _RimLightMode: 1
     - _RimLightThickness: 1
     - _RimLightType: 0
-    - _RimShadowCt: 1
-    - _RimShadowFeather0: 0.01
-    - _RimShadowFeather1: 0.01
-    - _RimShadowFeather2: 0.01
-    - _RimShadowFeather3: 0.01
-    - _RimShadowFeather4: 0.01
-    - _RimShadowFeather5: 0.01
-    - _RimShadowFeather6: 0.01
-    - _RimShadowFeather7: 0.01
-    - _RimShadowIntensity: 1
-    - _RimShadowWidth0: 1
-    - _RimShadowWidth1: 1
-    - _RimShadowWidth2: 1
-    - _RimShadowWidth3: 1
-    - _RimShadowWidth4: 1
-    - _RimShadowWidth5: 1
-    - _RimShadowWidth6: 1
-    - _RimShadowWidth7: 1
     - _RimType0: 1
     - _RimType1: 1
     - _RimType2: 1
@@ -316,19 +288,14 @@ Material:
     - _RimType5: 1
     - _RimType6: 1
     - _RimType7: 1
-    - _RimWeight: 1
     - _RimWidth: 1
     - _Rimintensity: 1
     - _Scale: 0.01
     - _ScanColorScaler: 0
     - _ScanDirection_Switch: 0
     - _ScanSpeed: 0.8
-    - _ShadowBoost: 0
-    - _ShadowBoostVal: 0
-    - _ShadowFeather: 0.0001
     - _ShadowRamp: 1
     - _ShadowRampWidth: 1
-    - _ShadowThreshold: 0.5
     - _ShadowTransitionRange: 0.01
     - _ShadowTransitionRange2: 0.01
     - _ShadowTransitionRange3: 0.01
@@ -377,23 +344,22 @@ Material:
     - _SpecularShininess5: 10
     - _SpecularShininess6: 10
     - _SpecularShininess7: 10
-    - _SrcBlend: 1
+    - _SrcBlend: 5
     - _Star01Speed: 0
     - _Star02Height: 0
     - _StarBrightness: 60
     - _StarCloakBlendRate: 1
-    - _StarCloakEnable: 0
+    - _StarCloakEnable: 1
     - _StarCloakOveride: 0
     - _StarHeight: 14.89
-    - _StencilCompA: 8
-    - _StencilCompB: 8
-    - _StencilPassA: 0
+    - _StencilCompA: 0
+    - _StencilCompB: 0
+    - _StencilPassA: 2
     - _StencilPassB: 0
     - _StencilRef: 0
     - _StockDarkWidth: 0.5
     - _StockRoughness: 1
     - _StockSP: 0.25
-    - _StockTransparency: 0
     - _Stockpower: 1
     - _Stockpower1: 1
     - _Stockthickness: 0
@@ -407,7 +373,7 @@ Material:
     - _UseBackFaceUV2: 1
     - _UseBumpMap: 0
     - _UseClipPlane: 0
-    - _UseFaceMapNew: 1
+    - _UseFaceMapNew: 0
     - _UseFresnel: 1
     - _UseHairSideFade: 1
     - _UseLightMapColorAO: 1
@@ -419,7 +385,7 @@ Material:
     - _UsePattern: 1
     - _UseShadowRamp: 1
     - _UseVertexColorAO: 1
-    - _UseWeapon: 0
+    - _UseWeapon: 1
     - _VertexColorLinear: 0
     - _WeaponDissolveValue: 1
     - _ZTest: 4
@@ -434,17 +400,28 @@ Material:
     - m_end_emissionglow: 0
     - m_end_emissionpulse: 0
     - m_end_faceblush: 0
+    - m_end_faceexpression: 0
     - m_end_faceshading: 0
     - m_end_fresnel: 0
+    - m_end_hair: 0
     - m_end_lightandshadow: 0
+    - m_end_lighting: 0
+    - m_end_lightingrim: 0
+    - m_end_lightingrimcolor: 0
+    - m_end_lightingrimdark: 0
+    - m_end_lightingrimsoftness: 0
+    - m_end_lightingrimtype: 0
     - m_end_lightning: 0
     - m_end_main: 0
     - m_end_mainalpha: 0
+    - m_end_maincolor: 0
     - m_end_maindetail: 0
     - m_end_matid: 0
     - m_end_metallics: 0
     - m_end_metallicscolor: 0
     - m_end_normalmap: 0
+    - m_end_outlinecolor: 0
+    - m_end_outlinelip: 0
     - m_end_outlines: 0
     - m_end_outlinescolor: 0
     - m_end_outlinesoffset: 0
@@ -455,51 +432,73 @@ Material:
     - m_end_shadowcolorsnight: 0
     - m_end_shadowtransitions: 0
     - m_end_specialeffects: 0
+    - m_end_specialeffectsemission: 0
     - m_end_specular: 0
+    - m_end_specularcolor: 0
+    - m_end_specularintensity: 0
+    - m_end_specularroughness: 0
+    - m_end_specularshininess: 0
     - m_end_starcock: 0
     - m_end_starcockcloud: 0
     - m_end_starcockcolorpallete: 0
     - m_end_starcockconstellation: 0
     - m_end_starcocknoise: 0
+    - m_end_stockings: 0
     - m_end_weaponscan: 0
     - m_end_weaponshading: 0
     - m_start_debugOptions: 0
-    - m_start_emissioneyeglow: 0
+    - m_start_emissioneyeglow: 1
     - m_start_emissionglow: 1
-    - m_start_emissionpulse: 0
-    - m_start_faceblush: 0
-    - m_start_faceshading: 0
-    - m_start_fresnel: 0
-    - m_start_lightandshadow: 0
+    - m_start_emissionpulse: 1
+    - m_start_faceblush: 1
+    - m_start_faceexpression: 1
+    - m_start_faceshading: 1
+    - m_start_fresnel: 1
+    - m_start_hair: 1
+    - m_start_lightandshadow: 1
     - m_start_lighting: 0
+    - m_start_lightingrim: 0
+    - m_start_lightingrimcolor: 0
+    - m_start_lightingrimdark: 0
+    - m_start_lightingrimsoftness: 0
+    - m_start_lightingrimtype: 0
     - m_start_main: 0
     - m_start_mainalpha: 0
+    - m_start_maincolor: 0
     - m_start_maindetail: 0
     - m_start_matid: 0
     - m_start_metallics: 0
     - m_start_metallicscolor: 0
     - m_start_normalmap: 0
+    - m_start_outlinecolor: 0
+    - m_start_outlinelip: 1
     - m_start_outlines: 0
     - m_start_outlinescolor: 0
     - m_start_outlinesoffset: 0
     - m_start_reflections: 0
-    - m_start_renderingOptions: 0
+    - m_start_renderingOptions: 1
     - m_start_rimlight: 0
     - m_start_shadowcolorsday: 0
     - m_start_shadowcolorsnight: 0
     - m_start_shadowtransitions: 0
     - m_start_specialeffects: 0
+    - m_start_specialeffectsemission: 1
     - m_start_specular: 0
-    - m_start_starcock: 0
+    - m_start_specularcolor: 0
+    - m_start_specularintensity: 0
+    - m_start_specularroughness: 0
+    - m_start_specularshininess: 0
+    - m_start_starcock: 1
     - m_start_starcockcloud: 0
     - m_start_starcockcolorpallete: 0
     - m_start_starcockconstellation: 0
     - m_start_starcocknoise: 0
-    - m_start_weaponscan: 0
+    - m_start_stockings: 0
+    - m_start_weaponscan: 1
     - m_start_weaponshading: 0
     - shader_is_using_thry_editor: 69
     - shader_master_label: 0
-    - variant_selector: 1
+    - variant_selector: 2
     m_Colors:
     - _AddColor: {r: 0, g: 0, b: 0, a: 0}
     - _BackColor: {r: 1, g: 1, b: 1, a: 1}
@@ -510,7 +509,6 @@ Material:
     - _CoolShadowMultColor3: {r: 0.9, g: 0.7, b: 0.75, a: 1}
     - _CoolShadowMultColor4: {r: 0.9, g: 0.7, b: 0.75, a: 1}
     - _CoolShadowMultColor5: {r: 0.9, g: 0.7, b: 0.75, a: 1}
-    - _DarkColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
     - _ES_RimLightOffset: {r: 0, g: 0, b: 0, a: 0}
     - _ES_SPColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _ElementRimColor: {r: 0, g: 0, b: 0, a: 1}
@@ -521,8 +519,6 @@ Material:
     - _ExEyeColor: {r: 1, g: 1, b: 1, a: 1}
     - _ExShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _ExShyColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EyeBaseShadowColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EyeShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _FaceBlushColor: {r: 1, g: 0.8, b: 0.7, a: 1}
     - _FirstShadowMultColor: {r: 0.9, g: 0.7, b: 0.75, a: 1}
     - _FirstShadowMultColor2: {r: 0.9, g: 0.7, b: 0.75, a: 1}
@@ -557,15 +553,6 @@ Material:
     - _RimColor6: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor7: {r: 1, g: 1, b: 1, a: 1}
     - _RimOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _RimShadowColor0: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor1: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor2: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor3: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor4: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor5: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor6: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowColor7: {r: 1, g: 1, b: 1, a: 1}
-    - _RimShadowOffset: {r: 0, g: 0, b: 0, a: 0}
     - _ScanColor: {r: 0.8970588, g: 0.8970588, b: 0.8970588, a: 1}
     - _ShadowColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _SkillEmisssionColor: {r: 0, g: 0, b: 0, a: 0}

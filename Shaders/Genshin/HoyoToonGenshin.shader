@@ -34,7 +34,7 @@
         _TextureLineSmoothness ("Texture Line Smoothness", Range(0.0, 1.0)) = 0.15
         _TextureLineThickness ("Texture Line Thickness", Range(0.0, 1.0)) = 0.55
         _TextureLineDistanceControl ("Texture Line Distance Control", Vector) = (0.1, 0.6, 1.0, 1.0)
-        [Gamma] [HDR] _TextureLineMultiplier ("Texture Line Multiplier", Color) = (0.6, 0.6, 0.6, 1.0)
+        [Gamma] [HDR] _TextureLineMultiplier ("Texture Line Color", Color) = (0.6, 0.6, 0.6, 1.0)
         [HideInInspector] _TextureBiasWhenDithering ("Texture Dithering Bias", Float) = -1.0
         [HideInInspector] m_end_maindetail ("", Float) = 0
         [HideInInspector] m_start_matid ("Material IDs", Float) = 0
@@ -52,7 +52,7 @@
         [SmallTexture]_BumpMap("Normal Map",2D)= "bump" { } 
         // changed the default normal map texture to unitys basic bump map
         // [SmallTexture]_BumpMap("Normal Map",2D)= "white" { }
-        _BumpScale ("Normal Map Scale", Range(0.0, 1.0)) = 0.0 
+        _BumpScale ("Normal Map Scale", Range(0.0, 1.0)) = 0.0
         [HideInInspector] m_end_normalmap ("", Float) = 0
         //Normal Map End
 
@@ -64,8 +64,8 @@
         [HideInInspector] _UseFaceMapNew ("Enable Face Shader", Range(0.0, 1.0)) = 0.0
         _FaceMapSoftness ("Face Lighting Softness", Range(0.0, 1.0)) = 0.001
         [IntRange] _MaterialID ("Face Material ID", Range(1.0, 5.0)) = 2.0
-        _headForwardVector ("Forward Vector", Vector) = (0, 1, 0, 0)
-        _headRightVector ("Right Vector, ignore the last element", Vector) = (0, 0, -1, 0)
+        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 1, 0, 0)
+        _headRightVector ("Right Vector | XYZ", Vector) = (0, 0, -1, 0)
         [HideInInspector] m_start_faceblush ("Blush", Float) = 0
         _NoseBlushStrength ("Nose Blush Strength", Range(0.0, 1.0)) = 0.0
         _FaceBlushStrength ("Face Blush Strength", Range(0.0, 1.0)) = 0.0
@@ -106,9 +106,9 @@
         [HideInInspector] g_start_light("", Int) = 0
         [HideInInspector] m_start_lightandshadow("Shadow", Float) = 0
         [SmallTexture]_PackedShadowRampTex("Shadow Ramp",2D)= "white"{ }
-        [Toggle] _UseLightMapColorAO ("Use Lightmap Ambient Occlusion?", Range(0.0, 1.0)) = 1.0
-        [Toggle] _UseShadowRamp ("Use Shadow Ramp Texture?", Float) = 1.0
-        [Toggle] _UseVertexColorAO ("Use Vertex Color Ambient Occlusion?", Range(0.0, 1.0)) = 1.0
+        [Toggle] _UseLightMapColorAO ("Enable Lightmap Ambient Occlusion", Range(0.0, 1.0)) = 1.0
+        [Toggle] _UseShadowRamp ("Enable Shadow Ramp Texture", Float) = 1.0
+        [Toggle] _UseVertexColorAO ("Enable Vertex Color Ambient Occlusion", Range(0.0, 1.0)) = 1.0
         _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
 
         _LightArea ("Shadow Position", Range(0.0, 2.0)) = 0.55
@@ -159,7 +159,7 @@
         _MTShininess ("Metallic Specular Shininess--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 90.0
         _MTSpecularScale ("Metallic Specular Scale--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 15.0 
         _MTMapTileScale ("Metallic Matcap Tile Scale--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Range(0.0, 2.0)) = 1.0
-        _MTSpecularAttenInShadow ("Metallic Specular Attenuation in Shadow--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Range(0.0, 1.0)) = 0.2
+        _MTSpecularAttenInShadow ("Metallic Specular Power in Shadow--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Range(0.0, 1.0)) = 0.2
         _MTSharpLayerOffset ("Metallic Sharp Layer Offset--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Range(0.001, 1.0)) = 1.0
         [HideInInspector] m_start_metallicscolor("Metallic Colors--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Int) = 0
         [Gamma] [HDR] _MTMapDarkColor ("Metallic Matcap Dark Color", Color) = (0.51, 0.3, 0.19, 1.0)
@@ -231,9 +231,9 @@
         [HideInInspector] m_end_emissionpulse ("", Float) = 0
         [HideInInspector] m_end_emissionglow ("", Float) = 0
 
-        [HideInInspector] m_start_starcock("StarGlow--{tooltip:Paimon & Dainsleif Cape}", Float) = 0 //tribute to the starcock 
+        [HideInInspector] m_start_starcock("Star Cloak--{tooltip:Paimon & Dainsleif Cape}", Float) = 0 //tribute to the starcock 
         [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
-        [Toggle] _StarCloakOveride("Disable all shading but star cloak--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
+        [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
         _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Range(0.0, 2.0)) = 1.0
         _StarTex ("Star Texture 1--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { } // cock 
         _Star02Tex ("Star Texture 2--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { }

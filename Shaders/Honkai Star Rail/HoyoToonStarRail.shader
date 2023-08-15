@@ -45,7 +45,7 @@ Shader "HoyoToon/StarRail"
         [HideInInspector] m_start_main ("Main", Float) = 0
         [SmallTexture]_MainTex ("Diffuse Texture", 2D) = "white" {}
         [SmallTexture]_LightMap ("Light Map Texture", 2D) = "grey" {}
-        [Toggle]_UseMaterialValuesLUT ("Use Mat Lut", Float) = 0
+        [Toggle]_UseMaterialValuesLUT ("Enable Material LUT", Float) = 0
         [SmallTexture]_MaterialValuesPackLUT ("Mat Pack LUT--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialValuesLUT==1.0}}", 2D) = "white" {}
         _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
         [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
@@ -57,8 +57,8 @@ Shader "HoyoToon/StarRail"
         _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
-        _EnvColor ("Env Color", Color) = (1, 1, 1, 1)
-        _AddColor ("Env Color", Color) = (0, 0, 0, 0)
+        //_EnvColor ("Env Color", Color) = (1, 1, 1, 1)
+        //_AddColor ("Add Color", Color) = (0, 0, 0, 0)
         [HideInInspector] m_end_maincolor ("", Float) = 0
         [HideInInspector] m_end_main ("", Float) = 0
         // -------------------------------------------
@@ -87,7 +87,7 @@ Shader "HoyoToon/StarRail"
 
         // Hair Settings
         [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0}}", Float) = 0
-        [Toggle]_UseHairSideFade ("Stencil Fade At Sides", Float) = 1
+        [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 1
         _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
         [HideInInspector] m_end_hair("", Float) = 0
 
@@ -213,7 +213,7 @@ Shader "HoyoToon/StarRail"
 
         // specular 
         [HideInInspector] m_start_specular("Specular", Float) = 0
-        [Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
+        //[Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
         _ES_SPColor ("Global Specular Color", Color) = (0.5, 0.5, 0.5, 1)
         _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
         [HideInInspector] m_start_specularcolor("Specular Color", Float) = 0
@@ -263,7 +263,7 @@ Shader "HoyoToon/StarRail"
 
 
         [HideInInspector] m_start_stockings("Stockings", Float) = 0
-        [Toggle] _EnableStocking ("Use Stocking Material", Float) = 0
+        [Toggle] _EnableStocking ("Enable Stockings", Float) = 0
         _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
         _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
         _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
