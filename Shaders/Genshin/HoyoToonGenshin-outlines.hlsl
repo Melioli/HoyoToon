@@ -26,7 +26,8 @@ vsOut vert(vsIn v)
     {
         float3 ws_view = mul(UNITY_MATRIX_MV, o.vertexOS);
         float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
-        float fov = 1.0f / (rsqrt(abs(-ws_view.z / unity_CameraProjection._m11)));
+        // float fov = 1.0f / (rsqrt(abs(-ws_view.z / unity_CameraProjection._m11)));
+        float fov = (2.41400003 / unity_CameraProjection._m11) * -ws_view.z;;
         float depth = fov;
         
         float2 range;
@@ -44,7 +45,7 @@ vsOut vert(vsIn v)
         }
         
         float offset = lerpByZ(scale.x, scale.y, range.x, range.y, depth);
-        offset = offset * 0.414f * v.vertexcol.w * _OutlineWidth * _Scale;
+        offset = offset * 0.414f * v.vertexcol.w * _OutlineWidth * (_Scale * 100.0f);
 
         outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, outline_normal);
         outline_normal.z = 0.0099f;
