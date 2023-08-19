@@ -243,6 +243,14 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     // ========================================================= //
     // shadow 
     float litFactor = 1.0f;
+    float3 fresnel = (float3)0.0f;
+    if(_UseFresnel)
+    {
+        fresnel = saturate(1.0f - dot(normal, view));
+        fresnel = max(1.0f - ndotv, 0.000001f);
+        fresnel = pow(fresnel, _HitColorFresnelPower);
+        fresnel = _HitColor.xyz * fresnel.xxx * _HitColorScaler;
+    }
     if(_UseFaceMapNew != 0.0f) // face shading
     // besides the additional option of using material shadow colors
     // this comes from straight from primotoon but i dont care, the way i do it in mmd has always been buggy cuz of rotation matrices and shit
@@ -335,7 +343,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             
             float3 bumpmap = normalmap.xyz;
             bumpmap.xy = bumpmap.xy * 2.0f - 1.0f;
-            bumpmap.z = max(_BumpScale, 0.001f);
+            bumpmap.z = max(1.0f - min(_BumpScale, 0.95f), 0.001f);
             bumpmap.xyz = normalize(bumpmap);
 
             // world space position derivative
@@ -523,8 +531,9 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             emission = lerp((float3)0.0f, _EmissionStrength * customemi.xyz * _EmissionColor, saturate(emis_area * pulse));
         }
         
+                
         finalColor.xyz = (metal_area) ? diffuse.xyz * metal + metal_specular: diffuse.xyz * shadow_color + specular;
-        finalColor.xyz = finalColor.xyz * lerp(1.0, environmentLighting, _EnvironmentLightingStrength).xyz;
+        finalColor.xyz = finalColor.xyz * lerp(1.0f, environmentLighting, _EnvironmentLightingStrength).xyz;
        
         // finalColor = diffuse;
         // finalColor.xyz = lightmap.x;
@@ -539,17 +548,17 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float3 scan_line = 0.0f;
     if(_UseWeapon)
     {
-        half2 weaponUVs = (_ProceduralUVs != 0.0) ? (i.vertexOS.zx + 0.25) * 1.5 : i.uv.zw;
+        half2 weaponUVs = (_ProceduralUVs) ? (i.vertexOS.zx + 0.25f) * 1.5f : i.uv.zw;
 
         half2 weaponPatternUVs = _Time.yy * _Pattern_Speed + weaponUVs; // tmp1.xy
         fixed4 weaponPatternTex = _WeaponPatternTex.Sample(sampler_WeaponPatternTex, weaponPatternUVs);
         half buf = weaponPatternTex;
-        weaponPatternTex = sin(((_WeaponDissolveValue - 0.25) * 6.28));
-        weaponPatternTex += 1.0;
+        weaponPatternTex = sin(((_WeaponDissolveValue - 0.25f) * 6.28f));
+        weaponPatternTex += 1.0f;
         buf *= weaponPatternTex.x;      
         weapon_pattern = buf * _WeaponPatternColor;      
         half buf2 = 1.0 - weaponUVs.y;
-        buf = (_ScanDirection_Switch != 0.0) ? buf2 : weaponUVs.y;
+        buf = (_ScanDirection_Switch) ? buf2 : weaponUVs.y;
         half buf4 = _ScanSpeed * _Time.y;
         half buf3 = buf * 0.5 + buf4;
         fixed4 scanTex = _ScanPatternTex.Sample(sampler_ScanPatternTex, half2(weaponUVs.x, buf3));      
@@ -557,11 +566,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         calculateDissolve(dissolve, weaponUVs, weaponPatternTex.x);     
         // apply dissolve
         clip(dissolve.x - _ClipAlphaThreshold);
-        finalColor.xyz = finalColor.xyz + max((_UsePattern != 0.0) ? weapon_pattern : 0.0, pow(dissolve.y, 2.0) * _WeaponPatternColor * 2);
+        finalColor.xyz = finalColor.xyz + max((_UsePattern != 0.0f) ? weapon_pattern : 0.0, pow(dissolve.y, 2.0f) * _WeaponPatternColor * 2.0f);
         finalColor.xyz = finalColor.xyz + scan_line;
     }
-    
-    finalColor.xyz = (_RimLightType > 0) ? (ColorDodge(rim_depth, finalColor.xyz)) : finalColor.xyz + rim_depth;
+    finalColor.xyz = finalColor.xyz + fresnel;
+    finalColor.xyz = (_RimLightType > 0) ? ((rim_depth == 1.0f) ? rim_depth : min(finalColor.xyz / (1.0f - rim_depth), 1.0f)) : finalColor.xyz + rim_depth;
 
     return finalColor;
 }
