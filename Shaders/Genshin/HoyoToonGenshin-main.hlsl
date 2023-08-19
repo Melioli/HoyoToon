@@ -172,7 +172,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float rim_depth = (offset_depth - org_depth);
     rim_depth = max(rim_depth, 0.001f);
     rim_depth = pow(rim_depth, 0.04f); 
-    rim_depth = smoothstep(0.80f, 0.9f, rim_depth) * saturate(camera_dist);
+    rim_depth = smoothstep(0.80f, 0.9f, rim_depth) * saturate(max(0.75f, camera_dist));
     rim_depth = (rim_depth > 0.2f) ? rim_depth : 0.0f;
     rim_depth = (rim_depth * _RimLightIntensity * frontFacing);
 
@@ -492,12 +492,12 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             metal_specular = lerp(metal_specular * _MTSpecularAttenInShadow, metal_specular, saturate(shadow_area));
         }
 
-        if(_UseToonSpecular)
+        if(_SpecularHighlights)
         {
             specular = specular_values[material_ID - 1].y * _SpecularColor;
             ndoth = pow(max(ndoth,0.001f), specular_values[material_ID - 1].x);
             ndoth = (1.0f - lightmap.z) < ndoth;
-            specular = specular * ndoth;
+            specular = specular * ndoth * (float3)0.5f;
         } 
         float3 emission = (float3)0.0f;
         float emis_area = 0.0f;

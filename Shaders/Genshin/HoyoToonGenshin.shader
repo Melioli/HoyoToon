@@ -183,18 +183,18 @@
         [HideInInspector] m_end_metallicscolor ("", Int) = 0
         [HideInInspector] m_end_metallics("", Int) = 0
         [HideInInspector] m_start_specular("Specular Reflections", Int) = 0
-        [Toggle] _UseToonSpecular ("Enable Specular", Float) = 1.0
-        _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
-        _Shininess2 ("Shininess 2--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
-        _Shininess3 ("Shininess 3--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
-        _Shininess4 ("Shininess 4--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
-        _Shininess5 ("Shininess 5--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
-        _SpecMulti ("Specular Multiplier 1--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
-        _SpecMulti2 ("Specular Multiplier 2--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
-        _SpecMulti3 ("Specular Multiplier 3--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
-        _SpecMulti4 ("Specular Multiplier 4--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
-        _SpecMulti5 ("Specular Multiplier 5--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
-        [Gamma] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+        [Toggle] _SpecularHighlights ("Enable Specular", Float) = 0.0
+        _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
+        _Shininess2 ("Shininess 2--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
+        _Shininess3 ("Shininess 3--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
+        _Shininess4 ("Shininess 4--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
+        _Shininess5 ("Shininess 5--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
+        _SpecMulti ("Specular Multiplier 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
+        _SpecMulti2 ("Specular Multiplier 2--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
+        _SpecMulti3 ("Specular Multiplier 3--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
+        _SpecMulti4 ("Specular Multiplier 4--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
+        _SpecMulti5 ("Specular Multiplier 5--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
+        [Gamma] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
         [HideInInspector] m_end_specular("", Int) = 0
         [HideInInspector] m_end_reflections ("", Float) = 0
         //Reflections End
@@ -507,7 +507,7 @@
         float4 _FirstShadowMultColor4;
         float4 _FirstShadowMultColor5;
 
-        float _UseToonSpecular;
+        float _SpecularHighlights;
         float _Shininess;
         float _Shininess2;
         float _Shininess3;
