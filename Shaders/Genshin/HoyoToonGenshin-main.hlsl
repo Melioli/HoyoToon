@@ -381,8 +381,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             mapped_normals = normalize(mapped_normals); // for some reason, this normalize messes things up in mmd
 
             mapped_normals = (0.99f >= bumpmap.z) ? mapped_normals : corrected_normal;
-    
-   
+
             normal = mapped_normals;
         }
         if(_TextureLineUse) // its ultimately better to only use the texture lines if the bump map is on since the textures come togehter but ill leave them decoupled so custom features can be implemented later
@@ -427,11 +426,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             float shadow_thresh = shadow_area < _LightArea;
             ndotl = 1.0f - (((_LightArea - ndotl) / _LightArea) / ramp_width);
 
-            float2 ramp_uvs = float2(ndotl, (((6.0f - material_ID) - 1.0f) * 0.1f) + 0.5f);
+            float2 ramp_uvs = float2(ndotl, (((6.0f - material_ID) - 1.0f) * 0.1f) + 0.05f);
             float4 ramp_day = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ramp_uvs);
             float4 ramp_nit = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ramp_uvs + float2(0.0f, 0.5f));
                        
-            shadow_color = lerp(ramp_day, ramp_nit, _DayOrNight);
+            shadow_color = lerp(ramp_nit, ramp_day, _DayOrNight);
             shadow_color = (shadow_thresh && lightmap.y < 0.95f) ? shadow_color : 1.0f;
         }
         else
