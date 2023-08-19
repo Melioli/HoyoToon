@@ -1,9 +1,9 @@
 /* helper functions */
 
 // light fallback
-vector<half, 4> getlightDir(){
-    vector<half, 4> lightDir = (_WorldSpaceLightPos0 != 0) ? _WorldSpaceLightPos0 :
-                               vector<half, 4>(0, 0, 0, 0) + vector<half, 4>(1, 1, 0, 0);
+half4 getlightDir(){
+    half4 lightDir = (_WorldSpaceLightPos0 != 0) ? _WorldSpaceLightPos0 :
+                               half4(0, 0, 0, 0) + half4(1, 1, 0, 0);
     return lightDir;
 }
 
@@ -21,12 +21,12 @@ float lerpByZ(const float startScale, const float endScale, const float startZ, 
 }
 
 // environment lighting function
-vector<fixed, 4> calculateEnvLighting(vector<float, 3> vertexWSInput){
+fixed4 calculateEnvLighting(float3 vertexWSInput){
     // get all the point light positions
-    vector<half, 3> firstPointLightPos = { unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x };
-    vector<half, 3> secondPointLightPos = { unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y };
-    vector<half, 3> thirdPointLightPos = { unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z };
-    vector<half, 3> fourthPointLightPos = { unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w };
+    half3 firstPointLightPos = { unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x };
+    half3 secondPointLightPos = { unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y };
+    half3 thirdPointLightPos = { unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z };
+    half3 fourthPointLightPos = { unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w };
 
     // get all the point light attenuations
     half firstPointLightAtten = 2 * rsqrt(unity_4LightAtten0.x);
@@ -37,78 +37,89 @@ vector<fixed, 4> calculateEnvLighting(vector<float, 3> vertexWSInput){
     // first, get the distance between each vertex and all of the point light positions,
     // then invert the result and apply attenuation, saturate to prevent my guy from glowing
     // lastly, multiply it to the corresponding light's color
-    vector<half, 3> firstPointLight = saturate(lerp(1, 0, distance(vertexWSInput, firstPointLightPos) - 
+    half3 firstPointLight = saturate(lerp(1, 0, distance(vertexWSInput, firstPointLightPos) - 
                                       firstPointLightAtten)) * unity_LightColor[0];
-    vector<half, 3> secondPointLight = saturate(lerp(1, 0, distance(vertexWSInput, secondPointLightPos) - 
+    half3 secondPointLight = saturate(lerp(1, 0, distance(vertexWSInput, secondPointLightPos) - 
                                        secondPointLightAtten)) * unity_LightColor[1];
-    vector<half, 3> thirdPointLight = saturate(lerp(1, 0, distance(vertexWSInput, thirdPointLightPos) - 
+    half3 thirdPointLight = saturate(lerp(1, 0, distance(vertexWSInput, thirdPointLightPos) - 
                                       thirdPointLightAtten)) * unity_LightColor[2];
-    vector<half, 3> fourthPointLight = saturate(lerp(1, 0, distance(vertexWSInput, thirdPointLightPos) - 
+    half3 fourthPointLight = saturate(lerp(1, 0, distance(vertexWSInput, thirdPointLightPos) - 
                                        fourthPointLightAtten)) * unity_LightColor[3];
 
     // THIS COULD USE SOME IMPROVEMENTS, I DON'T KNOW HOW TO DISABLE THIS FOR SPOT LIGHTS
     // compare with all of the other point lights
-    vector<half, 3> pointLightCalc = firstPointLight;
+    half3 pointLightCalc = firstPointLight;
     pointLightCalc = max(pointLightCalc, secondPointLight);
     pointLightCalc = max(pointLightCalc, thirdPointLight);
     pointLightCalc = max(pointLightCalc, fourthPointLight);
 
     // get the color of whichever's greater between the light direction and the strongest nearby point light
-    vector<fixed, 4> environmentLighting = max(_LightColor0, vector<fixed, 4>(pointLightCalc, 1));
+    fixed4 environmentLighting = max(_LightColor0, fixed4(pointLightCalc, 1));
     // now get whichever's greater than the result of the first and the nearest light probe
-    vector<half, 3> ShadeSH9Alternative = vector<half, 3>(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + 
-                                          vector<half, 3>(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
-    //environmentLighting = max(environmentLighting, vector<fixed, 4>(ShadeSH9(vector<half, 4>(0, 0, 0, 1)), 1));
-    environmentLighting = max(environmentLighting, vector<fixed, 4>(ShadeSH9Alternative, 1));
+    half3 ShadeSH9Alternative = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + 
+                                          half3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
+    //environmentLighting = max(environmentLighting, fixed4(ShadeSH9(half4(0, 0, 0, 1)), 1));
+    environmentLighting = max(environmentLighting, fixed4(ShadeSH9Alternative, 1));
 
     return environmentLighting;
 }
 
-// rim light function
-vector<half, 4> calculateRimLight(const vector<float, 3> normalInput, const vector<float, 4> screenPosInput, 
-                                  const float RimLightIntensityInput, const float RimLightThicknessInput, 
-                                  const float factor){
-    // basically view-space normals, except we cannot use the normal map so get mesh's raw normals
-    vector<half, 3> rimNormals = UnityObjectToWorldNormal(normalInput);
-    rimNormals = mul(UNITY_MATRIX_V, rimNormals);
+// from: https://github.com/cnlohr/shadertrixx/blob/main/README.md#best-practice-for-getting-depth-of-a-given-pixel-from-the-depth-texture
+float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV)
+{
+	#if defined(UNITY_REVERSED_Z)
+	zDepthFromMap = 1 - zDepthFromMap;
+			
+	// When using a mirror, the far plane is whack.  This just checks for it and aborts.
+	if( zDepthFromMap >= 1.0 ) return _ProjectionParams.z;
+	#endif
 
-    // https://github.com/TwoTailsGames/Unity-Built-in-Shaders/blob/master/CGIncludes/UnityDeferredLibrary.cginc#L152
-    vector<half, 2> screenPos = screenPosInput.xy / screenPosInput.w;
+	float4 clipPos = float4(screenUV.xy, zDepthFromMap, 1.0);
+	clipPos.xyz = 2.0f * clipPos.xyz - 1.0f;
+	float4 camPos = mul(unity_CameraInvProjection, clipPos);
+	return -camPos.z / camPos.w;
+}
 
-    // sample depth texture and get it in linear form untouched
-    half linearDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenPos);
-    linearDepth = LinearEyeDepth(linearDepth);
+float3 calculateRimLight(float3 normal, float4 screenpos, float4 ws_pos, float rimint, float2 rimwidth, float factor)
+{
 
-    // now we modify screenPos to offset another sampled depth texture
-    screenPos = screenPos + (rimNormals.x * (0.00125 * max(_ScreenParams.x * 
-                0.00025, 1) + ((RimLightThicknessInput - 1) * 0.001)));
-    screenPos = screenPos + rimNormals.y * 0.001;
+    float3 vs_normal = mul(UNITY_MATRIX_V, float4(normal, 0.0f));
+    float2 screen_pos = screenpos.xy / screenpos.w;
+    float3 wvp_pos = mul(UNITY_MATRIX_VP, ws_pos).xyz;
+    // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
+    float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, ws_pos));
 
-    // sample depth texture again to another object with modified screenPos
-    half rimDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenPos);
-    rimDepth = LinearEyeDepth(rimDepth);
+    // multiply the rim widht material values by the lightmap red channel
+    float rim_width = rimwidth;
+    
+    // sample depth texture, this will be the base
+    float org_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy));
 
-    // now compare the two
-    half depthDiff = rimDepth - linearDepth;
+    float2 offset_uv = vs_normal.xy * (float2)0.002f + screen_pos.xy;
 
-    // finally, le rim light :)
-    half rimLight = saturate(smoothstep(0, 1, depthDiff));
-    // creative freedom from here on
-    rimLight *= saturate(lerp(1, 0, linearDepth - 8));
-    rimLight = rimLight * max(factor * 0.2, 0.1) * RimLightIntensityInput;
 
-    return rimLight;
+    float offset_depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy));
+
+    float rim_depth = -org_depth + offset_depth;
+    // rim_depth = pow(rim_depth, 1.0); 
+    rim_depth = smoothstep(0.0f, rimwidth, rim_depth);
+
+
+
+    float3 rim_light = rim_depth ;
+    // float3 rim_light = rim_side;
+    return rim_light;
 }
 
 /* https://github.com/penandlim/JL-s-Unity-Blend-Modes/blob/master/John%20Lim's%20Blend%20Modes/CGIncludes/PhotoshopBlendModes.cginc */
 
 // color dodge blend mode
-vector<fixed, 3> ColorDodge(const vector<fixed, 3> s, const vector<fixed, 3> d){
+fixed3 ColorDodge(const fixed3 s, const fixed3 d){
     return d / (1.0 - min(s, 0.999));
 }
 
-vector<fixed, 4> ColorDodge(const vector<fixed, 4> s, const vector<fixed, 4> d){
-    return vector<fixed, 4>(d.xyz / (1.0 - min(s.xyz, 0.999)), d.w);
+fixed4 ColorDodge(const fixed4 s, const fixed4 d){
+    return fixed4(d.xyz / (1.0 - min(s.xyz, 0.999)), d.w);
 }
 
 // https://github.com/cnlohr/shadertrixx/blob/main/README.md#detecting-if-you-are-on-desktop-vr-camera-etc
@@ -125,67 +136,67 @@ bool isVR(){
 // THIS IS NOT SUPPOSED TO BE USED NORMALLY, THE ONLY REASON AS TO WHY THIS IS HERE IS BECAUSE
 // MODEL RIPS CAN OCCASIONALLY BE IN .GLTF/.GLB FORMAT WHICH ENFORCES LINEAR VERTEX COLORS, WE
 // CAN WORK AROUND THAT IN-SHADER THROUGH THESE FUNCTIONS
-vector<float, 3> sRGBToLinear(const vector<float, 3> rgb){
+float3 sRGBToLinear(const float3 rgb){
   // See https://gamedev.stackexchange.com/questions/92015/optimized-linear-to-srgb-glsl
-  return lerp(pow((rgb + 0.055) * (1.0 / 1.055), (vector<float, 3>)2.4),
+  return lerp(pow((rgb + 0.055) * (1.0 / 1.055), (float3)2.4),
               rgb * (1.0/12.92),
-              rgb <= (vector<float, 3>)0.04045);
+              rgb <= (float3)0.04045);
 }
 
-vector<float, 3> LinearToSRGB(const vector<float, 3> rgb){
+float3 LinearToSRGB(const float3 rgb){
   // See https://gamedev.stackexchange.com/questions/92015/optimized-linear-to-srgb-glsl
-  return lerp(1.055 * pow(rgb, (vector<float, 3>)(1.0 / 2.4)) - 0.055,
+  return lerp(1.055 * pow(rgb, (float3)(1.0 / 2.4)) - 0.055,
               rgb * 12.92,
-              rgb <= (vector<float, 3>)0.0031308);
+              rgb <= (float3)0.0031308);
 }
 
-vector<float, 4> VertexColorConvertToLinear(const vector<float, 4> input){
-    return vector<float, 4>(sRGBToLinear(input.xyz),
+float4 VertexColorConvertToLinear(const float4 input){
+    return float4(sRGBToLinear(input.xyz),
                             input.w); // retain alpha
 }
 
-void calculateDissolve(out vector<float, 3> input, vector<float, 2> uvs, float factor){
+void calculateDissolve(out float3 input, float2 uvs, float factor){
     float buf2 = 1.0 - uvs.y;
     float buf = (_DissolveDirection_Toggle != 0.0) ? buf2 : uvs.y;
     buf = _WeaponDissolveValue * 2.1 + buf;
-    vector<float, 2> dissolveUVs = vector<float, 2>(uvs.x, buf - 1.0); // tmp1.xy
+    float2 dissolveUVs = float2(uvs.x, buf - 1.0); // tmp1.xy
 
-    vector<fixed, 4> dissolveTex = _WeaponDissolveTex.Sample(sampler_WeaponDissolveTex, dissolveUVs);
+    fixed4 dissolveTex = _WeaponDissolveTex.Sample(sampler_WeaponDissolveTex, dissolveUVs);
     buf = dissolveTex * 3.0 * factor;
     buf = buf * 0.5 + dissolveTex.x;
 
-    input = saturate(vector<float, 3>(buf.x, dissolveTex.y, 0.0));
+    input = saturate(float3(buf.x, dissolveTex.y, 0.0));
 }
 
 // apache license: https://gitlab.com/s-ilent/filamented/-/blob/master/Filamented/SharedFilteringLib.hlsl
-vector<float, 4> cubic(float v){
-    vector<float, 4> n = vector<float, 4>(1.0, 2.0, 3.0, 4.0) - v;
-    vector<float, 4> s = n * n * n;
+float4 cubic(float v){
+    float4 n = float4(1.0, 2.0, 3.0, 4.0) - v;
+    float4 s = n * n * n;
     float x = s.x;
     float y = s.y - 4.0 * s.x;
     float z = s.z - 4.0 * s.y + 6.0 * s.x;
     float w = 6.0 - x - y - z;
-    return vector<float, 4>(x, y, z, w);
+    return float4(x, y, z, w);
 }
 
-vector<float, 4> SampleTexture2DBicubicFilter(Texture2D tex, SamplerState smp, vector<float, 2> coord, const vector<float, 4> texSize){
+float4 SampleTexture2DBicubicFilter(Texture2D tex, SamplerState smp, float2 coord, const float4 texSize){
     coord = coord * texSize.xy - 0.5;
     float fx = frac(coord.x);
     float fy = frac(coord.y);
     coord.x -= fx;
     coord.y -= fy;
 
-    vector<float, 4> xcubic = cubic(fx);
-    vector<float, 4> ycubic = cubic(fy);
+    float4 xcubic = cubic(fx);
+    float4 ycubic = cubic(fy);
 
-    vector<float, 4> c = vector<float, 4>(coord.x - 0.5, coord.x + 1.5, coord.y - 0.5, coord.y + 1.5);
-    vector<float, 4> s = vector<float, 4>(xcubic.x + xcubic.y, xcubic.z + xcubic.w, ycubic.x + ycubic.y, ycubic.z + ycubic.w);
-    vector<float, 4> offset = c + vector<float, 4>(xcubic.y, xcubic.w, ycubic.y, ycubic.w) / s;
+    float4 c = float4(coord.x - 0.5, coord.x + 1.5, coord.y - 0.5, coord.y + 1.5);
+    float4 s = float4(xcubic.x + xcubic.y, xcubic.z + xcubic.w, ycubic.x + ycubic.y, ycubic.z + ycubic.w);
+    float4 offset = c + float4(xcubic.y, xcubic.w, ycubic.y, ycubic.w) / s;
 
-    vector<float, 4> sample0 = tex.Sample(smp, vector<float, 2>(offset.x, offset.z) * texSize.zw);
-    vector<float, 4> sample1 = tex.Sample(smp, vector<float, 2>(offset.y, offset.z) * texSize.zw);
-    vector<float, 4> sample2 = tex.Sample(smp, vector<float, 2>(offset.x, offset.w) * texSize.zw);
-    vector<float, 4> sample3 = tex.Sample(smp, vector<float, 2>(offset.y, offset.w) * texSize.zw);
+    float4 sample0 = tex.Sample(smp, float2(offset.x, offset.z) * texSize.zw);
+    float4 sample1 = tex.Sample(smp, float2(offset.y, offset.z) * texSize.zw);
+    float4 sample2 = tex.Sample(smp, float2(offset.x, offset.w) * texSize.zw);
+    float4 sample3 = tex.Sample(smp, float2(offset.y, offset.w) * texSize.zw);
 
     float sx = s.x / (s.x + s.y);
     float sy = s.z / (s.z + s.w);

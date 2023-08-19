@@ -21,10 +21,21 @@
         //Main
         [HideInInspector] m_start_main ("Main", Float) = 0
         [SmallTexture]_MainTex("Diffuse Texture",2D)= "white" { }
-        [SmallTexture]_LightMapTex("Lightmap",2D)= "white" { }
+        [SmallTexture]_LightMapTex("Light Map Texture", 2D) = "grey" {}
         [Enum(UV0, 0, UV1, 1)] _UseBackFaceUV2("Backface UV", int) = 1.0
         [Toggle] _VertexColorLinear ("Enable Linear Vertex Colors", Range(0.0, 1.0)) = 0.0
         [Toggle]_DayOrNight ("Enable Nighttime", Range(0.0, 1.0)) = 0.0
+        [HideInInspector] m_start_maincolor ("Color Options", Float) = 0
+        [HideInInspector] m_start_colormask ("Color Mask", Float) = 0
+        [Toggle] _UseMaterialMasksTex("Enable Material Color Mask", Int) = 0
+        [SmallTexture] _MaterialMasksTex ("Material Color Mask--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialMasksTex==1.0}}", 2D) = "white"{ }
+        [HideInInspector] m_end_colormask ("", Float) = 0
+        _Color ("Tint Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color2 ("Tint Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color3 ("Tint Color 3", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color4 ("Tint Color 4", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color5 ("Tint Color 5", Color) = (1.0, 1.0, 1.0, 1.0)
+        [HideInInspector] m_end_maincolor ("", Float) = 0
         [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
         [Enum(Off, 0, Transparency, 1, Glow, 2)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
         _MainTexAlphaCutoff("Alpha Cuttoff", Range(0, 1.0)) = 0.5
@@ -155,6 +166,8 @@
         [HideInInspector] m_start_metallics("Metallics", Int) = 0
         [Toggle] _MetalMaterial ("Enable Metallic", Range(0.0, 1.0)) = 1.0
         [SmallTexture]_MTMap("Metallic Matcap--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}",2D)= "white"{ }
+        [Toggle] _MTUseSpecularRamp ("Enable Metal Specular Ramp--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 0.0
+        [SmallTexture]_MTSpecularRamp("Specular Ramp--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_MetalMaterial==1},condition2:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1}}}",2D)= "white"{ }
         _MTMapBrightness ("Metallic Matcap Brightness--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 3.0
         _MTShininess ("Metallic Specular Shininess--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 90.0
         _MTSpecularScale ("Metallic Specular Scale--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 15.0 
@@ -170,19 +183,18 @@
         [HideInInspector] m_end_metallicscolor ("", Int) = 0
         [HideInInspector] m_end_metallics("", Int) = 0
         [HideInInspector] m_start_specular("Specular Reflections", Int) = 0
-        [Toggle] _MTUseSpecularRamp ("Enable Specular", Float) = 0.0
-        [SmallTexture]_MTSpecularRamp("Specular Ramp--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}",2D)= "white"{ }
-        _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 10
-        _Shininess2 ("Shininess 2--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 10
-        _Shininess3 ("Shininess 3--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 10
-        _Shininess4 ("Shininess 4--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 10
-        _Shininess5 ("Shininess 5--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 10
-        _SpecMulti ("Specular Multiplier 1--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 0.1
-        _SpecMulti2 ("Specular Multiplier 2--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 0.1
-        _SpecMulti3 ("Specular Multiplier 3--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 0.1
-        _SpecMulti4 ("Specular Multiplier 4--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 0.1
-        _SpecMulti5 ("Specular Multiplier 5--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Float) = 0.1
-        [Gamma] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+        [Toggle] _UseToonSpecular ("Enable Specular", Float) = 1.0
+        _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
+        _Shininess2 ("Shininess 2--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
+        _Shininess3 ("Shininess 3--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
+        _Shininess4 ("Shininess 4--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
+        _Shininess5 ("Shininess 5--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 10
+        _SpecMulti ("Specular Multiplier 1--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
+        _SpecMulti2 ("Specular Multiplier 2--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
+        _SpecMulti3 ("Specular Multiplier 3--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
+        _SpecMulti4 ("Specular Multiplier 4--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
+        _SpecMulti5 ("Specular Multiplier 5--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Float) = 0.1
+        [Gamma] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_UseToonSpecular==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
         [HideInInspector] m_end_specular("", Int) = 0
         [HideInInspector] m_end_reflections ("", Float) = 0
         //Reflections End
@@ -230,6 +242,14 @@
         _PulseMaxStrength ("Maximum Pulse Strength", Range(0.0, 1.0)) = 1.0
         [HideInInspector] m_end_emissionpulse ("", Float) = 0
         [HideInInspector] m_end_emissionglow ("", Float) = 0
+
+        [HideInInspector] m_start_animatedtex("Texture Animation", Float) = 0
+        [Toggle] _UseUVScroll ("Enable UV Scrolling", float) = 0
+        _UVScrollX ("UV X Scroll Speed", Float) = 0
+        _UVScrollY ("UV Y Scroll Speed", Float) = 0
+        [Toggle]_EnableScrollXSwing ("UV X Scroll Swing", Float) = 0
+        [Toggle]_EnableScrollYSwing ("UV Y Scroll Swing", Float) = 0
+        [HideInInspector] m_end_animatedtex ("", Float) = 0
 
         [HideInInspector] m_start_starcock("Star Cloak--{tooltip:Paimon & Dainsleif Cape}", Float) = 0 //tribute to the starcock 
         [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
@@ -343,7 +363,7 @@
         #pragma fragment frag
 
         #pragma multi_compile _ UNITY_HDR_ON
-        #pragma multi_compile_fog
+        // #pragma multi_compile_fog
 
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
@@ -354,20 +374,22 @@
 
         /* properties */
 
-        Texture2D _MainTex;                 SamplerState sampler_MainTex;                 const vector<float, 4> _MainTex_TexelSize;
+        Texture2D _MainTex;                 SamplerState sampler_MainTex;                 const float4 _MainTex_TexelSize;
         float4 _MainTex_ST;
-        Texture2D _LightMapTex;             SamplerState sampler_LightMapTex;             const vector<float, 4> _LightMapTex_TexelSize;
-        Texture2D _FaceMap;                 SamplerState sampler_FaceMap;                 const vector<float, 4> _FaceMap_TexelSize;
-        Texture2D _BumpMap;                 SamplerState sampler_BumpMap;                 const vector<float, 4> _BumpMap_TexelSize;
+        Texture2D _LightMapTex;             SamplerState sampler_LightMapTex;             const float4 _LightMapTex_TexelSize;
+        Texture2D _FaceMap;                 SamplerState sampler_FaceMap;                 const float4 _FaceMap_TexelSize;
+        Texture2D _BumpMap;                 SamplerState sampler_BumpMap;                 const float4 _BumpMap_TexelSize;
         Texture2D _PackedShadowRampTex;     SamplerState sampler_PackedShadowRampTex;
         Texture2D _MTSpecularRamp;          SamplerState sampler_MTSpecularRamp;
         Texture2D _MTMap;                   SamplerState sampler_MTMap;
         Texture2D _WeaponDissolveTex;       SamplerState sampler_WeaponDissolveTex;
-        Texture2D _WeaponPatternTex;        SamplerState sampler_WeaponPatternTex;        const vector<float, 4> _WeaponPatternTex_TexelSize;
+        Texture2D _WeaponPatternTex;        SamplerState sampler_WeaponPatternTex;        const float4 _WeaponPatternTex_TexelSize;
         Texture2D _ScanPatternTex;          SamplerState sampler_ScanPatternTex;
 
         Texture2D _CustomEmissionTex;       SamplerState sampler_CustomEmissionTex;
         Texture2D _CustomEmissionAOTex;     SamplerState sampler_CustomEmissionAOTex;
+
+        Texture2D _MaterialMasksTex;
 
         // star cloak textures and samplers
         Texture2D _StarTex;
@@ -390,6 +412,14 @@
 
         UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
+
+        bool _UseMaterialMasksTex;
+        float4 _Color;
+        float4 _Color2;
+        float4 _Color3;
+        float4 _Color4;
+        float4 _Color5;
+
         float _DayOrNight;
         float _EnvironmentLightingStrength;
         float _RimLightType;
@@ -398,21 +428,21 @@
         float _VertexColorLinear;
 
         float _UseFresnel;
-        vector<float, 4> _HitColor;
-        vector<float, 4> _ElementRimColor;
+        float4 _HitColor;
+        float4 _ElementRimColor;
         float _HitColorScaler;
         float _HitColorFresnelPower;
 
         float _UseFaceMapNew;
-        vector<float, 4> _headForwardVector;
-        vector<float, 4> _headRightVector;
+        float4 _headForwardVector;
+        float4 _headRightVector;
         float _FaceMapSoftness;
         float _flipFaceLighting;
         float _MaterialID;
         float _NoseBlushStrength;
-        vector<float, 4> _NoseBlushColor;
+        float4 _NoseBlushColor;
         float _FaceBlushStrength;
-        vector<float, 4> _FaceBlushColor;
+        float4 _FaceBlushColor;
 
         float _UseWeapon;
         float _UsePattern;
@@ -420,13 +450,13 @@
         float _ClipAlphaThreshold;
         float _WeaponDissolveValue;
         float _DissolveDirection_Toggle;
-        vector<float, 4> _WeaponPatternColor;
+        float4 _WeaponPatternColor;
         float _Pattern_Speed;
         float _SkillEmisssionPower;
         float4 _SkillEmisssionColor;
         float _SkillEmissionScaler;
         float _ScanColorScaler;
-        vector<float, 4> _ScanColor;
+        float4 _ScanColor;
         float _ScanDirection_Switch;
         float _ScanSpeed;
 
@@ -434,7 +464,7 @@
 
         float _ToggleEyeGlow;
         float _EmissionType;
-        vector<float, 4> _EmissionColor;
+        float4 _EmissionColor;
         float _EyeGlowStrength;
         float _EmissionStrength;
         float _TogglePulse;
@@ -466,17 +496,18 @@
         float _UseMaterial5;
         float _UseShadowRamp;
         float _UseVertexColorAO;
-        vector<float, 4> _CoolShadowMultColor;
-        vector<float, 4> _CoolShadowMultColor2;
-        vector<float, 4> _CoolShadowMultColor3;
-        vector<float, 4> _CoolShadowMultColor4;
-        vector<float, 4> _CoolShadowMultColor5;
-        vector<float, 4> _FirstShadowMultColor;
-        vector<float, 4> _FirstShadowMultColor2;
-        vector<float, 4> _FirstShadowMultColor3;
-        vector<float, 4> _FirstShadowMultColor4;
-        vector<float, 4> _FirstShadowMultColor5;
+        float4 _CoolShadowMultColor;
+        float4 _CoolShadowMultColor2;
+        float4 _CoolShadowMultColor3;
+        float4 _CoolShadowMultColor4;
+        float4 _CoolShadowMultColor5;
+        float4 _FirstShadowMultColor;
+        float4 _FirstShadowMultColor2;
+        float4 _FirstShadowMultColor3;
+        float4 _FirstShadowMultColor4;
+        float4 _FirstShadowMultColor5;
 
+        float _UseToonSpecular;
         float _Shininess;
         float _Shininess2;
         float _Shininess3;
@@ -487,7 +518,7 @@
         float _SpecMulti3;
         float _SpecMulti4;
         float _SpecMulti5;
-        vector<float, 4> _SpecularColor;
+        float4 _SpecularColor;
 
         float _MTMapBrightness;
         float _MTMapTileScale;
@@ -497,18 +528,18 @@
         float _MTSharpLayerOffset;
         float _MTUseSpecularRamp;
         float _MetalMaterial;
-        vector<float, 4> _MTMapDarkColor;
-        vector<float, 4> _MTMapLightColor;
-        vector<float, 4> _MTShadowMultiColor;
-        vector<float, 4> _MTSpecularColor;
-        vector<float, 4> _MTSharpLayerColor;
+        float4 _MTMapDarkColor;
+        float4 _MTMapLightColor;
+        float4 _MTShadowMultiColor;
+        float4 _MTSpecularColor;
+        float4 _MTSharpLayerColor;
 
         float _TextureBiasWhenDithering;
         float _TextureLineSmoothness;
         float _TextureLineThickness;
         float _TextureLineUse;
-        vector<float, 4> _TextureLineDistanceControl;
-        vector<float, 4> _TextureLineMultiplier;
+        float4 _TextureLineDistanceControl;
+        float4 _TextureLineMultiplier;
 
         float _StarCloakEnable;
         float _StarCloakBlendRate;
@@ -526,6 +557,12 @@
         float _CloudBrightness;
         float _CloudHeight;
 
+        float _UseUVScroll;
+        float _UVScrollX;
+        float _UVScrollY;
+        float _EnableScrollXSwing;
+        float _EnableScrollYSwing;
+
         float _ClipPlaneWorld;
         float _MaxOutlineZOffset;
         float _OutlineType; // cb0[13]
@@ -533,14 +570,14 @@
         float _OutlineWidth; // cb0[39].w or cb0[15].x
         float _Scale; // cb0[17].z
         float _UseClipPlane;
-        vector<float, 4> _ClipPlane; // cb0[26]
-        vector<float, 4> _OutlineColor;
-        vector<float, 4> _OutlineColor2;
-        vector<float, 4> _OutlineColor3;
-        vector<float, 4> _OutlineColor4;
-        vector<float, 4> _OutlineColor5;
-        vector<float, 4> _OutlineWidthAdjustScales; // cb0[20]
-        vector<float, 4> _OutlineWidthAdjustZs; // cb0[19]
+        float4 _ClipPlane; // cb0[26]
+        float4 _OutlineColor;
+        float4 _OutlineColor2;
+        float4 _OutlineColor3;
+        float4 _OutlineColor4;
+        float4 _OutlineColor5;
+        float4 _OutlineWidthAdjustScales; // cb0[20]
+        float4 _OutlineWidthAdjustZs; // cb0[19]
 
         float _ReturnDiffuseRGB;
         float _ReturnDiffuseA;

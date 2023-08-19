@@ -434,8 +434,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
 
-    // out_color.xyz = specular_values[curr_region].x;
-    // if(_DebugRimLight) out_color.xyz = 0.1f + rim_light;
 
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
@@ -462,7 +460,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         
         float hair_alpha = max(alpha_a, alpha_b);
         // out_color.xyz = hair_alpha;
-        out_color.w = (_UseHairSideFade) ? max(hair_alpha, _HairBlendSilhouette) : 0.5f;
+        out_color.w = (_UseHairSideFade) ? max(hair_alpha, _HairBlendSilhouette) : _HairBlendSilhouette;
     }
     else
     {
