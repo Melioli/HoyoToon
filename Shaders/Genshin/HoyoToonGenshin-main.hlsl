@@ -13,7 +13,7 @@ vsOut vert(vsIn v)
     o.uv.xy = v.uv0;
     o.uv.zw = v.uv1;
     o.normal = v.normal;
-    o.screenPos = ComputeScreenPos(pos_wvp);
+    o.screenPos = ComputeNonStereoScreenPos(pos_wvp);
     o.vertexcol = (_VertexColorLinear != 0.0) ? VertexColorConvertToLinear(v.vertexcol) : v.vertexcol;
     o.parallax = 0.0f;
 

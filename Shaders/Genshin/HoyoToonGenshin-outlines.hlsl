@@ -63,6 +63,7 @@ vsOut vert(vsIn v)
 
     o.vertexWS = mul(UNITY_MATRIX_M, v.vertex); 
     o.vertexOS = v.vertex;
+    
     return o;
 }
 
