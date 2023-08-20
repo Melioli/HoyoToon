@@ -416,15 +416,22 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float ndoth = dot(normal, half_vector);
 
         ndotl = ndotl * 0.5f + 0.5f;
-        float shadow_ao = ((_UseLightMapColorAO != 0) ? lightmap.y : 0.5) * ((_UseVertexColorAO != 0) ? i.vertexcol.x : 1.0);
+        float shadow_ao = ((_UseLightMapColorAO) ? lightmap.y : 0.5) * ((_UseVertexColorAO) ? i.vertexcol.x : 1.0);
         if(_UseShadowRamp)
         {
             float ramp_width = i.vertexcol.y * 2.0f * _ShadowRampWidth;
-            shadow_ao = smoothstep(0.00f, 0.4f, shadow_ao);
-            shadow_area = lerp(0, ndotl, saturate(shadow_ao));
-            
-            float shadow_thresh = shadow_area < _LightArea;
+            ndotl = (ndotl + shadow_ao) * 0.5f;
+            ndotl = (ndotl > 0.95f) ? 1.0f : ndotl;
+            ndotl = (ndotl < 0.05f) ? 0.0f : ndotl;
+
+            // shadow_ao = smoothstep(0.00f, 0.4f, shadow_ao);
+            // shadow_area = lerp(0, ndotl, saturate(shadow_ao));
+            float shadow_thresh = ndotl < _LightArea;
             ndotl = 1.0f - (((_LightArea - ndotl) / _LightArea) / ramp_width);
+            
+            // float shadow_thresh = shadow_area < _LightArea;
+            // ndotl = 1.0f - (((_LightArea - ndotl) / _LightArea) / ramp_width);
+            shadow_area = ndotl;
 
             float2 ramp_uvs = float2(ndotl, (((6.0f - material_ID) - 1.0f) * 0.1f) + 0.05f);
             float4 ramp_day = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ramp_uvs);
@@ -540,6 +547,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         finalColor.w = alpha;
         if(_MainTexAlphaUse == 1.0f)clip(finalColor.w - _MainTexAlphaCutoff);
         // finalColor.xyz = i.vertexWS;
+        // finalColor.xyz = i.vertexcol.w;
+        // finalColor.xyz = metal;
     }
 
     float3 dissolve = 0.0f;

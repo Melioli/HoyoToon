@@ -1,33 +1,37 @@
 // vertex
 vsOut vert(vsIn v)
 {
-    vsOut o = (vsOut)0.0f;
+    vsOut o = (vsOut)0.0f; // cast to 0 to avoid intiailization warnings
     if(_OutlineType == 0)
     {
-        return (vsOut)0.0f; // outline is set to off, zero everything out
+        return (vsOut)0.0f; // return every value as zero if outline type is set to none
     }
-    o.uv.xy = v.uv0;
-    o.uv.zw = v.uv1;
-    o.vertexWS = mul(UNITY_MATRIX_M, v.vertex); // TransformObjectToWorld, v0
-    o.vertexOS = v.vertex;
-    float3 outline_normal = (_OutlineType == 2) ? v.tangent.xyz : v.normal.xyz;
+        
+    float3 outline_normal;
+    outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, v.tangent.xyz);
+    outline_normal.z = -1;
+    outline_normal.xy = normalize(outline_normal.xy);
     if(_FallbackOutlines)
     {
-        outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, outline_normal);
-        outline_normal.z = 0.009f;
-        outline_normal.xy = normalize(outline_normal.xy);
         float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
         float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
         // if(!_EnableFOVWidth)fov_width = 1;
-        wv_pos.xyz = wv_pos + (outline_normal * (v.vertexcol.w * _OutlineWidth * _Scale));
+        wv_pos.xyz = wv_pos + (outline_normal * fov_width * (v.vertexcol.w * _OutlineWidth * (_Scale * 10)));
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
     else
     {
-        float3 ws_view = mul(UNITY_MATRIX_MV, o.vertexOS);
+        _OutlineWidthAdjustScales.w = 1.0f; // this is causing mad problems when you zoom out too far from the model
+        float3 view = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz);
         float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
-        float fov = 1.0f / (rsqrt(abs(-ws_view.z / unity_CameraProjection._m11)));
-        float depth = fov;
+        o.pos = wv_pos;
+
+        float fov = 1.0f;
+       
+            fov = 2.414f / unity_CameraProjection[1].y;
+        
+
+        float depth = -wv_pos.z * fov; // fov corrected depth
         
         float2 range;
         float2 scale;
@@ -42,18 +46,23 @@ vsOut vert(vsIn v)
             range = _OutlineWidthAdjustZs.zw;
             scale = _OutlineWidthAdjustScales.zw;
         }
-        
+
         float offset = lerpByZ(scale.x, scale.y, range.x, range.y, depth);
-        offset = offset * 0.414f * v.vertexcol.w * _OutlineWidth * (_Scale * 100);
 
-        outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, outline_normal);
-        outline_normal.z = 0.0f;
-        outline_normal.xy = normalize(outline_normal.xy);
-
-        wv_pos.xyz = wv_pos.xyz + outline_normal * offset;
-        o.pos = mul(UNITY_MATRIX_P, wv_pos);
+        offset = offset * 0.414f * v.vertexcol.w * (_OutlineWidth * _Scale * 100.0f);
+        // normal.z = 0.1f;
+        // outline_normal = normalize(normal);
+        o.pos.xyz = o.pos.xyz + outline_normal * offset ;
+        
+        o.pos = mul(UNITY_MATRIX_P, o.pos);
     }
-    o.vertexcol = v.vertexcol;
+
+
+    o.uv = float4(v.uv0.xy, v.uv1.xy);
+    o.vertexcol = v.vertexcol; 
+
+    o.vertexWS = mul(UNITY_MATRIX_M, v.vertex); 
+    o.vertexOS = v.vertex;
     return o;
 }
 
@@ -157,7 +166,6 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         // apply dissolve
         clip(dissolve.x - _ClipAlphaThreshold);
     }
-
  
     return globalOutlineColor;
 }
