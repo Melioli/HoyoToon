@@ -238,7 +238,6 @@
         [HideInInspector] m_end_emissioneyeglow ("", Float) = 0
         [HideInInspector] m_start_emissionpulse("Pulsing Emission", Float) = 0
         [Toggle] _TogglePulse ("Enable Pulse", Range(0.0, 1.0)) = 0.0
-        [Toggle] _EyePulse ("Enable Pulse for Eye Glow", Float) =  0.0
         _PulseSpeed ("Pulse Speed", Float) = 1.0
         _PulseMinStrength ("Minimum Pulse Strength", Range(0.0, 1.0)) = 0.0
         _PulseMaxStrength ("Maximum Pulse Strength", Range(0.0, 1.0)) = 1.0

@@ -520,14 +520,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
         if(_MainTexAlphaUse == 2.0f)
         {
-            if(_ToggleEyeGlow !=0 && lightmap.y > 0.95f)
-            {
-                emis_area = diffuse.w + 0.97f;
-            }
-            else 
-            {
-                emis_area = diffuse.w - 0.03f;
-            }
+            
+            emis_area = diffuse.w - 0.03f;
             emission =  lerp((float3)0.0f, _EmissionStrength * diffuse.xyz * _EmissionColor, saturate(emis_area * pulse));
         }
         else if (_EmissionType == 1)
@@ -535,6 +529,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             float3 customemi   = _CustomEmissionTex.Sample(sampler_CustomEmissionTex, uv).xyz;
             emis_area = _CustomEmissionAOTex.Sample(sampler_CustomEmissionAOTex, uv).xyz;
             emission = lerp((float3)0.0f, _EmissionStrength * customemi.xyz * _EmissionColor, saturate(emis_area * pulse));
+        }
+        if(_ToggleEyeGlow !=0 && lightmap.y > 0.95f)
+        {
+            emis_area = diffuse.w + 0.97f;
+            emission =  lerp((float3)0.0f, _EmissionStrength * diffuse.xyz * _EmissionColor, saturate(emis_area));
         }
         
                 
