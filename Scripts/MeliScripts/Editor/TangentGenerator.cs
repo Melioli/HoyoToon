@@ -8,17 +8,16 @@ using UnityEditor;
 using UnityEngine;
 
 public class TangentGenerator : MonoBehaviour
-{
-    [MenuItem("GameObject/HoyoToon/Set Tangents", false, 0)]
+{   [MenuItem("GameObject/HoyoToon/Set Tangents", false, 0)]
     [MenuItem("HoyoToon/Set Tangents")]
     public static void WriteAverageNormalToTangentTool()
     {
         MeshFilter[] meshFilters = Selection.activeGameObject.GetComponentsInChildren<MeshFilter>();
 
-        EditorCoroutine.Start(ProcessMeshes(meshFilters));
+        ProcessMeshes(meshFilters);
     }
 
-    private static IEnumerator ProcessMeshes(MeshFilter[] meshFilters)
+    private static void ProcessMeshes(MeshFilter[] meshFilters)
     {
         SkinnedMeshRenderer[] skinMeshRenderers = Selection.activeGameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
 
@@ -27,9 +26,6 @@ public class TangentGenerator : MonoBehaviour
             Mesh mesh = skinMeshRenderer.sharedMesh;
             Mesh editedMesh = ModifyMeshTangents(mesh);
             SaveMeshAsset(skinMeshRenderer, editedMesh);
-
-            // Wait for the next frame
-            yield return null;
         }
     }
 
