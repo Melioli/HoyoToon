@@ -23,45 +23,33 @@ float lerpByZ(const float startScale, const float endScale, const float startZ, 
 // environment lighting function
 fixed4 calculateEnvLighting(float3 vertexWSInput){
     // get all the point light positions
-    half3 firstPointLightPos = { unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x };
-    half3 secondPointLightPos = { unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y };
-    half3 thirdPointLightPos = { unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z };
-    half3 fourthPointLightPos = { unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w };
-
-    // get all the point light attenuations
-    half firstPointLightAtten = 2 * rsqrt(unity_4LightAtten0.x);
-    half secondPointLightAtten = 2 * rsqrt(unity_4LightAtten0.y);
-    half thirdPointLightAtten = 2 * rsqrt(unity_4LightAtten0.z);
-    half fourthPointLightAtten = 2 * rsqrt(unity_4LightAtten0.w);
-
-    // first, get the distance between each vertex and all of the point light positions,
-    // then invert the result and apply attenuation, saturate to prevent my guy from glowing
-    // lastly, multiply it to the corresponding light's color
-    half3 firstPointLight = saturate(lerp(1, 0, distance(vertexWSInput, firstPointLightPos) - 
-                                      firstPointLightAtten)) * unity_LightColor[0];
-    half3 secondPointLight = saturate(lerp(1, 0, distance(vertexWSInput, secondPointLightPos) - 
-                                       secondPointLightAtten)) * unity_LightColor[1];
-    half3 thirdPointLight = saturate(lerp(1, 0, distance(vertexWSInput, thirdPointLightPos) - 
-                                      thirdPointLightAtten)) * unity_LightColor[2];
-    half3 fourthPointLight = saturate(lerp(1, 0, distance(vertexWSInput, thirdPointLightPos) - 
-                                       fourthPointLightAtten)) * unity_LightColor[3];
-
-    // THIS COULD USE SOME IMPROVEMENTS, I DON'T KNOW HOW TO DISABLE THIS FOR SPOT LIGHTS
-    // compare with all of the other point lights
-    half3 pointLightCalc = firstPointLight;
-    pointLightCalc = max(pointLightCalc, secondPointLight);
-    pointLightCalc = max(pointLightCalc, thirdPointLight);
-    pointLightCalc = max(pointLightCalc, fourthPointLight);
-
-    // get the color of whichever's greater between the light direction and the strongest nearby point light
-    fixed4 environmentLighting = max(_LightColor0, fixed4(pointLightCalc, 1));
-    // now get whichever's greater than the result of the first and the nearest light probe
-    half3 ShadeSH9Alternative = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + 
-                                          half3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
-    //environmentLighting = max(environmentLighting, fixed4(ShadeSH9(half4(0, 0, 0, 1)), 1));
-    environmentLighting = max(environmentLighting, fixed4(ShadeSH9Alternative, 1));
-
-    return environmentLighting;
+    float4 lightX = unity_4LightPosX0 - vertexWSInput.x;
+    float4 lightY = unity_4LightPosY0 - vertexWSInput.y;
+    float4 lightZ = unity_4LightPosZ0 - vertexWSInput.z;
+    float4 lengthSq = (float4)0.0f;
+    lengthSq = lengthSq + (lightX * lightX);
+    lengthSq = lengthSq + (lightY * lightY);
+    lengthSq = lengthSq + (lightZ * lightZ);
+    lengthSq = max(lengthSq, 0.000001f);
+    float4 range = 5.0f * (1.0f / sqrt(unity_4LightAtten0));
+    float4 attenUV = sqrt(lengthSq) / range;
+    float4 atten = saturate(1.0f / (1.0f + 25.0f * attenUV * attenUV) * saturate((1.0f - attenUV) * 5.0f));
+    atten.x = lerp(1.0f, 0.0f, atten.x);
+    atten.y = lerp(1.0f, 0.0f, atten.y);
+    atten.z = lerp(1.0f, 0.0f, atten.z);
+    atten.w = lerp(1.0f, 0.0f, atten.w);
+    float3 firstcolor  = lerp(unity_LightColor[0].xyz, 0.0f, atten.x);
+    float3 secondcolor = lerp(unity_LightColor[1].xyz, 0.0f, atten.y);
+    float3 thirdcolor  = lerp(unity_LightColor[2].xyz, 0.0f, atten.z);
+    float3 fourthcolor = lerp(unity_LightColor[3].xyz, 0.0f, atten.w);
+    float3 pointlight = firstcolor;
+    pointlight = max(pointlight, secondcolor);
+    pointlight = max(pointlight, thirdcolor);
+    pointlight = max(pointlight, fourthcolor);
+    float3 light =  max(_LightColor0, float4(pointlight, 1.0f));
+    half3 ShadeSH9Alternative = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + half3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
+    light = max(light, ShadeSH9Alternative);         
+    return float4(light, 1.0f);
 }
 
 // from: https://github.com/cnlohr/shadertrixx/blob/main/README.md#best-practice-for-getting-depth-of-a-given-pixel-from-the-depth-texture
