@@ -508,6 +508,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float3 emission = (float3)0.0f;
         float emis_area = 0.0f;
         float pulse = 1.0f;
+        float eyepulse = 1.0f;
         if(_TogglePulse != 0)
         {
             // form the sine wave
@@ -516,6 +517,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             pulse = pulse * 0.5 + 0.5;
             // ensure emissionPulse never goes below or above the minimum and maximum values set by the user
             pulse = mapRange(0, 1, _PulseMinStrength, _PulseMaxStrength, pulse);
+            if(_EyePulse)
+            {
+                eyepulse = pulse;
+            }
+            
         }
 
         if(_MainTexAlphaUse == 2.0f)
@@ -533,7 +539,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         if(_ToggleEyeGlow !=0 && lightmap.y > 0.95f)
         {
             emis_area = diffuse.w + 0.97f;
-            emission =  lerp((float3)0.0f, _EmissionStrength * diffuse.xyz * _EmissionColor, saturate(emis_area));
+            emission =  lerp((float3)0.0f, _EyeGlowStrength * diffuse.xyz * _EmissionColor, saturate(emis_area * eyepulse));
         }
         
                 
