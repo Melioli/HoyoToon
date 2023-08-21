@@ -109,9 +109,9 @@ float4 rim_light_calc(float3 normal)
 float4 get_enviro_light(float3 ws_pos)
 {
    // get all the point light positions
-    float4 lightX = unity_4LightPosX0 - vertexWSInput.x;
-    float4 lightY = unity_4LightPosY0 - vertexWSInput.y;
-    float4 lightZ = unity_4LightPosZ0 - vertexWSInput.z;
+    float4 lightX = unity_4LightPosX0 - ws_pos.x;
+    float4 lightY = unity_4LightPosY0 - ws_pos.y;
+    float4 lightZ = unity_4LightPosZ0 - ws_pos.z;
     float4 lengthSq = (float4)0.0f;
     lengthSq = lengthSq + (lightX * lightX);
     lengthSq = lengthSq + (lightY * lightY);

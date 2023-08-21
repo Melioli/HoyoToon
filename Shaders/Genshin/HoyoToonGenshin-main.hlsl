@@ -421,11 +421,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         {
             float ramp_width = i.vertexcol.y * 2.0f * _ShadowRampWidth;
             ndotl = (ndotl + shadow_ao) * 0.5f;
-            ndotl = (ndotl > 0.95f) ? 1.0f : ndotl;
-            ndotl = (ndotl < 0.05f) ? 0.0f : ndotl;
+            ndotl = (shadow_ao > 0.95f) ? 1.0f : ndotl;
+            ndotl = (shadow_ao < 0.05f) ? 0.0f : ndotl;
 
-            // shadow_ao = smoothstep(0.00f, 0.4f, shadow_ao);
-            // shadow_area = lerp(0, ndotl, saturate(shadow_ao));
+            // // shadow_ao = smoothstep(0.00f, 0.4f, shadow_ao);
+            // // shadow_area = lerp(0, ndotl, saturate(shadow_ao));
             float shadow_thresh = ndotl < _LightArea;
             ndotl = 1.0f - (((_LightArea - ndotl) / _LightArea) / ramp_width);
             
@@ -443,8 +443,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         else
         {
             ndotl = (ndotl + shadow_ao) * 0.5f;
-            ndotl = (ndotl > 0.95f) ? 1.0f : ndotl;
-            ndotl = (ndotl < 0.05f) ? 0.0f : ndotl;
+            ndotl = (shadow_ao > 0.95f) ? 1.0f : ndotl;
+            ndotl = (shadow_ao < 0.05f) ? 0.0f : ndotl;
 
             if(ndotl < _LightArea)
             {
@@ -503,7 +503,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             specular = specular_values[material_ID - 1].y * _SpecularColor;
             ndoth = pow(max(ndoth,0.001f), specular_values[material_ID - 1].x);
             ndoth = (1.0f - lightmap.z) < ndoth;
-            specular = specular * ndoth * (float3)0.5f;
+            specular = specular * ndoth * (float3)0.5f * lightmap.r;
         } 
         float3 emission = (float3)0.0f;
         float emis_area = 0.0f;
@@ -541,14 +541,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         finalColor.xyz = (metal_area) ? diffuse.xyz * metal + metal_specular: diffuse.xyz * shadow_color + specular;
         finalColor.xyz = finalColor.xyz * lerp(1.0f, environmentLighting, _EnvironmentLightingStrength).xyz;
        
-        // finalColor = diffuse;
-        // finalColor.xyz = lightmap.x;
+
         finalColor.xyz = finalColor + emission;
         finalColor.w = alpha;
+        // finalColor.xyz = shadow_area;
         if(_MainTexAlphaUse == 1.0f)clip(finalColor.w - _MainTexAlphaCutoff);
-        // finalColor.xyz = i.vertexWS;
-        // finalColor.xyz = i.vertexcol.w;
-        // finalColor.xyz = metal;
     }
 
     float3 dissolve = 0.0f;
