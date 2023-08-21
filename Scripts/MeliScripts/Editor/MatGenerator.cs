@@ -104,7 +104,7 @@ public class MatGenerator
         finally { AssetDatabase.StopAssetEditing(); }
     }
 
-    // [MenuItem("Assets/HoyoToon/Generate HSR Materials")]
+    [MenuItem("Assets/HoyoToon/Generate HSR Materials")]
     private static void CreateMaterialsHSR()
     {
         try
