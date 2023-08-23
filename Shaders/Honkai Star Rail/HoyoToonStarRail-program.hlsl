@@ -347,9 +347,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     rim_depth = smoothstep(0.0f, _RimWidth, rim_depth);
 
 
-
+    float rim_env_col = clamp(avg_env_col, 0.25f, 1.0f);
     float3 rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
-
+    rim_light = rim_light * rim_env_col;
     // ================================================================================================ //
     // rim shadow
     // this is distinct from the rim light, whatever it does
