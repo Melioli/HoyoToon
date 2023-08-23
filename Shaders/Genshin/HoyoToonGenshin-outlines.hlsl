@@ -48,7 +48,7 @@ vsOut vert(vsIn v)
         }
 
         float offset = lerpByZ(scale.x, scale.y, range.x, range.y, depth);
-
+        float Z = saturate(v.vertexcol.z - 0.5f) * _MaxOutlineZOffset;
         offset = offset * 0.414f * v.vertexcol.w * (_OutlineWidth * _Scale * 100.0f);
         // normal.z = 0.1f;
         // outline_normal = normalize(normal);
@@ -167,6 +167,6 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         // apply dissolve
         clip(dissolve.x - _ClipAlphaThreshold);
     }
- 
+    clip(i.vertexcol.w - 0.1f);
     return globalOutlineColor;
 }

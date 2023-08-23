@@ -550,6 +550,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         finalColor.xyz = finalColor + emission;
         finalColor.w = alpha;
         // finalColor.xyz = shadow_area;
+        // finalColor.xyz = i.vertexcol.w;
         if(_MainTexAlphaUse == 1.0f)clip(finalColor.w - _MainTexAlphaCutoff);
     }
 
