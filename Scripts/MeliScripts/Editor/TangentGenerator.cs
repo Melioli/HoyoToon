@@ -100,6 +100,16 @@ public class TangentGenerator : MonoBehaviour
             Mesh newMesh = ModifyMeshTangents(mesh);
             newMesh.name = mesh.name + " Tangent Mesh";
             meshFilter.sharedMesh = newMesh;
+
+            // save modified mesh to disk
+            string path = AssetDatabase.GetAssetPath(mesh);
+            string folderPath = Path.GetDirectoryName(path) + "/Tangent Mesh";
+            if (!Directory.Exists(folderPath))
+            {
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Tangent Mesh");
+            }
+            path = folderPath + "/" + newMesh.name + ".asset";
+            AssetDatabase.CreateAsset(newMesh, path);
         }
 
         foreach (var skinMeshRenderer in skinMeshRenderers)
@@ -108,6 +118,16 @@ public class TangentGenerator : MonoBehaviour
             Mesh newMesh = ModifyMeshTangents(mesh);
             newMesh.name = mesh.name + " Tangent Mesh";
             skinMeshRenderer.sharedMesh = newMesh;
+
+            // save modified mesh to disk
+            string path = AssetDatabase.GetAssetPath(mesh);
+            string folderPath = Path.GetDirectoryName(path) + "/Tangent Mesh";
+            if (!Directory.Exists(folderPath))
+            {
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Tangent Mesh");
+            }
+            path = folderPath + "/" + newMesh.name + ".asset";
+            AssetDatabase.CreateAsset(newMesh, path);
         }
     }
 }
