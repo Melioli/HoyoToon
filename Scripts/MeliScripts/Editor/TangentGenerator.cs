@@ -3,6 +3,7 @@
 //Github: https://github.com/Melioli/HoyoToon
 
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -10,32 +11,36 @@ using UnityEngine;
 public class TangentGenerator : MonoBehaviour
 {   [MenuItem("GameObject/HoyoToon/Set Tangents", false, 0)]
     [MenuItem("HoyoToon/Set Tangents")]
-    public static void WriteAverageNormalToTangentTool()
+    public static void GenTangents()
     {
         MeshFilter[] meshFilters = Selection.activeGameObject.GetComponentsInChildren<MeshFilter>();
-
-        ProcessMeshes(meshFilters);
-    }
-
-    private static void ProcessMeshes(MeshFilter[] meshFilters)
-    {
-        SkinnedMeshRenderer[] skinMeshRenderers = Selection.activeGameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-
-        foreach (var skinMeshRenderer in skinMeshRenderers)
+        foreach (var meshFilter in meshFilters)
         {
-            Mesh mesh = skinMeshRenderer.sharedMesh;
-            Mesh editedMesh = ModifyMeshTangents(mesh);
-            SaveMeshAsset(skinMeshRenderer, editedMesh);
+            Mesh mesh = meshFilter.sharedMesh;
+            ModifyMeshTangents(mesh);
+            meshFilter.sharedMesh = mesh;
         }
+
+        SkinnedMeshRenderer[] skinMeshRenders = Selection.activeGameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+        foreach (var skinMeshRender in skinMeshRenders)
+        {
+            Mesh mesh = skinMeshRender.sharedMesh;
+            ModifyMeshTangents(mesh);
+        }
+
+        // Call SaveMeshAssets after modifying all meshes
+        SaveMeshAssets(Selection.activeGameObject);
     }
 
     private static Mesh ModifyMeshTangents(Mesh mesh)
     {
-        var vertices = mesh.vertices;
-        var triangles = mesh.triangles;
-        var unmerged = new Vector3[mesh.vertexCount];
-        var merged = new Vector3[mesh.vertexCount];
-        var tangents = new Vector4[mesh.vertexCount];
+        Mesh newMesh = UnityEngine.Object.Instantiate(mesh);
+
+        var vertices = newMesh.vertices;
+        var triangles = newMesh.triangles;
+        var unmerged = new Vector3[newMesh.vertexCount];
+        var merged = new Vector3[newMesh.vertexCount];
+        var tangents = new Vector4[newMesh.vertexCount];
 
         // for each triangle
         for (int i = 0; i < triangles.Length; i += 3)
@@ -79,134 +84,30 @@ public class TangentGenerator : MonoBehaviour
             // this can be done in here
         }
 
-        mesh.tangents = tangents;
+        newMesh.tangents = tangents;
 
-        return mesh;
+        return newMesh;
     }
 
-    private static void SaveMeshAsset(MeshFilter meshFilter, Mesh editedMesh)
+    private static void SaveMeshAssets(GameObject gameObject)
     {
-        string assetPath = AssetDatabase.GetAssetPath(meshFilter.sharedMesh);
-        if (!string.IsNullOrEmpty(assetPath))
+        MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
+        SkinnedMeshRenderer[] skinMeshRenderers = gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+
+        foreach (var meshFilter in meshFilters)
         {
-            Mesh originalMesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
-            if (originalMesh != null)
-            {
-                // Create a new instance of the original mesh
-                Mesh newMesh = UnityEngine.Object.Instantiate(originalMesh);
-
-                // Assign the modified properties to the new mesh
-                newMesh.vertices = editedMesh.vertices;
-                newMesh.normals = editedMesh.normals;
-                newMesh.tangents = editedMesh.tangents;
-                newMesh.uv = editedMesh.uv;
-
-                // Preserve the original submeshes and materials
-                newMesh.subMeshCount = editedMesh.subMeshCount;
-                for (int i = 0; i < editedMesh.subMeshCount; i++)
-                {
-                    newMesh.SetTriangles(editedMesh.GetTriangles(i), i);
-                }
-
-                // Enable "Read/Write Enabled" for the new mesh asset        
-                ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
-                if (modelImporter != null)
-                {
-                    modelImporter.isReadable = true;
-                    modelImporter.SaveAndReimport();
-                }
-                else
-                {
-                    Debug.LogError("Failed to set 'Read/Write Enabled' for the new mesh asset. ModelImporter not found for path: " + assetPath);
-                }
-
-                // Create the "Tangent Mesh" folder if it doesn't exist
-                string folderPath = Path.GetDirectoryName(assetPath) + "/Tangent Mesh";
-                if (!AssetDatabase.IsValidFolder(folderPath))
-                {
-                    AssetDatabase.CreateFolder(Path.GetDirectoryName(assetPath), "Tangent Mesh");
-                }
-
-                // Save the new mesh as a separate asset inside the "Tangent Mesh" folder
-                string newAssetPath = folderPath + "/" + Path.GetFileNameWithoutExtension(assetPath) + ".mesh";
-                AssetDatabase.CreateAsset(newMesh, newAssetPath);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-
-                // Assign the new mesh to the mesh filter
-                meshFilter.sharedMesh = newMesh;
-            }
-            else
-            {
-                Debug.LogError("Failed to replace mesh asset. Original mesh not found at path: " + assetPath);
-            }
+            Mesh mesh = meshFilter.sharedMesh;
+            Mesh newMesh = ModifyMeshTangents(mesh);
+            newMesh.name = mesh.name + " Tangent Mesh";
+            meshFilter.sharedMesh = newMesh;
         }
-        else
+
+        foreach (var skinMeshRenderer in skinMeshRenderers)
         {
-            Debug.LogError("Failed to retrieve asset path for the selected object.");
-        }
-    }
-
-    private static void SaveMeshAsset(SkinnedMeshRenderer skinMeshRenderer, Mesh editedMesh)
-    {
-        string assetPath = AssetDatabase.GetAssetPath(skinMeshRenderer.sharedMesh);
-        if (!string.IsNullOrEmpty(assetPath))
-        {
-            Mesh originalMesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
-            if (originalMesh != null)
-            {
-                // Create a new instance of the original mesh
-                Mesh newMesh = UnityEngine.Object.Instantiate(originalMesh);
-
-                // Assign the modified properties to the new mesh
-                newMesh.vertices = editedMesh.vertices;
-                newMesh.normals = editedMesh.normals;
-                newMesh.tangents = editedMesh.tangents;
-                newMesh.uv = editedMesh.uv;
-
-                // Preserve the original submeshes and materials
-                newMesh.subMeshCount = editedMesh.subMeshCount;
-                for (int i = 0; i < editedMesh.subMeshCount; i++)
-                {
-                    newMesh.SetTriangles(editedMesh.GetTriangles(i), i);
-                }
-
-                // Enable "Read/Write Enabled" for the new mesh asset        
-                ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
-                if (modelImporter != null)
-                {
-                    modelImporter.isReadable = true;
-                    modelImporter.SaveAndReimport();
-                }
-                else
-                {
-                    Debug.LogError("Failed to set 'Read/Write Enabled' for the new mesh asset. ModelImporter not found for path: " + assetPath);
-                }
-
-                // Create the "Tangent Mesh" folder if it doesn't exist
-                string folderPath = Path.GetDirectoryName(assetPath) + "/Tangent Mesh";
-                if (!AssetDatabase.IsValidFolder(folderPath))
-                {
-                    AssetDatabase.CreateFolder(Path.GetDirectoryName(assetPath), "Tangent Mesh");
-                }
-
-                // Save the new mesh as a separate asset inside the "Tangent Mesh" folder
-                string newAssetPath = folderPath + "/" + Path.GetFileNameWithoutExtension(assetPath) + ".mesh";
-                AssetDatabase.CreateAsset(newMesh, newAssetPath);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-
-                // Assign the new mesh to the mesh filter
-                skinMeshRenderer.sharedMesh = newMesh;
-            }
-            else
-            {
-                Debug.LogError("Failed to replace mesh asset. Original mesh not found at path: " + assetPath);
-            }
-        }
-        else
-        {
-            Debug.LogError("Failed to retrieve asset path for the selected object.");
+            Mesh mesh = skinMeshRenderer.sharedMesh;
+            Mesh newMesh = ModifyMeshTangents(mesh);
+            newMesh.name = mesh.name + " Tangent Mesh";
+            skinMeshRenderer.sharedMesh = newMesh;
         }
     }
 }
