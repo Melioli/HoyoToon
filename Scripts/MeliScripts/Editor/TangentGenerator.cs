@@ -98,7 +98,7 @@ public class TangentGenerator : MonoBehaviour
         {
             Mesh mesh = meshFilter.sharedMesh;
             Mesh newMesh = ModifyMeshTangents(mesh);
-            newMesh.name = mesh.name + " Tangent Mesh";
+            newMesh.name = mesh.name + " Tangent";
             meshFilter.sharedMesh = newMesh;
 
             // save modified mesh to disk
@@ -108,7 +108,7 @@ public class TangentGenerator : MonoBehaviour
             {
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Tangent Mesh");
             }
-            path = folderPath + "/" + newMesh.name + ".asset";
+            path = folderPath + "/" + Path.GetFileNameWithoutExtension(path) + " " + newMesh.name + ".mesh";
             AssetDatabase.CreateAsset(newMesh, path);
         }
 
@@ -116,7 +116,7 @@ public class TangentGenerator : MonoBehaviour
         {
             Mesh mesh = skinMeshRenderer.sharedMesh;
             Mesh newMesh = ModifyMeshTangents(mesh);
-            newMesh.name = mesh.name + " Tangent Mesh";
+            newMesh.name = mesh.name + " Tangent";
             skinMeshRenderer.sharedMesh = newMesh;
 
             // save modified mesh to disk
@@ -126,7 +126,7 @@ public class TangentGenerator : MonoBehaviour
             {
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Tangent Mesh");
             }
-            path = folderPath + "/" + newMesh.name + ".asset";
+            path = folderPath + "/" + Path.GetFileNameWithoutExtension(path) + " " + newMesh.name + ".mesh";
             AssetDatabase.CreateAsset(newMesh, path);
         }
     }
