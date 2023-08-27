@@ -6,8 +6,9 @@ Shader "HoyoToon/StarRail"
         //Header
         [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Star Rail</color></i></b>✧", Float) = 0
 		[HideInInspector] shader_is_using_thry_editor ("", Float) = 0
-		[HideInInspector] footer_github ("{texture:{name:github},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
-		[HideInInspector] footer_discord ("{texture:{name:discord},action:{type:URL,data:https://discord.gg/VDzZERg6U4},hover:Discord}", Float) = 0
+        [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
+		[HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
+        [HideInInspector] footer_discord ("{texture:{name:hoyomeliverse},action:{type:URL,data:https://vrchat.com/home/world/wrld_3921fce9-c4c6-4ea4-ad0d-83c6d16a9fbf},hover:Meliverse Avatars}", Float) = 0
         //Header End
 
         //Material Type
@@ -42,18 +43,18 @@ Shader "HoyoToon/StarRail"
         // -------------------------------------------
 
         // main coloring 
-        [HideInInspector] m_start_main ("Main", Float) = 0
+        [HideInInspector] m_start_main ("Main--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#main},hover:Wiki Documentation}}", Float) = 0
         [SmallTexture]_MainTex ("Diffuse Texture", 2D) = "white" {}
         [SmallTexture]_LightMap ("Light Map Texture", 2D) = "grey" {}
         [Toggle]_UseMaterialValuesLUT ("Enable Material LUT", Float) = 0
         [SmallTexture]_MaterialValuesPackLUT ("Mat Pack LUT--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialValuesLUT==1.0}}", 2D) = "white" {}
         _EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
-        [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
+        [HideInInspector] m_start_mainalpha ("Alpha Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#alpha-options},hover:Wiki Documentation}}", Float) = 0
         [Toggle]_IsTransparent ("Enable Transparency", float) = 0
         [Toggle] _EnableAlphaCutoff ("Enable Alpha Cutoff", Float) = 0
         _AlphaCutoff ("Alpha Cutoff value", Range(0.0, 1.0)) = 0.5
         [HideInInspector] m_end_mainalpha ("", Float) = 0
-        [HideInInspector] m_start_maincolor ("Color Options", Float) = 0
+        [HideInInspector] m_start_maincolor ("Color Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#color-options},hover:Wiki Documentation}}", Float) = 0
         // _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
@@ -64,12 +65,12 @@ Shader "HoyoToon/StarRail"
         // -------------------------------------------
 
         // face specific settings 
-        [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_FaceMaterial==1.0}}", Float) = 0
+        [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_FaceMaterial==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#face},hover:Wiki Documentation}}}", Float) = 0
         [SmallTexture] _FaceMap ("Face Map Texture", 2D) = "white" {}
         [SmallTexture] _FaceExpression ("Face Expression map", 2D) = "black" {}
         _NoseLineColor ("Nose Line Color", Color) = (1, 1, 1, 1)
         _NoseLinePower ("Nose Line Power", Range(0, 8)) = 1
-        [HideInInspector] m_start_faceexpression("Face Expression", Float) = 0
+        [HideInInspector] m_start_faceexpression("Face Expression--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#face-expression},hover:Wiki Documentation}}", Float) = 0
         _ExCheekColor ("Expression Cheek Color, ", Color) = (1.0, 1.0, 1.0, 1.0)
         _ExMapThreshold ("Expression Map Threshold", Range(0.0, 1.0)) = 0.5
         _ExSpecularIntensity ("Expression Specular Intensity", Range(0.0, 7.0)) = 0.0
@@ -86,15 +87,15 @@ Shader "HoyoToon/StarRail"
         [HideInInspector] m_end_faceshading("", Float) = 0
 
         // Hair Settings
-        [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0}}", Float) = 0
+        [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#hair},hover:Wiki Documentation}}}", Float) = 0
         [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 1
         _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
         [HideInInspector] m_end_hair("", Float) = 0
 
         // Lighting Options
         // -------------------------------------------
-        [HideInInspector] m_start_lighting("Lighting Options", Float) = 0
-        [HideInInspector] m_start_lightandshadow("Shadow", Float) = 0
+        [HideInInspector] m_start_lighting("Lighting Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#lighting-options},hover:Wiki Documentation}}", Float) = 0
+        [HideInInspector] m_start_lightandshadow("Shadow--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#shadow},hover:Wiki Documentation}}", Float) = 0
         [SmallTexture]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
         [SmallTexture]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
         //[Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
@@ -110,7 +111,7 @@ Shader "HoyoToon/StarRail"
 		//_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
 		//_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
         [HideInInspector] m_end_lightandshadow("", Float) = 0
-        [HideInInspector] m_start_lightingrim("Rim Light", Float) = 0
+        [HideInInspector] m_start_lightingrim("Rim Light--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
         //_RimCt ("Rim CT", Float) = 5
         _Rimintensity ("Rim Intensity", Float) = 1
@@ -122,7 +123,7 @@ Shader "HoyoToon/StarRail"
         _RimOffset ("Rim Offset", Vector) = (0, 0, 0, 0)
         _ES_RimLightOffset ("Global Rim Light Offset | XY", Vector) = (0.0, 0.0, 0.0, 0.0)
         //_RimEdge ("Rim Edge Base", Range(0.01, 0.02)) = 0.015
-        [HideInInspector] m_start_lightingrimcolor("Rimlight Color", Float) = 0
+        [HideInInspector] m_start_lightingrimcolor("Rimlight Color--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         _RimColor0 (" Rim Light Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
         _RimColor1 (" Rim Light Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
         _RimColor2 (" Rim Light Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
@@ -143,7 +144,7 @@ Shader "HoyoToon/StarRail"
         // _RimWidth7 ("Rim Width 7 | (RGB ID = 223)", Float) = 1
         // these actually go unused so im disabling them, dont delete these in case they use them in the future
         // --- Rim Edge Softness 
-        [HideInInspector] m_start_lightingrimsoftness("Rimlight Softness", Float) = 0
+        [HideInInspector] m_start_lightingrimsoftness("Rimlight Softness--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         _RimEdgeSoftness0 ("Rim Edge Softness 0 | (RGB ID = 0)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness1 ("Rim Edge Softness 1 | (RGB ID = 31)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness2 ("Rim Edge Softness 2 | (RGB ID = 63)", Range(0.01, 0.9)) = 0.1
@@ -153,7 +154,7 @@ Shader "HoyoToon/StarRail"
         _RimEdgeSoftness6 ("Rim Edge Softness 6 | (RGB ID = 192)", Range(0.01, 0.9)) = 0.1
         _RimEdgeSoftness7 ("Rim Edge Softness 7 | (RGB ID = 223)", Range(0.01, 0.9)) = 0.1
         [HideInInspector] m_end_lightingrimsoftness("", Float) = 0
-        [HideInInspector] m_start_lightingrimtype("Rimlight Type", Float) = 0
+        [HideInInspector] m_start_lightingrimtype("Rimlight Type--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         _RimType0 ("Rim Type 0 | (RGB ID = 0)", Range(0.0, 1.0)) = 1.0
         _RimType1 ("Rim Type 1 | (RGB ID = 31)", Range(0.0, 1.0)) = 1.0
         _RimType2 ("Rim Type 2 | (RGB ID = 63)", Range(0.0, 1.0)) = 1.0
@@ -163,7 +164,7 @@ Shader "HoyoToon/StarRail"
         _RimType6 ("Rim Type 6 | (RGB ID = 192)", Range(0.0, 1.0)) = 1.0
         _RimType7 ("Rim Type 7 | (RGB ID = 223)", Range(0.0, 1.0)) = 1.0
         [HideInInspector] m_end_lightingrimtype("", Float) = 0
-        [HideInInspector] m_start_lightingrimdark("Rimlight Dark", Float) = 0
+        [HideInInspector] m_start_lightingrimdark("Rimlight Dark--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         _RimDark0 ("Rim Dark 0 | (RGB ID = 0)", Range(0.0, 1.0)) = 0.5
         _RimDark1 ("Rim Dark 1 | (RGB ID = 31)", Range(0.0, 1.0)) = 0.5
         _RimDark2 ("Rim Dark 2 | (RGB ID = 63)", Range(0.0, 1.0)) = 0.5
@@ -212,11 +213,11 @@ Shader "HoyoToon/StarRail"
 
 
         // specular 
-        [HideInInspector] m_start_specular("Specular", Float) = 0
+        [HideInInspector] m_start_specular("Specular--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#specular},hover:Wiki Documentation}}", Float) = 0
         //[Toggle]_AnisotropySpecular ("Anisotropic Specular", Float) = 0
         _ES_SPColor ("Global Specular Color", Color) = (0.5, 0.5, 0.5, 1)
         _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
-        [HideInInspector] m_start_specularcolor("Specular Color", Float) = 0
+        [HideInInspector] m_start_specularcolor("Specular Color--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#specular},hover:Wiki Documentation}}", Float) = 0
         _SpecularColor0 ("Specular Color 0 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
         _SpecularColor1 ("Specular Color 1 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
         _SpecularColor2 ("Specular Color 2 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
@@ -227,7 +228,7 @@ Shader "HoyoToon/StarRail"
         _SpecularColor7 ("Specular Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
         [HideInInspector] m_end_specularcolor("", Float) = 0
 
-        [HideInInspector] m_start_specularshininess("Specular Shininess", Float) = 0
+        [HideInInspector] m_start_specularshininess("Specular Shininess--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#specular},hover:Wiki Documentation}}", Float) = 0
         _SpecularShininess0 ("Specular Shininess 0 (Power) | (RGB ID = 0)", Range(0.1, 500))   = 10
         _SpecularShininess1 ("Specular Shininess 1 (Power) | (RGB ID = 31)", Range(0.1, 500))  = 10
         _SpecularShininess2 ("Specular Shininess 2 (Power) | (RGB ID = 63)", Range(0.1, 500))  = 10
@@ -238,7 +239,7 @@ Shader "HoyoToon/StarRail"
         _SpecularShininess7 ("Specular Shininess 7 (Power) | (RGB ID = 223)", Range(0.1, 500)) = 10
         [HideInInspector] m_end_specularshininess("", Float) = 0
         
-        [HideInInspector] m_start_specularroughness("Specular Roughness", Float) = 0
+        [HideInInspector] m_start_specularroughness("Specular Roughness--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#specular},hover:Wiki Documentation}}", Float) = 0
         _SpecularRoughness0 ("Specular Roughness 0 | (RGB ID = 0)", Range(0, 1))   = 0.02
         _SpecularRoughness1 ("Specular Roughness 1 | (RGB ID = 31)", Range(0, 1))  = 0.02
         _SpecularRoughness2 ("Specular Roughness 2 | (RGB ID = 63)", Range(0, 1))  = 0.02
@@ -249,7 +250,7 @@ Shader "HoyoToon/StarRail"
         _SpecularRoughness7 ("Specular Roughness 7 | (RGB ID = 223)", Range(0, 1)) = 0.02
         [HideInInspector] m_end_specularroughness("", Float) = 0
         
-        [HideInInspector] m_start_specularintensity("Specular Intensity", Float) = 0
+        [HideInInspector] m_start_specularintensity("Specular Intensity--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#specular},hover:Wiki Documentation}}", Float) = 0
         _SpecularIntensity0 ("Specular Intensity 0 | (RGB ID = 0)", Range(0, 50))   = 1
         _SpecularIntensity1 ("Specular Intensity 1 | (RGB ID = 31)", Range(0, 50))  = 1
         _SpecularIntensity2 ("Specular Intensity 2 | (RGB ID = 63)", Range(0, 50))  = 1
@@ -262,7 +263,7 @@ Shader "HoyoToon/StarRail"
         [HideInInspector] m_end_specular("", Float) = 0
 
 
-        [HideInInspector] m_start_stockings("Stockings", Float) = 0
+        [HideInInspector] m_start_stockings("Stockings--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#stockings},hover:Wiki Documentation}}", Float) = 0
         [Toggle] _EnableStocking ("Enable Stockings", Float) = 0
         _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
         _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
@@ -276,8 +277,8 @@ Shader "HoyoToon/StarRail"
 		// _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
         [HideInInspector] m_end_stockings("", Float) = 0
          
-        [HideInInspector] m_start_specialeffects("Special Effects", Float) = 0
-        [HideInInspector] m_start_specialeffectsemission("Emission", Float) = 0
+        [HideInInspector] m_start_specialeffects("Special Effects--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#special-effects},hover:Wiki Documentation}}", Float) = 0
+        [HideInInspector] m_start_specialeffectsemission("Emission--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#emission},hover:Wiki Documentation}}", Float) = 0
         [Enum(Off, 0, Ingame, 1, Custom, 2)] _EnableEmission ("Enable Emission", Float) = 0
         _EmissionTex ("Emission Texture--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission==2}}", 2D) = "white" {}
         _EmissionTintColor ("Emission Color Tint--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Color) = (1, 1, 1, 1)
@@ -287,13 +288,13 @@ Shader "HoyoToon/StarRail"
         [HideInInspector] m_end_specialeffects("", Float) = 0
 
 
-        [HideInInspector] m_start_outlines("Outlines", Float) = 0
+        [HideInInspector] m_start_outlines("Outlines--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#outlines},hover:Wiki Documentation}}", Float) = 0
         //_Outline ("Outline", Range(0, 1)) = 0
         //[KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalFrom ("Outline Type", Float) = 0 
         [Toggle]_EnableFOVWidth ("Enable FOV Scaling", Float) = 1
         _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
         _OutlineScale ("Outline Scale", Range(0, 1)) = 0.1
-        [HideInInspector] m_start_outlinecolor("Outline Color", Float) = 0
+        [HideInInspector] m_start_outlinecolor("Outline Color--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#outline-color},hover:Wiki Documentation}}", Float) = 0
         _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
 		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0, 0, 0, 1)
 		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0, 0, 0, 1)
@@ -304,7 +305,7 @@ Shader "HoyoToon/StarRail"
 		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0, 0, 0, 1)
 		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0, 0, 0, 1)
         [HideInInspector] m_end_outlinecolor("", Float) = 0
-        [HideInInspector] m_start_outlinelip("Lip Outlines", Float) = 0
+        [HideInInspector] m_start_outlinelip("Lip Outlines--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#lip-outlines},hover:Wiki Documentation}}", Float) = 0
         _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
         _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
         _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
@@ -317,7 +318,7 @@ Shader "HoyoToon/StarRail"
         [HideInInspector] m_end_outlines("", Float) = 0
 
         //Rendering Options
-        [HideInInspector] m_start_renderingOptions("Rendering Options", Float) = 0
+        [HideInInspector] m_start_renderingOptions("Rendering Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Star-Rail-Shader#render-options},hover:Wiki Documentation}}", Float) = 0
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
 		[Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
