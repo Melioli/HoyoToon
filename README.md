@@ -5,11 +5,11 @@
 
 <p align="center">
     <a href="https://github.com/Melioli/HoyoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/License-GPL--3.0-702963?style=for-the-badge"></a><br>
-    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Melioli/HoyoToon?style=for-the-badge">
+    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Melioli/HoyoToon?style=for-the-badge"
 "></a>
-    <a href="https://discord.gg/VDzZERg6U4"><img alt="Discord" src="https://img.shields.io/discord/1129811149416824934?style=for-the-badge
+    <img alt="Discord" src="https://img.shields.io/discord/1129811149416824934?style=for-the-badge"
 "></a>
-    <a href="https://github.com/Melioli/HoyoToon/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Melioli/HoyoToon?style=for-the-badge
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/Melioli/HoyoToon?style=for-the-badge"
 "></a>
 </p>
 
