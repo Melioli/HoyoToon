@@ -21,7 +21,7 @@
 
 ## Wiki
 > [!WARNING]
-> **WIP**
+> Please remember to read the [Wiki](https://github.com/Melioli/HoyoToon/wiki) for the approriate information about how to use the shader and the accompanying scripts. 
 
 
 ## Unity Prerequisites 
