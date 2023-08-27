@@ -54,7 +54,7 @@ Shader "HoyoToon/StarRail"
         _AlphaCutoff ("Alpha Cutoff value", Range(0.0, 1.0)) = 0.5
         [HideInInspector] m_end_mainalpha ("", Float) = 0
         [HideInInspector] m_start_maincolor ("Color Options", Float) = 0
-        _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
+        // _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
         //_EnvColor ("Env Color", Color) = (1, 1, 1, 1)
@@ -77,7 +77,7 @@ Shader "HoyoToon/StarRail"
         _ExShyColor ("Expression Shy Color", Color) = (1, 1, 1, 1)
         _ExShyIntensity ("Expression Shy Intensity", Range(0, 1)) = 0
         _ExShadowColor ("Expression Shadow Color", Color) = (1, 1, 1, 1)
-        _ExEyeColor ("Expression Eye Color", Color) = (1, 1, 1, 1)
+        // _ExEyeColor ("Expression Eye Color", Color) = (1, 1, 1, 1)
         _ExShadowIntensity ("Expression Shadow Intensity", Range(0, 1)) = 0
         _headUpVector ("Up Vector | XYZ", Vector) = (0, 1, 1, 0)
         _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
@@ -273,7 +273,7 @@ Shader "HoyoToon/StarRail"
         //_StockTransparency ("Stockings Transparency", Range(0, 1)) = 0
         _StockRoughness ("Stockings Texture Intensity", Range(0, 1)) = 1
 		_Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
-		_Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
+		// _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
         [HideInInspector] m_end_stockings("", Float) = 0
          
         [HideInInspector] m_start_specialeffects("Special Effects", Float) = 0

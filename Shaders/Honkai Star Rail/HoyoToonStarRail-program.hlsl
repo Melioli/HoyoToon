@@ -111,6 +111,7 @@ vs_out vs_edge(vs_in i)
     o.v_col = i.v_col; 
     // o.v_col.w = (i.v_col.w < 0.05f);   
     o.ws_pos = mul(unity_ObjectToWorld, i.pos);
+
     return o;
 }
 
@@ -434,6 +435,8 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
 
+    // out_color.xyz = out_color.w;
+
 
     #ifdef is_stencil // so the hair and eyes dont lose their shading
     if(_FaceMaterial)
@@ -476,6 +479,11 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float2 uv      = i.uv.xy;
 
     float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
+    // if(!vface)
+    // {
+    //     uv = i.uv.zw;
+    // }
+    float alpha = _MainTex.Sample(sampler_MainTex, uv).w;
 
     float4 enviro_light = get_enviro_light(i.ws_pos);
     enviro_light.xyz = lerp(1, enviro_light, _EnvironmentLightingStrength);
@@ -506,5 +514,6 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     out_color.a = 1.0f;
     if(i.v_col.w < 0.05f) clip(-1); // discard all pixels with the a vertex color alpha value of less than 0.05f
     // this fixes double sided meshes for hsr having bad outlines
+    if(_EnableAlphaCutoff) clip(alpha - _AlphaCutoff);
     return out_color;
 }
