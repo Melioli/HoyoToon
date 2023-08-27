@@ -14,9 +14,6 @@
 </p>
 
 
-
-<h2 align="center">This README.md is very WIP</h2>
-
 ---
 
 ## Wiki
