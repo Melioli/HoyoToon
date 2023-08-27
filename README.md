@@ -59,7 +59,7 @@ We understand that copying over the settings from the in-game models to the Hoyo
 All you need to do is right-click on a JSON file and select either the **Generate HSR Materials** or **Generate GI Materials** option under the HoyoToon tab. This will automatically generate the materials you need to use HoyoToon with your models, saving you time and effort.
 
 ## Contact
-- [Discord server](https://discord.gg/VDzZERg6U4)
+- [Discord server](https://discord.gg/meliverse)
 - [Meliodas's Twitter](https://twitter.com/Meliodas7DL)
 - [Manashiku's Twitter](https://twitter.com/Manashiku)
 
