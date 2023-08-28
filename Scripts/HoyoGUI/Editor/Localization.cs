@@ -7,7 +7,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry{
+namespace Hoyo{
     public class Localization : ScriptableObject
     {
         [SerializeField] Shader[] ValidateWithShaders;

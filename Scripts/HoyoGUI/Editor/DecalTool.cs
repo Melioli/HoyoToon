@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public class DecalTool : EditorWindow
     {

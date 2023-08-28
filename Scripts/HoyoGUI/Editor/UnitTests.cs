@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public class UnitTests
     {

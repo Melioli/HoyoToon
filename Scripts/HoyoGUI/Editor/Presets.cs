@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry.ThryEditor
+namespace Hoyo.ThryEditor
 {
     public class Presets : AssetPostprocessor
     {

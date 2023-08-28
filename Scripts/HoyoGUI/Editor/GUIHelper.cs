@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public class GuiHelper
     {

@@ -1,5 +1,5 @@
 ﻿// Material/Shader Inspector for Unity 2017/2018
-// Copyright (C) 2019 Thryrallo
+// Copyright (C) 2023 Thryrallo & Meliodas
 
 using System;
 using System.Collections;
@@ -11,7 +11,7 @@ using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public abstract class ModuleSettings
     {
@@ -74,7 +74,7 @@ namespace Thry
             _is_init = true;
 
             if (thry_message == null)
-                WebHelper.DownloadStringASync(Thry.URL.SETTINGS_MESSAGE_URL, (Action<string>)delegate (string s) { thry_message = Parser.Deserialize<ButtonData>(s); });
+                WebHelper.DownloadStringASync(Hoyo.URL.SETTINGS_MESSAGE_URL, (Action<string>)delegate (string s) { thry_message = Parser.Deserialize<ButtonData>(s); });
         }
 
         //------------------Main GUI

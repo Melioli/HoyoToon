@@ -48,7 +48,7 @@ using static VRC.SDK3.Avatars.Components.VRCAvatarDescriptor;
 using VRC.SDK3.Avatars.Components;
 #endif
 
-namespace Thry
+namespace Hoyo
 {
     
     public enum LightMode
@@ -1996,7 +1996,7 @@ namespace Thry
                     return;
 
                 // Strip shaders from the build under the following conditions:
-                // - Has the property "shader_is_using_thry_editor", which should be present on all shaders using ThryEditor (even if it's not using the optimizer)
+                // - Has the property "shader_is_using_thry_editor", which should be present on all shaders using HoyoEditor (even if it's not using the optimizer)
                 // - Has the property "_ShaderOptimizerEnabled", indicating the shader is using the optimizer
                 // - Doesn't have a name starting with "Hidden/Locked/", indicating the shader is unlocked
                 bool shouldStrip = shader.FindPropertyIndex("shader_is_using_thry_editor") >= 0 && shader.FindPropertyIndex("_ShaderOptimizerEnabled") >= 0 && !shader.name.StartsWith("Hidden/Locked/");

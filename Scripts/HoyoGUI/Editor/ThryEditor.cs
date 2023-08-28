@@ -1,18 +1,18 @@
 ﻿﻿// Material/Shader Inspector for Unity 2017/2018
-// Copyright (C) 2019 Thryrallo
+// Copyright (C) 2023 Thryrallo & Meliodas
 
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using Thry;
+using Hoyo;
 using System;
 using System.Reflection;
 using System.Linq;
-using Thry.ThryEditor;
+using Hoyo.ThryEditor;
 
-namespace Thry
+namespace Hoyo
 {
     public class ShaderEditor : ShaderGUI
     {
@@ -118,7 +118,7 @@ namespace Thry
                     return labels;
                 }
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                string[] data = Regex.Split(Thry.FileHelper.ReadFileIntoString(path), @"\r?\n");
+                string[] data = Regex.Split(Hoyo.FileHelper.ReadFileIntoString(path), @"\r?\n");
                 foreach (string d in data)
                 {
                     string[] set = Regex.Split(d, ":=");

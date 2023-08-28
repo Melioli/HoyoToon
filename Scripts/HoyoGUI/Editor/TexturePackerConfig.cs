@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static Thry.TexturePacker;
+using static Hoyo.TexturePacker;
 
-namespace Thry
+namespace Hoyo
 {
     public class TexturePackerConfig : ScriptableObject
     {

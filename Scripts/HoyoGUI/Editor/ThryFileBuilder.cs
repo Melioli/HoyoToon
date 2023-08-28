@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry {
+namespace Hoyo {
     public class ThryFileCreator {
 
         [MenuItem("Thry/ShaderUI/UI Creator Helper/Create Label Boiler", false, priority = 40)]

@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public class GradientEditor2 : EditorWindow
     {

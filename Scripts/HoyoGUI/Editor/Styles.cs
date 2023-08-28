@@ -1,5 +1,5 @@
 ﻿// Material/Shader Inspector for Unity 2017/2018
-// Copyright (C) 2019 Thryrallo
+// Copyright (C) 2023 Thryrallo & Meliodas
 
 using System;
 using System.Collections;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public class Styles
     {

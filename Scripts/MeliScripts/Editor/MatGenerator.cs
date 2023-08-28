@@ -22,6 +22,7 @@ public class MatGenerator
 
 
     private const string regexFaceNameMatchPatternGI = @"(?i)face";
+    private const string regexweaponNameMatchPatternGI = @"(?i)equip";
     private const string regexFaceNameMatchPatternHSR = @"(?i)face$";
     private const string regexBody1NameMatchPatternHSR = @"(?i)body1";
     private const string regexBody2NameMatchPatternHSR = @"(?i)body2";
@@ -47,6 +48,7 @@ public class MatGenerator
                 if (!jsonAsset) continue;
                 string json = jsonAsset.text;
                 bool isFace = Regex.Match(jsonAsset.name, regexFaceNameMatchPatternGI).Success;
+                bool isWeapon = Regex.Match(jsonAsset.name, regexweaponNameMatchPatternGI).Success;
                 Shader shader = Shader.Find(gishader);
                 Material newMat = new Material(shader);
 
@@ -93,6 +95,15 @@ public class MatGenerator
                 {   
                     newMat.SetColor("_headForwardVector", new Color(0, 0, 1, 0));
                     newMat.SetColor("_headRightVector", new Color(1, 0, 0, 0));
+                    newMat.SetInt("variant_selector", 1);
+                }
+                else if (isWeapon)
+                {
+                    newMat.SetInt("variant_selector", 2);
+                }
+                else
+                {
+                    newMat.SetInt("variant_selector", 0);
                 }
 
                 var jsonPath = AssetDatabase.GetAssetPath(jsonAsset);

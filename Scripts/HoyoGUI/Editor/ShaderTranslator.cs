@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using static Thry.ThryEditor.ShaderTranslator;
+using static Hoyo.ThryEditor.ShaderTranslator;
 
-namespace Thry.ThryEditor
+namespace Hoyo.ThryEditor
 {
     public class ShaderTranslator : ScriptableObject
     {

@@ -1,5 +1,5 @@
 ﻿// Material/Shader Inspector for Unity 2017/2018
-// Copyright (C) 2019 Thryrallo
+// Copyright (C) 2023 Thryrallo & Meliodas
 
 using System;
 using System.Collections;
@@ -20,7 +20,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 
-namespace Thry
+namespace Hoyo
 {
     static class StringExtensions
     {

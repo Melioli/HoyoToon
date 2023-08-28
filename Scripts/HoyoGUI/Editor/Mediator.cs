@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Thry
+namespace Hoyo
 {
     public class Mediator
     {
