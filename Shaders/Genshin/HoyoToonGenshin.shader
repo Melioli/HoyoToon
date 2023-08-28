@@ -154,8 +154,8 @@
         [HideInInspector] m_end_lightandshadow ("", Float) = 0
         [HideInInspector] m_start_rimlight("Rim Light--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         [Enum(Add, 0, Color Dodge, 1)] _RimLightType ("Rim Light Blend Mode", Float) = 0.0
-        _RimLightIntensity ("Rim Light Intensity", Float) = 1.0
-        _RimLightThickness ("Rim Light Thickness", Range(0.0, 10.0)) = 1.0
+        _RimLightIntensity ("Rim Light Intensity", Float) = 0.25
+        _RimLightThickness ("Rim Light Thickness", Range(0.0, 10.0)) = 0.25
         [HideInInspector] m_end_rimlight ("", Float) = 0
         [HideInInspector] g_end_light("", Int) = 0
         [HideInInspector] m_end_lightning ("", Float) = 0
