@@ -661,5 +661,5 @@
             ENDHLSL
         }
     }
-    CustomEditor "Thry.ShaderEditor"
+    CustomEditor "Hoyo.ShaderEditor"
 }

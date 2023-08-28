@@ -658,5 +658,5 @@ Shader "HoyoToon/StarRail"
 
         UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
-        CustomEditor "Thry.ShaderEditor"
+        CustomEditor "Hoyo.ShaderEditor"
 }
