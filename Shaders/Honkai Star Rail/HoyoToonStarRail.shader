@@ -548,7 +548,7 @@ Shader "HoyoToon/StarRail"
         float _RimShadowFeather7;
 
         // emission properties
-        bool _EnableEmission;
+        int _EnableEmission;
         float4 _EmissionTintColor;
         float _EmissionThreshold;
         float _EmissionIntensity;
