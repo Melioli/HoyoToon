@@ -797,10 +797,10 @@ namespace Hoyo
         {
             if (s_edtiorDirectoryPath == null)
             {
-                IEnumerable<string> paths = AssetDatabase.FindAssets("ThryEditor").Select(g => AssetDatabase.GUIDToAssetPath(g));
+                IEnumerable<string> paths = AssetDatabase.FindAssets("HoyoEditor").Select(g => AssetDatabase.GUIDToAssetPath(g));
                 foreach (string p in paths)
                 {
-                    if (p.EndsWith("/ThryEditor.cs"))
+                    if (p.EndsWith("/HoyoEditor.cs"))
                         s_edtiorDirectoryPath = Directory.GetParent(Path.GetDirectoryName(p)).FullName;
                 }
             }
