@@ -24,7 +24,7 @@ namespace Hoyo
         public const string PROPERTY_NAME_LOCALE = "shader_locale";
         public const string PROPERTY_NAME_ON_SWAP_TO_ACTIONS = "shader_on_swap_to";
         public const string PROPERTY_NAME_SHADER_VERSION = "shader_version";
-        public const string PROPERTY_NAME_EDITOR_DETECT = "shader_is_using_thry_editor";
+        public const string PROPERTY_NAME_EDITOR_DETECT = "shader_is_using_hoyeditor";
 
         //Static
         private static string s_edtiorDirectoryPath;
@@ -414,7 +414,7 @@ namespace Hoyo
             if (Materials[0].HasProperty(PROPERTY_NAME_EDITOR_DETECT) == false)
             {
                 string path = AssetDatabase.GetAssetPath(Materials[0].shader);
-                UnityHelper.AddShaderPropertyToSourceCode(path, "[HideInInspector] shader_is_using_thry_editor(\"\", Float)", "0");
+                UnityHelper.AddShaderPropertyToSourceCode(path, "[HideInInspector] shader_is_using_hoyeditor(\"\", Float)", "0");
             }
             Materials[0].SetFloat(PROPERTY_NAME_EDITOR_DETECT, 69);
         }
@@ -717,7 +717,7 @@ namespace Hoyo
             //test if material has been reset
             if (_wasUsed && e.type == EventType.Repaint)
             {
-                if (Materials[0].HasProperty("shader_is_using_thry_editor") && Materials[0].GetFloat("shader_is_using_thry_editor") != 69)
+                if (Materials[0].HasProperty("shader_is_using_hoyeditor") && Materials[0].GetFloat("shader_is_using_hoyeditor") != 69)
                 {
                     _doReloadNextDraw = true;
                     HandleReset();
@@ -777,7 +777,7 @@ namespace Hoyo
             this._didSwapToShader = true;
             this._doReloadNextDraw = true;
             this.Repaint();
-            ThryWideEnumDrawer.Reload();
+            HoyoWideEnumDrawer.Reload();
             ThryRGBAPackerDrawer.Reload();
         }
 

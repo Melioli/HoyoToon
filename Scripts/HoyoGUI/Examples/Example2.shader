@@ -2,7 +2,7 @@ Shader "Thry/Example 2"
 {
 	Properties 
   { 
-      [HideInInspector] shader_is_using_thry_editor("", Float)=0
+      [HideInInspector] shader_is_using_hoyeditor("", Float)=0
 		[HideInInspector] shader_master_label("<color=#ff0000ff>Example 2</color>", Float) = 0
 		[HideInInspector] shader_presets("ThryPresetsExample", Float) = 0
 		[HideInInspector] shader_properties_label_file("ThryLabelExample", Float) = 0
