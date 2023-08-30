@@ -40,6 +40,7 @@
         [HideInInspector] m_start_mainalpha ("Alpha Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#alpha-options},hover:Wiki Documentation}}", Float) = 0
         [Enum(Off, 0, Transparency, 1, Glow, 2)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
         _MainTexAlphaCutoff("Alpha Cuttoff", Range(0, 1.0)) = 0.5
+        [Toggle] _AlphaSpecial ("See through Material", Float) = 0.0
         [HideInInspector] m_end_mainalpha ("", Float) = 0
         [HideInInspector] m_start_maindetail ("Details--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#details},hover:Wiki Documentation}}", Float) = 0
         [Toggle] _TextureLineUse ("Texture Line", Range(0.0, 1.0)) = 0.0
@@ -243,6 +244,15 @@
         _PulseMinStrength ("Minimum Pulse Strength", Range(0.0, 1.0)) = 0.0
         _PulseMaxStrength ("Maximum Pulse Strength", Range(0.0, 1.0)) = 1.0
         [HideInInspector] m_end_emissionpulse ("", Float) = 0
+        [HideInInspector] m_start_outlineemission("Outline Emission--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#pulsing-emission},hover:Wiki Documentation}}", Float) = 0
+        [Toggle] _EnableOutlineGlow("Make Outlines Glow!", Float) = 0
+        _OutlineGlowInt("Outline Glow Intesnity", Range(0.0000, 100.0000)) = 1.0
+        _OutlineGlowColor("Outline Glow Color 0", Color) = (1.0, 1.0, 1.0, 1.0)
+        _OutlineGlowColor2("Outline Glow Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
+        _OutlineGlowColor3("Outline Glow Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
+        _OutlineGlowColor4("Outline Glow Color 3", Color) = (1.0, 1.0, 1.0, 1.0)
+        _OutlineGlowColor5("Outline Glow Color 4", Color) = (1.0, 1.0, 1.0, 1.0)
+        [HideInInspector] m_end_outlineemission ("", Float) = 0
         [HideInInspector] m_end_emissionglow ("", Float) = 0
 
         [HideInInspector] m_start_animatedtex("Texture Animation--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#texture-animation},hover:Wiki Documentation}}", Float) = 0
@@ -463,6 +473,7 @@
         float _ScanSpeed;
 
         float _MainTexAlphaUse;
+        bool _AlphaSpecial;
 
         float _ToggleEyeGlow;
         float _EmissionType;
@@ -565,6 +576,15 @@
         float _UVScrollY;
         float _EnableScrollXSwing;
         float _EnableScrollYSwing;
+
+        bool _EnableOutlineGlow;
+        float _OutlineGlowInt;
+        float4 _OutlineGlowColor;
+        float4 _OutlineGlowColor2;
+        float4 _OutlineGlowColor3;
+        float4 _OutlineGlowColor4;
+        float4 _OutlineGlowColor5;
+
 
         float _ClipPlaneWorld;
         float _MaxOutlineZOffset;

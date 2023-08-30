@@ -68,14 +68,14 @@ vsOut vert(vsIn v)
 }
 
 // fragment
-vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
+float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 {
     // if frontFacing == 1, use uv.xy, else uv.zw
-    vector<half, 2> newUVs = (frontFacing) ? i.uv.xy : i.uv.zw;
+    float2 newUVs = (frontFacing) ? i.uv.xy : i.uv.zw;
 
     // sample textures to objects
-    vector<fixed, 4> mainTex = _MainTex.Sample(sampler_MainTex, vector<half, 2>(i.uv.xy));
-    vector<fixed, 4> lightmapTex = _LightMapTex.Sample(sampler_LightMapTex, vector<half, 2>(i.uv.xy));
+    float4 mainTex = _MainTex.Sample(sampler_MainTex, vector<half, 2>(i.uv.xy));
+    float4 lightmapTex = _LightMapTex.Sample(sampler_LightMapTex, vector<half, 2>(i.uv.xy));
 
 
     /* MATERIAL IDS */
@@ -96,12 +96,22 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         materialID = 2;
     }
 
+    float4 glow_colors[5] =
+    {
+        _OutlineGlowColor,
+        _OutlineGlowColor2,
+        _OutlineGlowColor3,
+        _OutlineGlowColor4,
+        _OutlineGlowColor5,
+    };
+
+
     /* END OF MATERIAL IDS */
 
 
     /* ENVIRONMENT LIGHTING */
 
-    vector<fixed, 4> environmentLighting = calculateEnvLighting(i.vertexWS);
+   float4 environmentLighting = calculateEnvLighting(i.vertexWS);
     
     // ensure environmentLighting does not make outlines greater than 1
     environmentLighting = min(1, environmentLighting);
@@ -112,7 +122,7 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     /* COLOR CREATION */
 
     // form outline colors
-    vector<fixed, 4> globalOutlineColor = _OutlineColor;
+    float4 globalOutlineColor = _OutlineColor;
     if(_UseFaceMapNew == 0){
         if(materialID == 2){
             globalOutlineColor = _OutlineColor2;
@@ -134,6 +144,8 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
     /* END OF COLOR CREATION */
 
+    if(_EnableOutlineGlow) globalOutlineColor.xyz = globalOutlineColor.xyz + (glow_colors[materialID - 1].xyz * _OutlineGlowInt);
+
 
     /* CUTOUT TRANSPARENCY */
 
@@ -145,9 +157,9 @@ vector<fixed, 4> frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     /* WEAPON */
 
     if(_UseWeapon != 0.0){
-        vector<half, 2> weaponUVs = (_ProceduralUVs != 0.0) ? (i.vertexOS.zx + 0.25) * 1.5 : i.uv.zw;
+       half2 weaponUVs = (_ProceduralUVs != 0.0) ? (i.vertexOS.zx + 0.25) * 1.5 : i.uv.zw;
 
-        vector<fixed, 3> dissolve = 0.0;
+        float3 dissolve = 0.0;
 
         /* DISSOLVE */
 
