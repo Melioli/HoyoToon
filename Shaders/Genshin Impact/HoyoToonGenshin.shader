@@ -40,7 +40,7 @@
         [HideInInspector] m_start_mainalpha ("Alpha Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#alpha-options},hover:Wiki Documentation}}", Float) = 0
         [Enum(Off, 0, Transparency, 1, Glow, 2)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
         _MainTexAlphaCutoff("Alpha Cuttoff", Range(0, 1.0)) = 0.5
-        [HideInInspector] m_start_seethrough ("Ghosting", Float) = 0
+        [HideInInspector] m_start_seethrough ("Ghosting--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#ghosting},hover:Wiki Documentation}}", Float) = 0
         [Helpbox]ghostmodehelpbox("Enabling Ghost Mode will require you to tweak the Alpha values of the Color Tint inside of Color Options to fade specific parts of the body.",Float)= 0
         [Enum(Off, 0, On, 1)] _AlphaSpecial("Enable Ghost Mode--{on_value_actions:[
         {value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
@@ -252,10 +252,10 @@
         [HideInInspector] m_end_emissionpulse ("", Float) = 0
         [HideInInspector] m_end_emissionglow ("", Float) = 0
 
-        [HideInInspector] m_start_outlineemission("Outline Emission--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#pulsing-emission},hover:Wiki Documentation}}", Float) = 0
+        [HideInInspector] m_start_outlineemission("Outline Emission--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#outline-glow},hover:Wiki Documentation}}", Float) = 0
         [Toggle] _EnableOutlineGlow("Enable Outline Emission", Float) = 0
         _OutlineGlowInt("Outline Emission Intesnity", Range(0.0000, 100.0000)) = 1.0
-        [HideInInspector] m_start_outlineemissioncolors("Outline Emission Colors", Float) = 0
+        [HideInInspector] m_start_outlineemissioncolors("Outline Emission Colors--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#outline-emission-colors},hover:Wiki Documentation}}", Float) = 0
         _OutlineGlowColor("Outline Emission Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
         _OutlineGlowColor2("Outline Emission Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
         _OutlineGlowColor3("Outline Emission Color 3", Color) = (1.0, 1.0, 1.0, 1.0)
