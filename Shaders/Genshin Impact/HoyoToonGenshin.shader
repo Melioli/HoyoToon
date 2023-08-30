@@ -234,6 +234,7 @@
         [NoScaleOffset] _CustomEmissionAOTex ("Custom Emission AO--{condition_show:{type:PROPERTY_BOOL,data:_EmissionType==1}}", 2D) = "white"{}
         _EmissionStrength ("Emission Strength", Float) = 1.0
         [HideInInspector] m_start_emissioneyeglow("Eye & Archon Glow--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#eye--archon-glow},hover:Wiki Documentation}}", Float) = 0
+        [Helpbox]archonglowhelpbox("Archon Glow is exclusively for Archons. If you'd want other characters to behave the same, use the custom masking feature in the Emission section.",Float)= 0
         [Toggle] _ToggleEyeGlow ("Enable Eye & Archon Glow", Range(0.0, 1.0)) = 1.0
         _EyeGlowStrength ("Eye & Archon Glow Strength", Float) = 1.0
         [HideInInspector] m_end_emissioneyeglow ("", Float) = 0
