@@ -40,7 +40,12 @@
         [HideInInspector] m_start_mainalpha ("Alpha Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#alpha-options},hover:Wiki Documentation}}", Float) = 0
         [Enum(Off, 0, Transparency, 1, Glow, 2)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
         _MainTexAlphaCutoff("Alpha Cuttoff", Range(0, 1.0)) = 0.5
-        [Toggle] _AlphaSpecial ("See through Material", Float) = 0.0
+        [HideInInspector] m_start_seethrough ("Ghosting", Float) = 0
+        [Helpbox]ghostmodehelpbox("Enabling Ghost Mode will require you to tweak the Alpha values of the Color Tint inside of Color Options to fade specific parts of the body.",Float)= 0
+        [Enum(Off, 0, On, 1)] _AlphaSpecial("Enable Ghost Mode--{on_value_actions:[
+        {value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
+        {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=5},{type:SET_PROPERTY,data:_DstBlend=10},{type:SET_PROPERTY,data:render_queue=2999}]}]}", Int) = 0
+        [HideInInspector] m_end_seethrough ("", Float) = 0
         [HideInInspector] m_end_mainalpha ("", Float) = 0
         [HideInInspector] m_start_maindetail ("Details--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#details},hover:Wiki Documentation}}", Float) = 0
         [Toggle] _TextureLineUse ("Texture Line", Range(0.0, 1.0)) = 0.0
