@@ -326,6 +326,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
         // apply environment lighting
         finalColor.xyz *= lerp(1.0, environmentLighting, _EnvironmentLightingStrength).xyz;
+
+        finalColor.w = finalColor.w * color.w;
         // if(_ReturnFaceMap) return faceFactor;
         /* END OF COLOR CREATION */
         // return ShadowFinal;
