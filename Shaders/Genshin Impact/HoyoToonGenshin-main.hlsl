@@ -244,6 +244,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     // shadow 
     float litFactor = 1.0f;
     float3 fresnel = (float3)0.0f;
+    
     if(_UseFresnel)
     {
         fresnel = saturate(1.0f - dot(normal, view));
@@ -251,6 +252,15 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         fresnel = pow(fresnel, _HitColorFresnelPower);
         fresnel = _HitColor.xyz * fresnel.xxx * _HitColorScaler;
     }
+    float3 headForward = normalize(UnityObjectToWorldDir(_headForwardVector.xyz));
+    float3 headRight = normalize(UnityObjectToWorldDir(_headRightVector.xyz));
+    float3 shadow_color = (float3)1.0f;
+    float shadow_area = 1.0f;
+    float3 specular = (float3)0.0f;
+    float metal_area = (lightmap.x > 0.9f) * _MetalMaterial;
+    float3 metal = (float3)1.0f;
+    float3 metal_specular = (float3)0.0f;
+    float3 emission = 0.0f;
     if(_UseFaceMapNew != 0.0f) // face shading
     // besides the additional option of using material shadow colors
     // this comes from straight from primotoon but i dont care, the way i do it in mmd has always been buggy cuz of rotation matrices and shit
@@ -258,9 +268,6 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     {
 
         float lightmap_flipped = _LightMapTex.Sample(sampler_LightMapTex, float2(1.0f - uv.x, uv.y)).w;
-        // get head directions
-        float3 headForward = normalize(UnityObjectToWorldDir(_headForwardVector.xyz));
-        float3 headRight = normalize(UnityObjectToWorldDir(_headRightVector.xyz));
 
         // get dot products of each head direction and the lightDir
         half FdotL = dot(normalize(light.xz), headForward.xz);
@@ -334,12 +341,6 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     }
     else // everything else
     {
-        float3 shadow_color = (float3)1.0f;
-        float shadow_area = 1.0f;
-        float3 specular = (float3)0.0f;
-        float metal_area = (lightmap.x > 0.9f) * _MetalMaterial;
-        float3 metal = (float3)1.0f;
-        float3 metal_specular = (float3)0.0f;
         if(_UseBumpMap)
         {
             
@@ -507,7 +508,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             ndoth = (1.0f - lightmap.z) < ndoth;
             specular = specular * ndoth * (float3)0.5f * lightmap.r;
         } 
-        float3 emission = (float3)0.0f;
+        emission = (float3)0.0f;
         float emis_area = 0.0f;
         float pulse = 1.0f;
         float eyepulse = 1.0f;
@@ -551,6 +552,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
         finalColor.xyz = finalColor + emission;
         finalColor.w = alpha * color.w;
+
+
         // finalColor.xyz = shadow_area;
         // finalColor.xyz = i.vertexcol.w;
         if(_MainTexAlphaUse == 1.0f)clip(finalColor.w - _MainTexAlphaCutoff);
@@ -584,6 +587,30 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     }
     finalColor.xyz = finalColor.xyz + fresnel;
     finalColor.xyz = (_RimLightType > 0) ? ((rim_depth == 1.0f) ? rim_depth : min(finalColor.xyz / (1.0f - rim_depth), 1.0f)) : finalColor.xyz + rim_depth;
-
+    
+    if(_ReturnDiffuseRGB) return float4(diffuse.xyz, 1.0f);
+    if(_ReturnDiffuseA) return float4(diffuse.www, 1.0f);
+    if(_ReturnLightmapR) return float4(lightmap.xxx, 1.0f);
+    if(_ReturnLightmapG) return float4(lightmap.yyy, 1.0f);
+    if(_ReturnLightmapB) return float4(lightmap.zzz, 1.0f);
+    if(_ReturnLightmapA) return float4(lightmap.www, 1.0f);
+    if(_ReturnFaceMap) return float4(facemap.xyz, 1.0f);
+    if(_ReturnFaceMapAlpha) return float4(facemap.www, 1.0f);
+    if(_ReturnNormalMap) return float4(normalmap.xy, 1.0f, 1.0f);
+    if(_ReturnTextureLineMap) return float4(normalmap.zzz, 1.0f);
+    if(_ReturnVertexColorR) return float4(i.vertexcol.xxx, 1.0f);
+    if(_ReturnVertexColorG) return float4(i.vertexcol.yyy, 1.0f);
+    if(_ReturnVertexColorB) return float4(i.vertexcol.zzz, 1.0f);
+    if(_ReturnVertexColorA) return float4(i.vertexcol.www, 1.0f);
+    if(_ReturnRimLight) return float4(rim_depth.xxx, 1.0f);
+    if(_ReturnNormals) return float4(normal.xyz, 1.0f);
+    if(_ReturnRawNormals) return float4(i.normal.xyz, 1.0f);
+    if(_ReturnTangents) return float4(i.tangent.xyz, 1.0f);
+    if(_ReturnMetal) return float4(metal.xyz, 1.0f);
+    if(_ReturnSpecular) return float4(specular.xyz, 1.0f);
+    if(_ReturnEmissionFactor) return float4(emission.xyz, 1.0f);
+    if(_ReturnForwardVector) return float4(headForward.xyz, 1.0f);
+    if(_ReturnRightVector) return float4(headRight.xyz, 1.0f);
+    
     return finalColor;
 }

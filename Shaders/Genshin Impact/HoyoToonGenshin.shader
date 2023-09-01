@@ -334,29 +334,31 @@
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
-        // [HideInInspector] m_start_debugOptions("Debug", Float) = 0
-        // [Toggle] _ReturnDiffuseRGB ("Show Diffuse", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnDiffuseA ("Show Diffuse Alpha", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnLightmapR ("Show Lightmap Red", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnLightmapG ("Show Lightmap Green", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnLightmapB ("Show Lightmap Blue", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnLightmapA ("Show Lightmap Alpha", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnFaceMap ("Show Face Shadow", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnNormalMap ("Show Normal Map", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnTextureLineMap ("Show Texture Line Map", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnVertexColorR ("Show Vertex Color Red", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnVertexColorG ("Show Vertex Color Green", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnVertexColorB ("Show Vertex Color Blue", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnVertexColorA ("Show Vertex Color Alpha", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnRimLight ("Show Rim Light", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnNormals ("Show Normals", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnRawNormals ("Show Raw Normals", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnTangents ("Show Tangents", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnMetal ("Show Metal", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnEmissionFactor ("Show Emission Factor", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnForwardVector ("Show Forward Vector (it should look blue)", Range(0.0, 1.0)) = 0.0
-        // [Toggle] _ReturnRightVector ("Show Right Vector (it should look red)", Range(0.0, 1.0)) = 0.0
-        // [HideInInspector] m_end_debugOptions("Debug", Float) = 0
+        [HideInInspector] m_start_debugOptions("Debug", Float) = 0
+        [Toggle] _ReturnDiffuseRGB ("Show Diffuse", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnDiffuseA ("Show Diffuse Alpha", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnLightmapR ("Show Lightmap Red", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnLightmapG ("Show Lightmap Green", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnLightmapB ("Show Lightmap Blue", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnLightmapA ("Show Lightmap Alpha", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnFaceMap ("Show Face Shadow", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnFaceMapAlpha ("Show Face Shadow Alpha", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnNormalMap ("Show Normal Map", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnTextureLineMap ("Show Texture Line Map", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnVertexColorR ("Show Vertex Color Red", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnVertexColorG ("Show Vertex Color Green", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnVertexColorB ("Show Vertex Color Blue", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnVertexColorA ("Show Vertex Color Alpha", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnRimLight ("Show Rim Light", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnNormals ("Show Normals", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnRawNormals ("Show Raw Normals", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnTangents ("Show Tangents", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnMetal ("Show Metal", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnSpecular ("Show Specular", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnEmissionFactor ("Show Emission Factor", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnForwardVector ("Show Forward Vector (it should look blue)", Range(0.0, 1.0)) = 0.0
+        [Toggle] _ReturnRightVector ("Show Right Vector (it should look red)", Range(0.0, 1.0)) = 0.0
+        [HideInInspector] m_end_debugOptions("Debug", Float) = 0
         //[Enum(Thry.ColorMask)] _ColorMask ("Color Mask", Int) = 15
         //_OffsetFactor ("Offset Factor", Float) = 0.0
         //_OffsetUnits ("Offset Units", Float) = 0.0
@@ -618,6 +620,7 @@
         float _ReturnLightmapB;
         float _ReturnLightmapA;
         float _ReturnFaceMap;
+        float _ReturnFaceMapAlpha;
         float _ReturnNormalMap;
         float _ReturnTextureLineMap;
         float _ReturnVertexColorR;
@@ -629,6 +632,7 @@
         float _ReturnRawNormals;
         float _ReturnTangents;
         float _ReturnMetal;
+        float _ReturnSpecular;
         float _ReturnEmissionFactor;
         float _ReturnForwardVector;
         float _ReturnRightVector;
