@@ -316,7 +316,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         }
         else
         {
-            ShadowFinal = lerp(shadow_colors_cool[material_ID - 1], shadow_colors_warm[material_ID - 1], _DayOrNight);
+            ShadowFinal = lerp(shadow_colors_warm[material_ID - 1], shadow_colors_cool[material_ID - 1], _DayOrNight);
         }
 
         // make lit areas 1
