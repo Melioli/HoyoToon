@@ -133,7 +133,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
     float4 shadow_colors_cool[5] =
     {
-        _FirstShadowMultColor, _FirstShadowMultColor2, _FirstShadowMultColor3, _FirstShadowMultColor4, _FirstShadowMultColor5
+        _CoolShadowMultColor, _CoolShadowMultColor2, _CoolShadowMultColor3, _CoolShadowMultColor4, _CoolShadowMultColor5
     };
 
     float2 shadow_transitions[5] = // x = range y = softness
@@ -309,7 +309,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         {
 
             float2 ramp_uvs = float2(faceFactor, (((6.0f - _MaterialID) - 1.0f) * 0.1f) + 0.5f);
-            float4 ramp_day = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ramp_uvs);
+            float4 ramp_day = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ramp_uvs); 
             float4 ramp_nit = _PackedShadowRampTex.Sample(sampler_PackedShadowRampTex, ramp_uvs + float2(0.0f, 0.5f));
 
             ShadowFinal = lerp(ramp_day, ramp_nit, _DayOrNight);
