@@ -58,6 +58,14 @@ Shader "HoyoToon/StarRail"
         // _VertexShadowColor ("Vertex Shadow Color", Color) = (1, 1, 1, 1) // unsure of what this does yet for star rail
         _Color  ("Front Face Color", Color) = (1, 1, 1, 1)
         _BackColor ("Back Face Color", Color) = (1, 1, 1, 1)
+        _Color0(" Color 0", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color1(" Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color2(" Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color3(" Color 3", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color4(" Color 4", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color5(" Color 5", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color6(" Color 6", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Color7(" Color 7", Color) = (1.0, 1.0, 1.0, 1.0)
         //_EnvColor ("Env Color", Color) = (1, 1, 1, 1)
         //_AddColor ("Add Color", Color) = (0, 0, 0, 0)
         [HideInInspector] m_end_maincolor ("", Float) = 0
@@ -285,6 +293,20 @@ Shader "HoyoToon/StarRail"
         _EmissionThreshold ("Emission Threshold--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Range(0,1)) = 0.5
         _EmissionIntensity ("Emission Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Float) = 1
         [HideInInspector] m_end_specialeffectsemission("", Float) = 0
+        [HideInInspector] m_start_caustic("Caustics--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#caustics},hover:Wiki Documentation}}", Float) = 0
+        [Toggle] _CausToggle ("Enable Caustics", Float) = 0.0
+        _CausTexture ("Caustic Texture--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", 2D) = "black" {} 
+        _CausTexSTA ("First Caustic Texture Scale & Bias--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Vector) = (1.0, 1.0, 0.0, 0.0)
+        _CausTexSTB ("Second Caustic Texture Scale & Bias--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Vector) = (1.0, 1.0, 0.0, 0.0)
+        [Toggle] _CausUV ("Use UVs for projection--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
+        _CausSpeedA ("First Caustic Speed--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(-5.00, 5.00)) = 1.0
+        _CausSpeedB ("Second Caustic Speed--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(-5.00, 5.00)) = 1.0
+        _CausColor ("Caustic Color--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+        _CausInt ("Caustic Intensity--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(0.000, 10.000)) = 1.0
+        _CausExp ("Caustic Exponent--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(0.000, 10.000)) = 1.0
+        [Toggle] _EnableSplit ("Enable Caustic RGB Split--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
+        _CausSplit ("Caustic RGB Split--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_CausToggle==1},condition2:{type:PROPERTY_BOOL,data:_EnableSplit==1}}}", Range(0.0, 1.0)) = 0.0
+        [HideInInspector] m_end_caustic ("", Float) = 0 
         [HideInInspector] m_end_specialeffects("", Float) = 0
 
 
@@ -361,11 +383,15 @@ Shader "HoyoToon/StarRail"
         Texture2D _FaceExpression;
         Texture2D _MaterialValuesPackLUT;
         Texture2D _EmissionTex; 
+        Texture2D _CausTexture;
+        float4 _CausTexture_ST;
         SamplerState sampler_MaterialValuesPackLUT;
         SamplerState sampler_MainTex;
         SamplerState sampler_LightMap;
         SamplerState sampler_DiffuseRampMultiTex;
         SamplerState sampler_FaceMap;
+
+        
 
 
         UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
@@ -382,6 +408,14 @@ Shader "HoyoToon/StarRail"
         float4 _BackColor;
         float4 _EnvColor;
         float4 _AddColor;
+        float4 _Color0;
+        float4 _Color1;
+        float4 _Color2;
+        float4 _Color3;
+        float4 _Color4;
+        float4 _Color5;
+        float4 _Color6;
+        float4 _Color7;
 
         // alpha cutoff 
         bool _EnableAlphaCutoff;
@@ -552,6 +586,20 @@ Shader "HoyoToon/StarRail"
         float4 _EmissionTintColor;
         float _EmissionThreshold;
         float _EmissionIntensity;
+
+        // caustic properties
+        float _CausToggle;
+        float _CausUV;
+        float4 _CausTexSTA;
+        float4 _CausTexSTB;
+        float _CausSpeedA;
+        float _CausSpeedB;
+        float4 _CausColor;
+        float _CausInt;
+        float _CausExp;
+        float _EnableSplit;
+        float _CausSplit;
+
 
         // outline properties 
         float _EnableFOVWidth;

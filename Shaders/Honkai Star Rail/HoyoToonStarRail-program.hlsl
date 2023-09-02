@@ -126,7 +126,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float4 vcol      = i.v_col;
 
     // MATERIAL COLOR :
-    float4 color = _Color;
+    float4 color = (_HairMaterial) ? _Color0 * _Color : _Color;
 
     if(!vface) // use uv2 if vface is false
     { // so basically if its a backfacing face
@@ -180,7 +180,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     out_color = out_color * enviro_light;
 
     // EXTRACT MATERIAL REGIONS 
-    float material_ID = floor(8.0f * lightmap.w);
+    float material_ID = floor(8.1f * lightmap.w);
     float ramp_ID     = ((material_ID * 2.0f + 1.0f) * 0.0625f);
     // when writing the shader for mmd i had to invert the ramp ID since the uvs are read differently  
 
@@ -196,8 +196,16 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float4 lut_rimval  = _MaterialValuesPackLUT.Load(float4(material_ID, 4, 0, 0)); // x : rim type, y : softness , z : dark
     float4 lut_rimscol = _MaterialValuesPackLUT.Load(float4(material_ID, 5, 0, 0)); // xyz : color
     float4 lut_rimsval = _MaterialValuesPackLUT.Load(float4(material_ID, 6, 0, 0)); // x: rim shadow width, y: rim shadow feather 
-    
+        
     // ================================================================================================ //
+    // Material Coloring : 
+    float4 mat_color[8] = 
+    {
+        _Color0, _Color1, _Color2, _Color3, _Color4, _Color5, _Color6, _Color7, 
+    };
+
+    if(!_HairMaterial)out_color = out_color * mat_color[material_ID];
+    // // ================================================================================================ //
     // SHADOW AREA :
     float shadow_area = shadow_rate(ndotl, lightmap.y, vcol.x, _ShadowRamp);
 
@@ -210,8 +218,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     float3 shadow_color = lerp(warm_ramp, cool_ramp, 0.0f);
 
-    
-    
     if(_FaceMaterial)
     {
         float face_sdf_right = _FaceMap.Sample(sampler_FaceMap, uv).w;
@@ -445,7 +451,38 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(!_IsTransparent) out_color.w = 1.0f;
     if(_EyeShadowMat) out_color = _Color;
 
-    // out_color.xyz = out_color.w;
+    if(_CausToggle)
+    {
+        float2 caus_uv = i.ws_pos.xy;
+        caus_uv.x = caus_uv.x + i.ws_pos.z; 
+        if(_CausUV) caus_uv = uv;
+        float2 caus_uv_a = _CausTexSTA.xy * caus_uv + _CausTexSTA.zw;
+        float2 caus_uv_b = _CausTexSTB.xy * caus_uv + _CausTexSTB.zw;
+        caus_uv_a = _CausSpeedA * _Time.yy + caus_uv_a;
+        caus_uv_b = _CausSpeedB * _Time.yy + caus_uv_b;
+        float3 caus_a = (float3)0.0f;
+        float3 caus_b = (float3)0.0f;
+        if(_EnableSplit)
+        {
+            float caus_a_r = _CausTexture.Sample(sampler_LightMap, caus_uv_a + float2(_CausSplit, _CausSplit)).x;
+            float caus_a_g = _CausTexture.Sample(sampler_LightMap, caus_uv_a + float2(_CausSplit, -_CausSplit)).x;
+            float caus_a_b = _CausTexture.Sample(sampler_LightMap, caus_uv_a + float2(-_CausSplit, -_CausSplit)).x;
+            float caus_b_r = _CausTexture.Sample(sampler_LightMap, caus_uv_b + float2(_CausSplit, _CausSplit)).x;
+            float caus_b_g = _CausTexture.Sample(sampler_LightMap, caus_uv_b + float2(_CausSplit, -_CausSplit)).x;
+            float caus_b_b = _CausTexture.Sample(sampler_LightMap, caus_uv_b + float2(-_CausSplit, -_CausSplit)).x;
+            caus_a = float3(caus_a_r, caus_a_g, caus_a_b);
+            caus_b = float3(caus_b_r, caus_b_g, caus_b_b);
+        }
+        else
+        {
+            caus_a = _CausTexture.Sample(sampler_LightMap, caus_uv_a).xxx;
+            caus_b = _CausTexture.Sample(sampler_LightMap, caus_uv_b).xxx;
+        }
+
+        float3 caus = min(caus_a, caus_b);  
+        caus = pow(caus, _CausExp) * _CausColor * _CausInt;      
+        out_color.xyz = out_color.xyz + caus;
+    }
 
 
     #ifdef is_stencil // so the hair and eyes dont lose their shading

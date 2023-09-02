@@ -324,6 +324,20 @@
         _HitColorScaler ("Fresnel Color Scaler", Float) = 6
         _HitColorFresnelPower ("Fresnel Power", Float) = 1.5
         [HideInInspector] m_end_fresnel ("", Float) = 0
+        [HideInInspector] m_start_caustic("Caustics--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#caustics},hover:Wiki Documentation}}", Float) = 0
+        [Toggle] _CausToggle ("Enable Caustics", Float) = 0.0
+        _CausTexture ("Caustic Texture--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", 2D) = "black" {} 
+        _CausTexSTA ("First Caustic Texture Scale & Bias--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Vector) = (1.0, 1.0, 0.0, 0.0)
+        _CausTexSTB ("Second Caustic Texture Scale & Bias--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Vector) = (1.0, 1.0, 0.0, 0.0)
+        [Toggle] _CausUV ("Use UVs for projection--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
+        _CausSpeedA ("First Caustic Speed--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(-5.00, 5.00)) = 1.0
+        _CausSpeedB ("Second Caustic Speed--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(-5.00, 5.00)) = 1.0
+        _CausColor ("Caustic Color--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+        _CausInt ("Caustic Intensity--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(0.000, 10.000)) = 1.0
+        _CausExp ("Caustic Exponent--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(0.000, 10.000)) = 1.0
+        [Toggle] _EnableSplit ("Enable Caustic RGB Split--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
+        _CausSplit ("Caustic RGB Split--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_CausToggle==1},condition2:{type:PROPERTY_BOOL,data:_EnableSplit==1}}}", Range(0.0, 1.0)) = 0.0
+        [HideInInspector] m_end_caustic ("", Float) = 0 
         [HideInInspector] m_end_specialeffects ("", Float) = 0
         //Special Effects End
 
@@ -397,16 +411,16 @@
 
         /* properties */
 
-        Texture2D _MainTex;                 SamplerState sampler_MainTex;                 const float4 _MainTex_TexelSize;
+        Texture2D _MainTex;                 SamplerState sampler_MainTex;
         float4 _MainTex_ST;
-        Texture2D _LightMapTex;             SamplerState sampler_LightMapTex;             const float4 _LightMapTex_TexelSize;
-        Texture2D _FaceMap;                 SamplerState sampler_FaceMap;                 const float4 _FaceMap_TexelSize;
-        Texture2D _BumpMap;                 SamplerState sampler_BumpMap;                 const float4 _BumpMap_TexelSize;
+        Texture2D _LightMapTex;             SamplerState sampler_LightMapTex;
+        Texture2D _FaceMap;                 
+        Texture2D _BumpMap;                 SamplerState sampler_BumpMap;
         Texture2D _PackedShadowRampTex;     SamplerState sampler_PackedShadowRampTex;
         Texture2D _MTSpecularRamp;          SamplerState sampler_MTSpecularRamp;
         Texture2D _MTMap;                   SamplerState sampler_MTMap;
         Texture2D _WeaponDissolveTex;       SamplerState sampler_WeaponDissolveTex;
-        Texture2D _WeaponPatternTex;        SamplerState sampler_WeaponPatternTex;        const float4 _WeaponPatternTex_TexelSize;
+        Texture2D _WeaponPatternTex;        SamplerState sampler_WeaponPatternTex;
         Texture2D _ScanPatternTex;          SamplerState sampler_ScanPatternTex;
 
         Texture2D _CustomEmissionTex;       SamplerState sampler_CustomEmissionTex;
@@ -432,6 +446,10 @@
         float4 _ConstellationTex_ST;
         Texture2D _CloudTex; 
         float4 _CloudTex_ST;
+
+        Texture2D _CausTexture;
+        float4 _CausTexture_ST;
+
 
         UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
@@ -466,6 +484,19 @@
         float4 _NoseBlushColor;
         float _FaceBlushStrength;
         float4 _FaceBlushColor;
+
+
+        float _CausToggle;
+        float _CausUV;
+        float4 _CausTexSTA;
+        float4 _CausTexSTB;
+        float _CausSpeedA;
+        float _CausSpeedB;
+        float4 _CausColor;
+        float _CausInt;
+        float _CausExp;
+        float _EnableSplit;
+        float _CausSplit;
 
         float _UseWeapon;
         float _UsePattern;

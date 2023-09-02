@@ -1,11 +1,17 @@
 // vertex
-vsOut vert(vsIn v)
+vsOut vert(vsIn v, uint id : SV_VertexID)
 {
     vsOut o = (vsOut)0.0f; // cast to 0 to avoid intiailization warnings
     if(_OutlineType == 0)
     {
         return (vsOut)0.0f; // return every value as zero if outline type is set to none
     }
+
+    // float iny =  v.vertex.y * 0.001f + _Time.y * (id * 0.001f);
+    // float wig_x = sin(v.normal.x * 0.001f + _Time.y * (id * 0.001f)) * 0.001f;
+    // float wig_y = cos(v.vertex.y * 0.001f + _Time.y * (id * 0.001f)) * 0.001f;
+    // v.vertex.x = v.vertex.x + wig_x;
+    // v.vertex.y = v.vertex.y + wig_y;
         
     float3 outline_normal;
     outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, v.tangent.xyz);

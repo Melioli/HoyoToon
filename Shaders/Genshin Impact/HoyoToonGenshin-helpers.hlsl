@@ -1,5 +1,21 @@
 /* helper functions */
 
+float3x3 CalcRotateMatrix(float3 vec) {
+   float cosX,sinX;
+   float cosY,sinY;
+   float cosZ,sinZ;
+
+   sincos(0.48 * vec.x,sinX,cosX);
+   sincos(0.42 * vec.y,sinY,cosY);
+   sincos(0.45 * vec.z,sinZ,cosZ);
+
+   return float3x3(
+      cosY * cosZ + sinX * sinY * sinZ,  cosY * sinZ - sinX * sinY * cosZ, cosX * sinY,
+     -cosX * sinZ,                       cosX * cosZ,                      sinX, 
+      sinX * cosY * sinZ - sinY * cosZ, -sinY * sinZ - sinX * cosY * cosZ, cosX * cosY
+   );
+}
+
 // light fallback
 half4 getlightDir(){
     half4 lightDir = (_WorldSpaceLightPos0 != 0) ? _WorldSpaceLightPos0 :

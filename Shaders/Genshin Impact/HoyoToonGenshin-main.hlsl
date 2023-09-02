@@ -56,6 +56,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float3 normal = i.normal;
     float3 light  = _WorldSpaceLightPos0;
 
+   
     if(_UseUVScroll)
     {   
         float2 swing = sin(_Time.yy * float2(_UVScrollX, _UVScrollY));
@@ -70,15 +71,15 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float3 half_vector = normalize(view + light);
 
     // invert normals if theyre back facing 
-    // normal = (frontFacing) ? normal : -normal;
+    normal = (frontFacing) ? normal : -normal;
     // normal = normalize(i.normal);
     normal = UnityObjectToWorldNormal(i.normal);
     normal = normalize(normal);
 
     // sample textures : 
-    float4 diffuse   = _MainTex.Sample(sampler_MainTex, uv);
+    float4 diffuse   = _MainTex.Sample(sampler_MainTex, uv * _MainTex_ST.xy + _MainTex_ST.zw);
     float4 lightmap  = _LightMapTex.Sample(sampler_LightMapTex, uv);
-    float4 facemap   = _FaceMap.Sample(sampler_FaceMap, uv);
+    float4 facemap   = _FaceMap.Sample(sampler_LightMapTex, uv);
     float4 normalmap = _BumpMap.Sample(sampler_BumpMap, uv);
     float4 matmask   = _MaterialMasksTex.Sample(sampler_LightMapTex, uv);
 
@@ -91,6 +92,10 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
     // get enviromental colors
     float4 environmentLighting = calculateEnvLighting(i.vertexWS);
+    // get average environment color for adjusting the brightness of the rim light in dark areas
+    float avg_env_col = (environmentLighting.x + environmentLighting.y + environmentLighting.z) / 3; // this is something i picked up while writing project diva shaders for mmd
+    float rim_env_col = clamp(avg_env_col, 0.05f, 1.0f); // 
+
 
     // ========================================================= //
     // extract material ids from lightmap alpha
@@ -547,16 +552,48 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         
                 
         finalColor.xyz = (metal_area) ? diffuse.xyz * metal + metal_specular: diffuse.xyz * shadow_color + specular;
-        finalColor.xyz = finalColor.xyz * lerp(1.0f, environmentLighting, _EnvironmentLightingStrength).xyz;
-       
-
         finalColor.xyz = finalColor + emission;
         finalColor.w = alpha * color.w;
+        finalColor.xyz = finalColor.xyz * lerp(1.0f, environmentLighting, _EnvironmentLightingStrength).xyz;
+
 
 
         // finalColor.xyz = shadow_area;
         // finalColor.xyz = i.vertexcol.w;
         if(_MainTexAlphaUse == 1.0f)clip(finalColor.w - _MainTexAlphaCutoff);
+    }
+    if(_CausToggle)
+    {
+        float2 caus_uv = i.vertexWS.xy;
+        caus_uv.x = caus_uv.x + i.vertexWS.z; 
+        if(_CausUV) caus_uv = uv;
+        if((i.vertexWS.y == 0.0f)) caus_uv = uv;
+        float2 caus_uv_a = _CausTexSTA.xy * caus_uv + _CausTexSTA.zw;
+        float2 caus_uv_b = _CausTexSTB.xy * caus_uv + _CausTexSTB.zw;
+        caus_uv_a = _CausSpeedA * _Time.yy + caus_uv_a;
+        caus_uv_b = _CausSpeedB * _Time.yy + caus_uv_b;
+        float3 caus_a = (float3)0.0f;
+        float3 caus_b = (float3)0.0f;
+        if(_EnableSplit)
+        {
+            float caus_a_r = _CausTexture.Sample(sampler_LightMapTex, caus_uv_a + float2(_CausSplit, _CausSplit)).x;
+            float caus_a_g = _CausTexture.Sample(sampler_LightMapTex, caus_uv_a + float2(_CausSplit, -_CausSplit)).x;
+            float caus_a_b = _CausTexture.Sample(sampler_LightMapTex, caus_uv_a + float2(-_CausSplit, -_CausSplit)).x;
+            float caus_b_r = _CausTexture.Sample(sampler_LightMapTex, caus_uv_b + float2(_CausSplit, _CausSplit)).x;
+            float caus_b_g = _CausTexture.Sample(sampler_LightMapTex, caus_uv_b + float2(_CausSplit, -_CausSplit)).x;
+            float caus_b_b = _CausTexture.Sample(sampler_LightMapTex, caus_uv_b + float2(-_CausSplit, -_CausSplit)).x;
+            caus_a = float3(caus_a_r, caus_a_g, caus_a_b);
+            caus_b = float3(caus_b_r, caus_b_g, caus_b_b);
+        }
+        else
+        {
+            caus_a = _CausTexture.Sample(sampler_LightMapTex, caus_uv_a).xxx;
+            caus_b = _CausTexture.Sample(sampler_LightMapTex, caus_uv_b).xxx;
+        }
+
+        float3 caus = min(caus_a, caus_b);  
+        caus = pow(caus, _CausExp) * _CausColor * _CausInt;      
+        finalColor.xyz = finalColor.xyz + caus;
     }
 
     float3 dissolve = 0.0f;
@@ -586,7 +623,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         finalColor.xyz = finalColor.xyz + scan_line;
     }
     finalColor.xyz = finalColor.xyz + fresnel;
-    finalColor.xyz = (_RimLightType > 0) ? ((rim_depth == 1.0f) ? rim_depth : min(finalColor.xyz / (1.0f - rim_depth), 1.0f)) : finalColor.xyz + rim_depth;
+    finalColor.xyz = (_RimLightType > 0) ? ((rim_depth == 1.0f) ? rim_depth : min(finalColor.xyz / (1.0f - (rim_depth)), 1.0f)) : finalColor.xyz + (rim_depth * rim_env_col);
     
     if(_ReturnDiffuseRGB) return float4(diffuse.xyz, 1.0f);
     if(_ReturnDiffuseA) return float4(diffuse.www, 1.0f);
