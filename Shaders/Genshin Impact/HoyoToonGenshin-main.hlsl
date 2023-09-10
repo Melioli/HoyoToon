@@ -13,7 +13,7 @@ vsOut vert(vsIn v)
     o.uv.xy = v.uv0;
     o.uv.zw = v.uv1;
     o.normal = v.normal;
-    o.screenPos = ComputeNonStereoScreenPos(pos_wvp);
+    o.screenPos = ComputeScreenPos(pos_wvp);
     o.vertexcol = (_VertexColorLinear != 0.0) ? VertexColorConvertToLinear(v.vertexcol) : v.vertexcol;
     o.parallax = 0.0f;
 
@@ -147,39 +147,69 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     };
 
     // ========================================================= //
-    // rim lighting
-    float2 screen_pos = i.screenPos.xy / i.screenPos.w;
-    float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
-    float3 vs_normal = mul(UNITY_MATRIX_V, normal);
-    // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
-    float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, i.vertexWS));
+    float3 rim_depth = (float3) 0.0f;
+    if(_UseRimLight)
+    {
+        // do stupid normal vector stuff for the rim lights
+        float3 vs_normal = normalize(mul(UNITY_MATRIX_V, normal));
+        float3 rim_normal = (vs_normal);      
 
-    // multiply the rim widht material values by the lightmap red channel
-    float rim_width = _RimLightThickness;
-    
-    // sample depth texture, this will be the base
-    float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
+        float normal_max = max(max(abs(rim_normal.y), abs(rim_normal.x)), abs(rim_normal.z));
 
-    float rim_side = (i.vertexWS.z * -vs_normal.x) - (i.vertexWS.x * -vs_normal.z);
-    rim_side = (rim_side > 0.0f) ? 0.0f : 1.0f;
-    
+        float2 normal_cmp;
+        normal_cmp.x = normal_max == abs(rim_normal).x;
+        normal_cmp.y = normal_max == abs(rim_normal).z;
+        float2 normal_something;
+        normal_something.x = normal_max == 0.5f ? 0.5f : 0.25f;
+        normal_something.y = normal_cmp.y ? 0.5f : 0.25;
+        float3 rim_normal_a = normal_cmp.y ? rim_normal.xyz : rim_normal.xzy;
+        rim_normal = normal_cmp.x ? rim_normal.xyz : rim_normal_a;
+        float rim_lt_check = rim_normal.z < 0.0f;
+        rim_normal.xy = rim_normal * 0.5f + 0.5f;
+        rim_normal.xy = rim_normal * 0.5f + normal_something;
+        rim_normal.xy = rim_normal * 2.0 - 1.0f;
+        rim_normal.z = 0.0f;
+        // rim lighting
+        float2 screen_pos = i.screenPos.xy / i.screenPos.w;
+        float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
+        // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
+        float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, i.vertexWS));
 
-    // create offset screen uv using rim width value and view space normals for offset depth texture
-    float2 offset_uv = _RimLightThickness;
-    offset_uv.x = lerp(offset_uv.x, -offset_uv.x, rim_side);
-    float2 offset = (_RimLightThickness * vs_normal * 0.0055f);
-    offset_uv.x = screen_pos.x + (offset.x * max(0.5f, camera_dist));
-    offset_uv.y = screen_pos.y + (offset.y * max(0.5f, camera_dist));
+        // sample depth texture, this will be the base
+        float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
+        float2 offset_uv = screen_pos.xy;
+        // offset_uv = lerp(offset_uv, -offset_uv, rim_side);
+        offset_uv = rim_normal.xy * ((float2)0.004f * _RimLightThickness) + offset_uv;
 
-    // sample depth texture using offset uv
-    float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
+        // sample depth texture using offset uv
+        float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
 
-    float rim_depth = (offset_depth - org_depth);
-    rim_depth = max(rim_depth, 0.001f);
-    rim_depth = pow(rim_depth, 0.04f); 
-    rim_depth = smoothstep(0.80f, 0.9f, rim_depth) * saturate(max(0.75f, camera_dist));
-    rim_depth = (rim_depth > 0.2f) ? rim_depth : 0.0f;
-    rim_depth = (rim_depth * _RimLightIntensity * frontFacing);
+        rim_depth = (offset_depth - org_depth);
+        rim_depth = max(rim_depth, 0.001f);
+        rim_depth = pow(rim_depth, 0.04f); 
+        
+        rim_depth = rim_depth + -0.8f;
+        rim_depth = rim_depth * 10.0f;
+
+        rim_depth = clamp(rim_depth, 0.0, 1.0);
+        rim_depth = (rim_depth * rim_depth) * (rim_depth * -2.0f + 3.0f);
+        
+        org_depth = min((-org_depth + 2.0f) * 0.3f + org_depth, 1.0f);
+        rim_depth = org_depth.x * rim_depth;
+        if(_SharpRimLight)
+        {
+            rim_depth = rim_depth < _RimThreshold ? 0.0f : rim_depth;
+        }
+        else
+        {
+            rim_depth = smoothstep(_RimThreshold, 1.0f, rim_depth); 
+        }
+
+        rim_depth = rim_depth * clamp(camera_dist, 0.0f, 0.5f);
+        // rim_depth = rim_depth < 0.9f ? 0.0f : 1.0f; 
+        rim_depth = (rim_depth * _RimLightIntensity) * _ES_SceneFrontRimColor;
+    }
+
 
     // ========================================================= //
     // material coloring
@@ -417,6 +447,9 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             // these 6 lines above are a smoothstep
             diffuse.xyz = lines * line_color + diffuse.xyz;
         }
+
+
+       
         
         // initialize dot products : 
         float ndotl = dot(normal, light);
@@ -488,7 +521,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
             metal = saturate(metal * _MTMapBrightness);
             metal = lerp(_MTMapDarkColor, _MTMapLightColor, metal);
-            metal = lerp(metal * _MTShadowMultiColor, metal, shadow_area);
+            metal = lerp(metal * _MTShadowMultiColor, metal, saturate(shadow_area + 0.75f));
 
             // metal specular 
             metal_specular = pow(max(ndoth, 0.001f), _MTShininess) * _MTSpecularScale;
@@ -561,6 +594,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         // finalColor.xyz = shadow_area;
         // finalColor.xyz = i.vertexcol.w;
         if(_MainTexAlphaUse == 1.0f)clip(finalColor.w - _MainTexAlphaCutoff);
+        
     }
     if(_CausToggle)
     {
@@ -624,6 +658,9 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     }
     finalColor.xyz = finalColor.xyz + fresnel;
     finalColor.xyz = (_RimLightType > 0) ? ((rim_depth == 1.0f) ? rim_depth : min(finalColor.xyz / (1.0f - (rim_depth)), 1.0f)) : finalColor.xyz + (rim_depth * rim_env_col);
+
+
+
     
     if(_ReturnDiffuseRGB) return float4(diffuse.xyz, 1.0f);
     if(_ReturnDiffuseA) return float4(diffuse.www, 1.0f);

@@ -44,7 +44,7 @@
         [Helpbox]ghostmodehelpbox("Enabling Ghost Mode will require you to tweak the Alpha values of the Color Tint inside of Color Options to fade specific parts of the body.",Float)= 0
         [Enum(Off, 0, On, 1)] _AlphaSpecial("Enable Ghost Mode--{on_value_actions:[
         {value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
-        {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=5},{type:SET_PROPERTY,data:_DstBlend=10},{type:SET_PROPERTY,data:render_queue=2999}]}]}", Int) = 0
+        {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=5},{type:SET_PROPERTY,data:_DstBlend=10},{type:SET_PROPERTY,data:render_queue=2225}]}]}", Int) = 0
         [HideInInspector] m_end_seethrough ("", Float) = 0
         [HideInInspector] m_end_mainalpha ("", Float) = 0
         [HideInInspector] m_start_maindetail ("Details--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#details},hover:Wiki Documentation}}", Float) = 0
@@ -159,9 +159,13 @@
         [HideInInspector] m_end_shadowcolorsnight ("", Float) = 0
         [HideInInspector] m_end_lightandshadow ("", Float) = 0
         [HideInInspector] m_start_rimlight("Rim Light--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
+        [Toggle] _UseRimLight ("Enable Rim Lighting", Float) = 1 // on by default
+        [Toggle] _SharpRimLight ("Enable Sharp Rim Light", Float) = 0 // 
+        _RimThreshold ("Rim Threshold", Range(0.0, 1.0)) = 0.0 // 
+        _ES_SceneFrontRimColor ("Rim Light Color", Color) = (1.0, 1.0, 1.0, 1.0)
         [Enum(Add, 0, Color Dodge, 1)] _RimLightType ("Rim Light Blend Mode", Float) = 0.0
-        _RimLightIntensity ("Rim Light Intensity", Float) = 0.25
-        _RimLightThickness ("Rim Light Thickness", Range(0.0, 10.0)) = 0.25
+        _RimLightIntensity ("Rim Light Intensity", Float) = 0.5
+        _RimLightThickness ("Rim Light Thickness", Range(0.0, 10.0)) = 1.0
         [HideInInspector] m_end_rimlight ("", Float) = 0
         [HideInInspector] g_end_light("", Int) = 0
         [HideInInspector] m_end_lightning ("", Float) = 0
@@ -405,12 +409,9 @@
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
         #include "UnityShaderVariables.cginc"
-
         #include "HoyoToonGenshin-inputs.hlsli"
 
-
         /* properties */
-
         Texture2D _MainTex;                 SamplerState sampler_MainTex;
         float4 _MainTex_ST;
         Texture2D _LightMapTex;             SamplerState sampler_LightMapTex;
@@ -463,6 +464,10 @@
 
         float _DayOrNight;
         float _EnvironmentLightingStrength;
+        float4 _ES_SceneFrontRimColor;
+        float _SharpRimLight;
+        float _RimThreshold;
+        float _UseRimLight;
         float _RimLightType;
         float _RimLightIntensity;
         float _RimLightThickness;
@@ -484,7 +489,6 @@
         float4 _NoseBlushColor;
         float _FaceBlushStrength;
         float4 _FaceBlushColor;
-
 
         float _CausToggle;
         float _CausUV;
@@ -709,19 +713,16 @@
 
             ENDHLSL
         }
-        Pass{
-            Name "ShadowCaster"
+        Pass
+        {
+            Tags {"LightMode"="ShadowCaster"}
 
-            Tags{ "LightMode" = "ShadowCaster" }
-            
+            Cull [_Cull]
+
             HLSLPROGRAM
-
-            #pragma multi_compile_instancing
-		    #pragma multi_compile_shadowcaster
-
-            // template by mochie bestie: https://github.com/cnlohr/shadertrixx/blob/main/README.md#shadowcasting
+            #pragma multi_compile_shadowcaster
+            #include "UnityCG.cginc"
             #include "HoyoToonGenshin-shadows.hlsl"
-
             ENDHLSL
         }
     }
