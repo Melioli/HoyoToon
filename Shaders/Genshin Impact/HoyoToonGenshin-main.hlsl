@@ -191,10 +191,12 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         if(isVR() && IsInMirror())
         {
             camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f / camera_dist)));
+            camera_dist = clamp(camera_dist, 0,1);
         }
         else 
         {
             camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
+            camera_dist = clamp(camera_dist, 0,1);
         }
         // return camera_dist.xxxx;
 
