@@ -96,6 +96,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float avg_env_col = (environmentLighting.x + environmentLighting.y + environmentLighting.z) / 3; // this is something i picked up while writing project diva shaders for mmd
     float rim_env_col = clamp(avg_env_col, 0.05f, 1.0f); // 
 
+
     // ========================================================= //
     // extract material ids from lightmap alpha
     float ID_tex = (_UseFaceMapNew) ? facemap.w : lightmap.w;
@@ -188,15 +189,16 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
         // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
         float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
-        if(isVR() && IsInMirror())
-        {
-            camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f / camera_dist)));
-        }
-        else 
-        {
-            camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
-        }
-        camera_dist = clamp(camera_dist, 0.5, 1.0);
+        camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
+        //  if(isVR() && IsInMirror())
+        // {
+        //     camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f / camera_dist)));
+        // }
+        // else 
+        // {
+        //     camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
+        // }
+        // camera_dist = clamp(camera_dist, 0.5, 1.0);
         // return camera_dist.xxxx;
 
         // sample depth texture, this will be the base
@@ -233,8 +235,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         rim_depth = rim_depth * camera_dist;
         // rim_depth = rim_depth < 0.9f ? 0.0f : 1.0f; 
         rim_depth = (rim_depth * _RimLightIntensity) * rim_color[material_ID];
-
-            return float4(rim_depth.xxx, 1.0f);
+        return float4(rim_depth.xxx, 1.0f);
     }
     else if(_UseRimLight == 2)
     {
