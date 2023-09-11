@@ -304,6 +304,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     // ================================================================================================ //
     // rim light : 
+    if(isVR())
+    {
+        _RimWidth = 0.5f;
+        _RimOffset = 0.0f;
+        _ES_RimLightOffset = 0.0f;
+    }
     // populate arrays with material values 
     float4 rim_color[8] =
     {

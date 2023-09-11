@@ -95,9 +95,14 @@ float3 specular_base(float shadow_area, float ndoth, float lightmap_spec, float3
     return specular;
 }
 
-float4 rim_light_calc(float3 normal)
-{
-     
+// https://github.com/cnlohr/shadertrixx/blob/main/README.md#detecting-if-you-are-on-desktop-vr-camera-etc
+bool isVR(){
+    // USING_STEREO_MATRICES
+    #if UNITY_SINGLE_PASS_STEREO
+        return true;
+    #else
+        return false;
+    #endif
 }
 
 // =============================================================================================================== //
