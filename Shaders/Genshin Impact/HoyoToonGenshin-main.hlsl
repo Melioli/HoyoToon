@@ -160,6 +160,11 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     if(_UseRimLight == 1)
     {
         // do stupid normal vector stuff for the rim lights
+        if(isVR())
+        {
+            _RimThreshold = 0.8f;
+            _RimLightThickness = 0.3f;
+        } 
         
         float3 rim_normal = (vs_normal);      
 
@@ -208,7 +213,6 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         
         org_depth = min((-org_depth + 2.0f) * 0.3f + org_depth, 1.0f);
         rim_depth = org_depth.x * rim_depth;
-        if(isVR()) _RimThreshold = 0.8f;
         if(_SharpRimLight)
         {
             rim_depth = rim_depth < _RimThreshold ? 0.0f : rim_depth;
