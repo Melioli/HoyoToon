@@ -188,10 +188,10 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float2 screen_pos = i.screenPos.xy / i.screenPos.w;
         float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
         // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
-        float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
+        float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS));
         if(isVR() && IsInMirror())
         {
-            camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f / camera_dist)));
+            camera_dist = saturate(smoothstep(2.0f, 0.0f, (1.0f / camera_dist)));
         }
         else 
         {
