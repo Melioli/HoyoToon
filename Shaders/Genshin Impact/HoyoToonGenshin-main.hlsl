@@ -190,14 +190,13 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
         if(isVR() && IsInMirror())
         {
-            camera_dist = saturate(smoothstep(0.5f, 2.0f, (1.0f / camera_dist)));
-            camera_dist = clamp(camera_dist, 0,1);
+            camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f / camera_dist)));
         }
         else 
         {
-            camera_dist = saturate(smoothstep(2.0f, 0.5f, camera_dist));
-            camera_dist = clamp(camera_dist, 0,1);
+            camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
         }
+        camera_dist = clamp(camera_dist, 0.5, 1.0);
         // return camera_dist.xxxx;
 
         // sample depth texture, this will be the base
