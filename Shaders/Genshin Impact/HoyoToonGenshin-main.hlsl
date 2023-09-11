@@ -164,6 +164,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         {
             _RimThreshold = 0.8f;
             _RimLightThickness = 0.3f;
+            
         } 
         
         float3 rim_normal = (vs_normal);      
@@ -188,7 +189,12 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
         // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
         float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
-        camera_dist = saturate(smoothstep(5.0f, 0.0f, camera_dist));
+        // camera_dist = saturate(smoothstep(5.0f, 0.0f, camera_dist));
+        #if defined(UNITY_REVERSED_Z)
+            camera_dist = saturate(smoothstep(5.0f, 0.0f, camera_dist));
+        #else
+            camera_dist = 0.0f;
+        #endif
         // return camera_dist.xxxx;
 
         // sample depth texture, this will be the base
