@@ -163,7 +163,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         if(isVR())
         {
             _RimThreshold = 0.8f;
-            _RimLightThickness = 0.3f;
+            _RimLightThickness = _RimLightThickness * 0.3f;
             
         } 
         
