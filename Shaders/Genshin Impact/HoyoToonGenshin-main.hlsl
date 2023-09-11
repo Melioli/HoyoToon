@@ -233,7 +233,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         // rim_depth = rim_depth < 0.9f ? 0.0f : 1.0f; 
         rim_depth = (rim_depth * _RimLightIntensity) * rim_color[material_ID];
 
-            return float4(camera_dist.xxx, 1.0f);
+            return float4(rim_depth.xxx, 1.0f);
     }
     else if(_UseRimLight == 2)
     {
