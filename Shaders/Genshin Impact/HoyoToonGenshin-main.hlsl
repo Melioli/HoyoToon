@@ -189,7 +189,14 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
         // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
         float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
-        camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
+        if(isVR() && !IsInMirror())
+        {
+            camera_dist = saturate(smoothstep(0.0f, 2.0f, camera_dist));
+        }
+        else 
+        {
+            camera_dist = saturate(smoothstep(2.0f, 0.0f, camera_dist));
+        }
         // return camera_dist.xxxx;
 
         // sample depth texture, this will be the base

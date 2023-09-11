@@ -23,6 +23,12 @@ half4 getlightDir(){
     return lightDir;
 }
 
+// poiyomi
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+
 // map range function
 float mapRange(const float min_in, const float max_in, const float min_out, const float max_out, const float value){
     float slope = (max_out - min_out) / (max_in - min_in);
