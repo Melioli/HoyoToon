@@ -205,7 +205,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
         float2 offset_uv = screen_pos.xy;
         // offset_uv = lerp(offset_uv, -offset_uv, rim_side);
-        offset_uv = (rim_normal.xy * ((float2)0.004f * _RimLightThickness) * camera_dist) + offset_uv;
+        offset_uv = (rim_normal.xy * ((float2)0.004f * _RimLightThickness) * clamp(camera_dist, 0.3f, 1.0f)) + offset_uv;
         // offset_uv = (rim_normal.xy * ((float2)0.004f * _RimLightThickness)) + offset_uv;
 
         // sample depth texture using offset uv
