@@ -96,7 +96,6 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float avg_env_col = (environmentLighting.x + environmentLighting.y + environmentLighting.z) / 3; // this is something i picked up while writing project diva shaders for mmd
     float rim_env_col = clamp(avg_env_col, 0.05f, 1.0f); // 
 
-
     // ========================================================= //
     // extract material ids from lightmap alpha
     float ID_tex = (_UseFaceMapNew) ? facemap.w : lightmap.w;
@@ -233,6 +232,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         rim_depth = rim_depth * camera_dist;
         // rim_depth = rim_depth < 0.9f ? 0.0f : 1.0f; 
         rim_depth = (rim_depth * _RimLightIntensity) * rim_color[material_ID];
+
+            return float4(camera_dist.xxx, 1.0f);
     }
     else if(_UseRimLight == 2)
     {
@@ -447,10 +448,6 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         // if(_ReturnFaceMap) return faceFactor;
         /* END OF COLOR CREATION */
         // return ShadowFinal;
-        if(IsInMirror())
-        {
-           return float4(1.0f, 0.0f, 0.0f, 1.0f);
-        }
     }
     else // everything else
     {
