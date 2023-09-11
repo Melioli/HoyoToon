@@ -191,7 +191,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
         if(isVR() && !IsInMirror())
         {
-            camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f - camera_dist)));
+            camera_dist = saturate(smoothstep(0.0f, 2.0f, (1.0f / camera_dist)));
         }
         else 
         {
