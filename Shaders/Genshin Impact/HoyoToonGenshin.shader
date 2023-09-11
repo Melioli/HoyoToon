@@ -159,13 +159,20 @@
         [HideInInspector] m_end_shadowcolorsnight ("", Float) = 0
         [HideInInspector] m_end_lightandshadow ("", Float) = 0
         [HideInInspector] m_start_rimlight("Rim Light--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
-        [Toggle] _UseRimLight ("Enable Rim Lighting", Float) = 1 // on by default
+        // [Toggle] _UseRimLight ("Enable Rim Lighting", Float) = 1 // on by default
+        [Enum(Off, 0, Genshin Like, 1,  Star Rail Like, 2)] _UseRimLight ("Rim Light Calculation Mode", Float) = 1
         [Toggle] _SharpRimLight ("Enable Sharp Rim Light", Float) = 0 // 
         _RimThreshold ("Rim Threshold", Range(0.0, 1.0)) = 0.0 // 
-        _ES_SceneFrontRimColor ("Rim Light Color", Color) = (1.0, 1.0, 1.0, 1.0)
-        [Enum(Add, 0, Color Dodge, 1)] _RimLightType ("Rim Light Blend Mode", Float) = 0.0
         _RimLightIntensity ("Rim Light Intensity", Float) = 0.5
         _RimLightThickness ("Rim Light Thickness", Range(0.0, 10.0)) = 1.0
+        [Enum(Add, 0, Color Dodge, 1)] _RimLightType ("Rim Light Blend Mode", Float) = 0.0
+        [HideInInspector] m_start_lightingrimcolor("Rimlight Color--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
+        _RimColor0 (" Rim Light Color 1 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
+        _RimColor1 (" Rim Light Color 2 | (RGB ID = 31)", Color)  = (1, 1, 1, 1)
+        _RimColor2 (" Rim Light Color 3 | (RGB ID = 63)", Color)  = (1, 1, 1, 1)
+        _RimColor3 (" Rim Light Color 4 | (RGB ID = 95)", Color)  = (1, 1, 1, 1)
+        _RimColor4 (" Rim Light Color 5 | (RGB ID = 127)", Color) = (1, 1, 1, 1)
+        [HideInInspector] m_end_lightingrimcolor("", Float) = 0
         [HideInInspector] m_end_rimlight ("", Float) = 0
         [HideInInspector] g_end_light("", Int) = 0
         [HideInInspector] m_end_lightning ("", Float) = 0
@@ -472,6 +479,22 @@
         float _RimLightIntensity;
         float _RimLightThickness;
         float _VertexColorLinear;
+
+        float4 _RimColor0;
+        float4 _RimColor1;
+        float4 _RimColor2;
+        float4 _RimColor3;
+        float4 _RimColor4;
+        float _RimEdgeSoftness0;
+        float _RimEdgeSoftness1;
+        float _RimEdgeSoftness2;
+        float _RimEdgeSoftness3;
+        float _RimEdgeSoftness4;
+        float _RimPower0;
+        float _RimPower1;
+        float _RimPower2;
+        float _RimPower3;
+        float _RimPower4;
 
         float _UseFresnel;
         float4 _HitColor;

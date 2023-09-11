@@ -148,10 +148,19 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
     // ========================================================= //
     float3 rim_depth = (float3) 0.0f;
-    if(_UseRimLight)
+    float3 vs_normal = normalize(mul(UNITY_MATRIX_V, normal));
+    float4 rim_color[5] =
+    {
+        _RimColor0,
+        _RimColor1,
+        _RimColor2,
+        _RimColor3,
+        _RimColor4, 
+    };
+    if(_UseRimLight == 1)
     {
         // do stupid normal vector stuff for the rim lights
-        float3 vs_normal = normalize(mul(UNITY_MATRIX_V, normal));
+        
         float3 rim_normal = (vs_normal);      
 
         float normal_max = max(max(abs(rim_normal.y), abs(rim_normal.x)), abs(rim_normal.z));
@@ -173,13 +182,16 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         float2 screen_pos = i.screenPos.xy / i.screenPos.w;
         float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
         // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
-        float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, i.vertexWS));
+        float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
+        camera_dist = saturate(smoothstep(5.0f, 0.0f, camera_dist));
+        // return camera_dist.xxxx;
 
         // sample depth texture, this will be the base
         float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
         float2 offset_uv = screen_pos.xy;
         // offset_uv = lerp(offset_uv, -offset_uv, rim_side);
-        offset_uv = rim_normal.xy * ((float2)0.004f * _RimLightThickness) + offset_uv;
+        offset_uv = (rim_normal.xy * ((float2)0.004f * _RimLightThickness) * camera_dist) + offset_uv;
+        // offset_uv = (rim_normal.xy * ((float2)0.004f * _RimLightThickness)) + offset_uv;
 
         // sample depth texture using offset uv
         float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
@@ -205,9 +217,58 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
             rim_depth = smoothstep(_RimThreshold, 1.0f, rim_depth); 
         }
 
-        rim_depth = rim_depth * clamp(camera_dist, 0.0f, 0.5f);
+        rim_depth = rim_depth * camera_dist;
         // rim_depth = rim_depth < 0.9f ? 0.0f : 1.0f; 
-        rim_depth = (rim_depth * _RimLightIntensity) * _ES_SceneFrontRimColor;
+        rim_depth = (rim_depth * _RimLightIntensity) * rim_color[material_ID];
+    }
+    else if(_UseRimLight == 2)
+    {
+        float rim_values[5] = 
+        {
+            _RimPower0,
+            _RimPower1,
+            _RimPower2,
+            _RimPower3,
+            _RimPower4,
+        }; 
+
+        float2 screen_pos = i.screenPos.xy / i.screenPos.w;
+        screen_pos.xy = screen_pos.xy;
+        float3 wvp_pos = mul(UNITY_MATRIX_VP, i.vertexWS);
+        // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
+        float camera_dist = (distance(_WorldSpaceCameraPos.xyz, i.vertexWS)) * 0.5f + 0.5f;
+        camera_dist = saturate(smoothstep(5.0f, 0.0f, camera_dist));
+
+        // multiply the rim widht material values by the lightmap red channel
+        float rim_width = _RimLightThickness;
+        
+        // sample depth texture, this will be the base
+        float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
+
+        float rim_side = (i.vertexWS.z * -vs_normal.x) - (i.vertexWS.x * -vs_normal.z);
+        rim_side = (rim_side > 0.0f) ? 0.0f : 1.0f;
+        
+
+        // create offset screen uv using rim width value and view space normals for offset depth texture
+        float2 offset_uv = 0.0f;
+        offset_uv.x = lerp(offset_uv.x, -offset_uv.x, rim_side);
+        float2 offset = ((rim_width * vs_normal) * 0.0055f) * camera_dist;
+        offset_uv.x = screen_pos.x + ((offset_uv.x * 0.01f + offset.x)); 
+        offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f + offset.y);
+
+        // sample depth texture using offset uv
+        float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
+
+        rim_depth = (offset_depth - org_depth);
+        rim_depth = pow(rim_depth, 0.8f); 
+        rim_depth = smoothstep(0.0f, _RimLightThickness, rim_depth);
+
+
+        // float rim_env_col = clamp(avg_env_col, 0.25f, 1.0f);
+        float3 rim_light = (rim_color[material_ID].xyz * rim_depth * _RimLightIntensity) * camera_dist;
+        // rim_light = rim_light * rim_env_col;  
+        rim_depth = rim_light;  
+
     }
 
 
