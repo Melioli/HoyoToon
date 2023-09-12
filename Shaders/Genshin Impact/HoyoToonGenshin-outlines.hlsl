@@ -20,9 +20,9 @@ vsOut vert(vsIn v, uint id : SV_VertexID)
     if(_FallbackOutlines)
     {
         float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
-        float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
+        // float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
         // if(!_EnableFOVWidth)fov_width = 1;
-        wv_pos.xyz = wv_pos + (outline_normal * fov_width * (v.vertexcol.w * _OutlineWidth * (_Scale * 10)));
+        wv_pos.xyz = wv_pos + (outline_normal * (v.vertexcol.w * _OutlineWidth * (_Scale * 10)));
         o.pos = mul(UNITY_MATRIX_P, wv_pos);
     }
     else
