@@ -160,7 +160,7 @@
         [HideInInspector] m_end_lightandshadow ("", Float) = 0
         [HideInInspector] m_start_rimlight("Rim Light--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#rim-light},hover:Wiki Documentation}}", Float) = 0
         // [Toggle] _UseRimLight ("Enable Rim Lighting", Float) = 1 // on by default
-        [Enum(Off, 0, Genshin Like, 1,  Star Rail Like, 2)] _UseRimLight ("Rim Light Calculation Mode", Float) = 1
+        [Enum(Off, 0, Latest, 1,  Old, 2)] _UseRimLight ("Rim Light Calculation Mode", Float) = 1
         [Toggle] _SharpRimLight ("Enable Sharp Rim Light", Float) = 0 // 
         _RimThreshold ("Rim Threshold", Range(0.0, 1.0)) = 0.0 // 
         _RimLightIntensity ("Rim Light Intensity", Float) = 0.5
