@@ -328,7 +328,7 @@
 
         [HideInInspector] m_end_starcockcloud("", Float) = 0 //starcock: the cock strikes back
 
-        [HideInInspector] m_start_starcockasmoday("Cringe Asmoday--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
+        [HideInInspector] m_start_starcockasmoday("Asmoday--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
 
         _BottomColor01 ("BottomColor01", Color) = (0,0,0,0)
         _BottomColor02 ("BottomColor02", Color) = (1,0,0,0)
@@ -351,7 +351,7 @@
 
         [HideInInspector] m_end_starcock ("", Float) = 0
 
-        [HideInInspector] m_start_asmodayarm("Asmoday Cringe 2", Float) = 0
+        [HideInInspector] m_start_asmodayarm("Asmoday Arm Effect", Float) = 0
         [Toggle] _HandEffectEnable ("Enable Asmoday Arm Effect", Float) = 0
         _LineColor ("LineColor", Color) = (1,1,1,0)
         _LightColor ("LightColor", Color) = (0.4117647,0.1665225,0.1665225,0)
