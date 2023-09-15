@@ -1,10 +1,11 @@
 // vertex
-vsOut vert(vsIn v)
+vsOut vert(vsIn v, uint id : SV_VertexID)
 {
     vsOut o = (vsOut)0.0f;
     o.pos = UnityObjectToClipPos(v.vertex);
     float4 pos_ws  = mul(unity_ObjectToWorld, v.vertex);
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
+
     o.pos = pos_wvp;
     // o.vertexWS = mul(UNITY_MATRIX_M, v.vertex); // TransformObjectToWorld
     o.vertexWS = pos_ws; // TransformObjectToWorld
@@ -12,6 +13,7 @@ vsOut vert(vsIn v)
     o.tangent = v.tangent;
     o.uv.xy = v.uv0;
     o.uv.zw = v.uv1;
+    o.uvb = v.uv2;
     o.normal = v.normal;
     o.screenPos = ComputeScreenPos(pos_wvp);
     o.vertexcol = (_VertexColorLinear != 0.0) ? VertexColorConvertToLinear(v.vertexcol) : v.vertexcol;
@@ -67,8 +69,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         uv.y = (_EnableScrollYSwing) ? uv.y + swing.y : uv.y + scrolling.y;
     }
     
-    // create half vector for specular
-    float3 half_vector = normalize(view + light);
+    // create half floattor for specular
+    float3 half_floattor = normalize(view + light);
 
     // invert normals if theyre back facing 
     normal = (frontFacing) ? normal : -normal;
@@ -88,7 +90,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     // initialize dot products : 
     float ndotl = dot(normal, light);
     float ndotv = dot(normal, view);
-    float ndoth = dot(normal, half_vector);
+    float ndoth = dot(normal, half_floattor);
 
     // get enviromental colors
     float4 environmentLighting = calculateEnvLighting(i.vertexWS);
@@ -159,7 +161,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     };
     if(_UseRimLight == 1)
     {
-        // do stupid normal vector stuff for the rim lights
+        // do stupid normal floattor stuff for the rim lights
         if(isVR())
         {
             _RimThreshold = 0.8f;
@@ -305,49 +307,265 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
     if(_StarCloakEnable) // almost forgot the most important part
     {
-        float3 parallax = normalize(i.parallax);
+        if(_StarCockType == 0)
+        {
+            float2 uv_use = i.uv.xy;
+            if(_StarUVSource == 1)
+            {
+                uv_use = i.uv.zw;
+            }
+            else if(_StarUVSource == 2)
+            {
+                uv_use = i.uvb.xy;
+            }
+            float3 parallax = normalize(i.parallax);
 
-        float star_speed = _Time.y * _Star01Speed;
+            float star_speed = _Time.y * _Star01Speed;
 
-        parallax = normalize(parallax);
-        float2 star_01_parallax = (parallax.xy * (_StarHeight - 1.0f))   * (float2)-0.1 + (float2(0.0f, star_speed) + TRANSFORM_TEX(uv, _StarTex));
-        float2 star_02_parallax = (parallax.xy * (_Star02Height - 1.0f)) * (float2)-0.1 + (float2(0.0f, star_speed * 0.5f) + TRANSFORM_TEX(uv, _Star02Tex));
-                
-        float2 pallete_uv = TRANSFORM_TEX(uv, _ColorPaletteTex);
-        pallete_uv.x = _Time.y * _ColorPalletteSpeed +  pallete_uv.x;
-        float3 pallete = _ColorPaletteTex.Sample(sampler_ColorPaletteTex, pallete_uv);
+            parallax = normalize(parallax);
+            float2 star_01_parallax = (parallax.xy * (_StarHeight - 1.0f))   * (float2)-0.1 + (float2(0.0f, star_speed) + TRANSFORM_TEX(uv, _StarTex));
+            float2 star_02_parallax = (parallax.xy * (_Star02Height - 1.0f)) * (float2)-0.1 + (float2(0.0f, star_speed * 0.5f) + TRANSFORM_TEX(uv, _Star02Tex));
+                    
+            float2 pallete_uv = TRANSFORM_TEX(uv, _ColorPaletteTex);
+            pallete_uv.x = _Time.y * _ColorPalletteSpeed +  pallete_uv.x;
+            float3 pallete = _ColorPaletteTex.Sample(sampler_ColorPaletteTex, pallete_uv);
 
-        float2 noise_01_uv = _Time.y * (float2)_Noise01Speed + TRANSFORM_TEX(uv, _NoiseTex01);
-        float2 noise_02_uv = _Time.y * (float2)_Noise02Speed + TRANSFORM_TEX(uv, _NoiseTex02);
+            float2 noise_01_uv = _Time.y * (float2)_Noise01Speed + TRANSFORM_TEX(uv, _NoiseTex01);
+            float2 noise_02_uv = _Time.y * (float2)_Noise02Speed + TRANSFORM_TEX(uv, _NoiseTex02);
 
-        float noise_01_tex = _NoiseTex01.Sample(sampler_NoiseTex01, noise_01_uv).x;
-        float noise_02_tex = _NoiseTex02.Sample(sampler_NoiseTex01, noise_02_uv).x;
+            float noise_01_tex = _NoiseTex01.Sample(sampler_NoiseTex01, noise_01_uv).x;
+            float noise_02_tex = _NoiseTex02.Sample(sampler_NoiseTex01, noise_02_uv).x;
 
-        float noise = noise_01_tex * noise_02_tex;
+            float noise = noise_01_tex * noise_02_tex;
 
-        float2 constellation_uv = TRANSFORM_TEX(uv, _ConstellationTex);
-        float2 const_parallax = (parallax.xy * (_ConstellationHeight - 1.0f)) * (float2)-0.1f + constellation_uv;
-        float3 constellation_tex = _ConstellationTex.Sample(sampler_LightMapTex, const_parallax).xyz * (float3)_ConstellationBrightness;
+            float2 constellation_uv = TRANSFORM_TEX(uv, _ConstellationTex);
+            float2 const_parallax = (parallax.xy * (_ConstellationHeight - 1.0f)) * (float2)-0.1f + constellation_uv;
+            float3 constellation_tex = _ConstellationTex.Sample(sampler_LightMapTex, const_parallax).xyz * (float3)_ConstellationBrightness;
 
-        float2 cloud_uv = TRANSFORM_TEX(uv, _CloudTex);
-        float2 cloud_parallax = (parallax.xy * (_CloudHeight - 1.0f)) * (float2)-0.1 + (noise * (float2)_Noise03Brightness + cloud_uv);
-        float cloud_tex = _CloudTex.Sample(sampler_NoiseTex01, cloud_parallax).x;
+            float2 cloud_uv = TRANSFORM_TEX(uv, _CloudTex);
+            float2 cloud_parallax = (parallax.xy * (_CloudHeight - 1.0f)) * (float2)-0.1 + (noise * (float2)_Noise03Brightness + cloud_uv);
+            float cloud_tex = _CloudTex.Sample(sampler_NoiseTex01, cloud_parallax).x;
 
-        float star_01 = _StarTex.Sample(sampler_StarTex, star_01_parallax).x;
-        float star_02 = _Star02Tex.Sample(sampler_StarTex, star_02_parallax).y;
+            float star_01 = _StarTex.Sample(sampler_StarTex, star_01_parallax).x;
+            float star_02 = _Star02Tex.Sample(sampler_StarTex, star_02_parallax).y;
 
-        float stars = star_01 + star_02;
-        stars = stars * diffuse.w;
-        cloud_tex = cloud_tex * diffuse.w;
+            float stars = star_01 + star_02;
+            stars = stars * diffuse.w;
+            cloud_tex = cloud_tex * diffuse.w;
 
-        float3 star_color = pallete * stars;
-        star_color = star_color * (float3)_StarBrightness;
+            float3 star_color = pallete * stars;
+            star_color = star_color * (float3)_StarBrightness;
 
-        float3 cloak = star_color * noise + constellation_tex;
-        cloak = ((cloud_tex * (float3)_CloudBrightness) * pallete + cloak);
-        diffuse.xyz = lerp(diffuse.xyz, cloak + diffuse.xyz, diffuse.w * _StarCloakBlendRate);
+            float3 cloak = star_color * noise + constellation_tex;
+            cloak = ((cloud_tex * (float3)_CloudBrightness) * pallete + cloak);
+            diffuse.xyz = lerp(diffuse.xyz, cloak + diffuse.xyz, diffuse.w * _StarCloakBlendRate);
 
-        if(_StarCloakOveride) return diffuse;
+            if(_StarCloakOveride) return diffuse;
+        }
+        else if(_StarCockType == 1)
+        {
+            float2 uv_use = i.uv.xy;
+            if(_StarUVSource == 1)
+            {
+                uv_use = i.uv.zw;
+            }
+            else if(_StarUVSource == 2)
+            {
+                uv_use = i.uvb.xy;
+            }
+
+            float2 noise_uv = uv_use.xy * _NoiseMap_ST.xy + _NoiseMap_ST.zw;
+            noise_uv = _Time.yy * _NoiseSpeed.xy + noise_uv;
+            float noise_tex = _NoiseMap.Sample(sampler_LightMapTex, noise_uv).x;
+            float2 flow_uv = uv_use.xy * _FlowMap_ST.xy + _FlowMap_ST.zw;
+            flow_uv = noise_tex.xx * _NoiseScale.x + flow_uv;
+            flow_uv = _Time.yy * _FlowMaskSpeed.xy + flow_uv;
+
+            float flowmap = _FlowMap.Sample(sampler_LightMapTex, flow_uv).x;
+
+            float2 flow2_uv = uv_use.xy * _FlowMap02_ST.xy + _FlowMap02_ST.zw;
+            flow2_uv = _Time.yy * _FlowMask02Speed.xy + flow2_uv;
+
+            float flowmap2 = _FlowMap02.Sample(sampler_LightMapTex, flow2_uv).x;
+
+            float2 mask_uv = uv_use.xy * _NoiseMap_ST.xy + _NoiseMap_ST.zw;
+
+
+            float3 uv_color = max(uv_use.y, 0.0001f);
+            uv_color = pow(uv_color, _BottomPower) * _BottomScale;            
+            uv_color = saturate(uv_color);
+            uv_color.xyz = lerp(_BottomColor01, _BottomColor02, uv_color.x);
+            float3 flow_color = _FlowColor * _FlowScale; 
+
+            float3 flow = flowmap2 + flowmap;
+            flow = flow * flow_color;
+
+            float3 flowmask = max(uv_use.y, 0.0001f);
+            flowmask = pow(flowmask, _FlowMaskPower) * _FlowMaskScale; 
+            flowmask = saturate(flowmask);
+            flow = flow * flowmask;
+
+            float masktex = _FlowMask.Sample(sampler_LightMapTex, mask_uv);
+
+            flow = flow * masktex + uv_color;
+
+            // return float3(noise_tex.xxx).xyzz;s
+
+            
+
+
+            diffuse.xyz = lerp(diffuse.xyz, flow, diffuse.w);
+        }
+    }
+
+    if(_HandEffectEnable)
+    {
+        // float2 mask_uv = i.uvb.xy * _Mask_ST.xy + _Mask_ST.zw;
+        // mask_uv = _Time.yy * float2(_Mask_Speed_U, 0.0f) + mask_uv.xy;
+        // float3 masktex = _Mask.Sample(sampler_Mask, mask_uv);
+
+        // float2 uv_1 = i.uvb.xy * _Tex01_UV.xy + _Tex01_UV.zw;
+        // uv_1 = _Time.yy * float2(_Tex01_Speed_U, _Tex01_Speed_V) + uv_1;
+        // float2 uv_2 = i.uvb.xy * _Tex02_UV.xy + _Tex02_UV.zw;
+        // uv_2 = _Time.yy * float2(_Tex02_Speed_U, _Tex02_Speed_V) + uv_2;
+        // float2 uv_3 = i.uvb.xy * _Tex03_UV.xy + _Tex03_UV.zw;
+        // uv_3 = _Time.yy * float2(_Tex03_Speed_U, _Tex03_Speed_V) + uv_3;
+        // float2 uv_4 = i.uvb.xy * _Tex04_UV.xy + _Tex04_UV.zw;
+        // uv_4 = _Time.yy * float2(_Tex04_Speed_U, _Tex04_Speed_V) + uv_4;
+        // float2 uv_5 = i.uvb.xy * _Tex05_UV.xy + _Tex05_UV.zw;
+        // uv_5 = _Time.yy * float2(_Tex05_Speed_U, _Tex05_Speed_V) + uv_5;
+
+        // float3 eff1 = _MainTex.Sample(sampler_MainTex, uv_1).xyw;
+        // float3 eff2 = _MainTex.Sample(sampler_MainTex, uv_2).xyw;
+        // float3 eff3 = _MainTex.Sample(sampler_MainTex, uv_3).xyw;
+        // float3 eff4 = _MainTex.Sample(sampler_MainTex, uv_4).zzz;
+        // float3 eff5 = _MainTex.Sample(sampler_MainTex, uv_5).zzz;
+
+        // float3 effmax = max(eff1.y, eff2.y);
+        // effmax = max(effmax.x, eff3.y);
+        // float2 effmul = masktex.xz * eff3.zx;
+        // effmax = max(effmax, effmul.y);
+        // effmul.xy = eff1.zx * eff2.zx + effmul;
+        // effmax = -effmul.y * effmax;
+
+        // bool downrange = i.uv.xy >= _DownMaskRange; 
+
+        // effmul = effmul * downrange; 
+
+        // float eff9 = eff4 * eff5;
+        // float toprange = eff9 >= _TopMaskRange;
+        // toprange = (toprange) ? 1.0f : 0.0f;
+        // float linerange = eff9 >= _TopLineRange;
+        // linerange = (linerange) ? -1.0f : 0.0f;
+
+        // float topline = toprange * effmul;
+        // linerange = linerange + toprange; 
+        // linerange = topline * linerange;
+
+        // effmax = max(linerange, effmax.x);
+        // effmax = saturate(effmax);
+        
+        // float3 effline = lerp(_LineColor, _LightColor, effmax);
+        // float3 effshdw = lerp(_ShadowColor, _LineColor, effmax);
+
+        // float3 effcol = -effshdw + effline;
+
+        // float shadoweff = ndoth * 0.5 + 0.5f;
+        // shadoweff = -shadoweff + 1.0f;
+
+        // shadoweff = (_ShadowWidth >= shadoweff) ? 1.0f : 0.0f;
+
+        // effshdw = shadoweff * effcol + effshdw;
+
+        // float3 efffrsn = 1.0f - ndotv; 
+        // efffrsn = pow(max(efffrsn, 0.0001f), _FresnelPower) * _FresnelScale;
+        // efffrsn = saturate(efffrsn);
+
+        // float3 eff = _FresnelColor * efffrsn + effshdw;
+
+        // float3 gradient = pow(max(i.uvb.y, 0.0001f), _GradientPower) * _GradientScale;
+
+
+        // return float4(eff, 1.0f);     
+
+        float2 mask_uv = i.uvb.xy * _Mask_ST.xy + _Mask_ST.zw;
+        // u_xlat1.x = _Time.y * _Mask_Speed_U;
+        // u_xlat1.y = 0.0;
+        mask_uv.xy = _Time.y * float2(_Mask_Speed_U, 0.0f) + mask_uv;
+        float3 masktex = _Mask.Sample(sampler_Mask, mask_uv.xy).xyz;
+
+        float2 effuv1 = i.uvb.xy * _Tex01_UV.xy + _Tex01_UV.zw;
+        effuv1.xy = _Time.yy * float2(_Tex01_Speed_U, _Tex01_Speed_V) + effuv1.xy;
+        float3 eff1 = _MainTex.Sample(sampler_MainTex, effuv1.xy).xyw;
+        float2 effuv2 = i.uvb.xy * _Tex02_UV.xy + _Tex02_UV.zw;
+        effuv2.xy = _Time.yy * float2(_Tex02_Speed_U, _Tex02_Speed_V) + effuv2.xy;
+        float3 eff2 = _MainTex.Sample(sampler_MainTex, effuv2.xy).xyw;
+        float3 effmax = max(eff1.y, eff2.y);
+        float2 effuv3 = i.uvb.xy * _Tex03_UV.xy + _Tex03_UV.zw;
+        effuv3.xy = _Time.yy * float2(_Tex03_Speed_U, _Tex03_Speed_V) + effuv3.xy;
+        float3 eff3 = _MainTex.Sample(sampler_MainTex, effuv3.xy).xyw;
+        effmax = max(effmax, eff3.y);
+        float2 effmul = masktex.xz * eff3.zx;
+        effmax = max(masktex.y, effmax);
+        effmul.xy = eff1.zx * eff2.zx + effmul.xy;
+        effmax = (-effmul.y) + effmax;
+
+        float downrange = i.uv.x>=_DownMaskRange;
+
+        downrange = (downrange) ? 1.0 : 0.0;
+        effmul.x = downrange * effmul.x;
+        float2 effuv4 = i.uvb.xy * _Tex04_UV.xy + _Tex04_UV.zw;
+        effuv4.xy = _Time.yy * float2(_Tex04_Speed_U, _Tex04_Speed_V) + effuv4.xy;
+        float eff4 = _MainTex.Sample(sampler_MainTex, effuv4.xy).z;
+        float2 effuv5 = i.uvb.xy * _Tex05_UV.xy + _Tex05_UV.zw;
+        effuv5.xy = _Time.yy * float2(_Tex05_Speed_U, _Tex05_Speed_V) + effuv5.xy;
+        float eff5 = _MainTex.Sample(sampler_MainTex, effuv5.xy).z;
+        float eff9 = eff5 * eff4;
+
+        float toprange = eff9.x>=_TopMaskRange;
+
+        float linerange = eff9.x>=_TopLineRange;
+
+        linerange = (linerange) ? -1.0 : -0.0;
+        toprange = (toprange) ? 1.0 : 0.0;
+        effmul.x = toprange * effmul.x;
+        linerange = linerange + toprange;
+        linerange = effmul.x * linerange;
+        effmax = max(linerange, effmax);
+
+        effmax = saturate(effmax);
+
+        float3 efflight = lerp(_LineColor, _LightColor, effmax);
+        _LightColor = lerp(_ShadowColor, _LightColor, (1.0f - (ndotl.x * 0.5 + 0.5)) <= _ShadowWidth);
+        effmax = lerp(_LightColor, _LineColor, effmax);
+        efflight.xyz = (-effmax) + efflight.xyz;
+        float effshadow = ndotl.x * 0.5 + 0.5;
+        effshadow = 1.0;
+
+        float shadowbool = _ShadowWidth>=effshadow;
+
+        effshadow = (shadowbool) ? 1.0 : 0.0;
+        effmax = effshadow.xxx * efflight.xyz + effmax;
+
+        float efffrsn = dot(normal.xyz, view.xyz);
+        efflight.x = (-efffrsn.x) + 1.0;
+        efflight.x = max(efflight.x, 0.0001f);
+
+        efflight.x = pow(efflight.x, _FresnelPower);
+        efflight.x = efflight.x + _FresnelScale;
+        efflight.x = saturate(efflight.x);
+        float4 outeff;
+        outeff.xyz = _FresnelColor.xyz * efflight.xxx + effmax;
+        effmax.x = max(i.uvb.y, 0.0001f);
+        effmax.x = pow(effmax.x, _GradientPower);
+        effmax.x = effmax.x * _GradientScale;
+        outeff.w = saturate(effmax.x * effmul.x); 
+
+        clip(outeff.w - _MainTexAlphaCutoff);
+        clip(saturate(1.0f - (i.uvb.y > 0.995f)) - 0.1f);
+        
+
+        return outeff; 
     }
 
     diffuse = diffuse * color;
@@ -530,7 +748,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         // initialize dot products : 
         float ndotl = dot(normal, light);
         float ndotv = dot(normal, view);
-        float ndoth = dot(normal, half_vector);
+        float ndoth = dot(normal, half_floattor);
 
         ndotl = ndotl * 0.5f + 0.5f;
         float shadow_ao = ((_UseLightMapColorAO) ? lightmap.y : 0.5) * ((_UseVertexColorAO) ? i.vertexcol.x : 1.0);

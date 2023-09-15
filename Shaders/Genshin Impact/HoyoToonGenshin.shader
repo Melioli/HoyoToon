@@ -285,7 +285,9 @@
 
         [HideInInspector] m_start_starcock("Star Cloak--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#star-cloak},hover:Wiki Documentation}}", Float) = 0 //tribute to the starcock 
         [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
+        [Enum(Paimon, 0, Asmoday, 1)] _StarCockType ("Star Cloak Type Override--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
         [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
+        [Enum(UV0, 0, UV1, 1, UV2, 2 )] _StarUVSource ("Star Cloak Shading Only--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
         _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Range(0.0, 2.0)) = 1.0
         _StarTex ("Star Texture 1--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { } // cock 
         _Star02Tex ("Star Texture 2--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { }
@@ -326,7 +328,61 @@
 
         [HideInInspector] m_end_starcockcloud("", Float) = 0 //starcock: the cock strikes back
 
+        [HideInInspector] m_start_starcockasmoday("Cringe Asmoday--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
+
+        _BottomColor01 ("BottomColor01", Color) = (0,0,0,0)
+        _BottomColor02 ("BottomColor02", Color) = (1,0,0,0)
+        _BottomScale ("BottomScale", Float) = 1
+        _BottomPower ("BottomPower", Float) = 1
+        _FlowMap ("FlowMap", 2D) = "white" { }
+        _FlowMaskScale ("FlowMaskScale", Float) = 1
+        _FlowMaskPower ("FlowMaskPower", Float) = 1
+        _FlowColor ("FlowColor", Color) = (1,1,1,0)
+        _FlowScale ("FlowScale", Float) = 1
+        _FlowMaskSpeed ("FlowMaskSpeed", Vector) = (0,0,0,0)
+        _FlowMap02 ("FlowMap02", 2D) = "white" { }
+        _FlowMask02Speed ("FlowMask02Speed", Vector) = (0,0,0,0)
+        _NoiseMap ("NoiseMap", 2D) = "white" { }
+        _NoiseScale ("NoiseScale", Range(0, 1)) = 0
+        _NoiseSpeed ("NoiseSpeed", Vector) = (0,0,0,0)
+        _FlowMask ("FlowMask", 2D) = "white" { }
+
+        [HideInInspector] m_end_starcockasmoday("", Float) = 0
+
         [HideInInspector] m_end_starcock ("", Float) = 0
+
+        [HideInInspector] m_start_asmodayarm("Asmoday Cringe 2", Float) = 0
+        [Toggle] _HandEffectEnable ("Enable Asmoday Arm Effect", Float) = 0
+        _LineColor ("LineColor", Color) = (1,1,1,0)
+        _LightColor ("LightColor", Color) = (0.4117647,0.1665225,0.1665225,0)
+        _ShadowColor ("ShadowColor", Color) = (0.2941176,0.1319204,0.1319204,0)
+        _DownMaskRange ("DownMaskRange", Range(0, 1)) = 0.3058824
+        _TopMaskRange ("TopMaskRange", Range(0, 1)) = 0.1147379
+        _TopLineRange ("TopLineRange", Range(0, 1)) = 0.2101024
+        _FresnelColor ("FresnelColor", Color) = (1,0.7573529,0.7573529,0)
+        _FresnelPower ("FresnelPower", Float) = 5
+        _FresnelScale ("FresnelScale", Range(-1, 1)) = -0.4970588
+        _ShadowWidth ("Shadow Width", Range(0, 1)) = 0.5764706
+        _Tex01_UV ("Tex01_UV", Vector) = (1,1,0,0)
+        _Tex01_Speed_U ("Tex01_Speed_U", Float) = 0.1
+        _Tex01_Speed_V ("Tex01_Speed_V", Float) = 0
+        _Tex02_UV ("Tex02_UV", Vector) = (1,1,0,0)
+        _Tex02_Speed_U ("Tex02_Speed_U", Float) = -0.1
+        _Tex02_Speed_V ("Tex02_Speed_V", Float) = 0
+        _Tex03_UV ("Tex03_UV", Vector) = (1,1,0,0)
+        _Tex03_Speed_U ("Tex03_Speed_U", Float) = 0
+        _Tex03_Speed_V ("Tex03_Speed_V", Float) = -0.5
+        _Tex04_UV ("Tex04_UV", Vector) = (1,1,0,-0.01)
+        _Tex04_Speed_U ("Tex04_Speed_U", Float) = 0
+        _Tex04_Speed_V ("Tex04_Speed_V", Float) = 0
+        _Tex05_UV ("Tex05_UV", Vector) = (1,1,0,0)
+        _Tex05_Speed_U ("Tex05_Speed_U", Float) = 0
+        _Tex05_Speed_V ("Tex05_Speed_V", Float) = 0 
+        _Mask ("Mask", 2D) = "white" { }
+        _Mask_Speed_U ("Mask_Speed_U", Float) = -0.1
+        _GradientPower ("GradientPower", Float) = 1
+        _GradientScale ("GradientScale", Float) = 1
+        [HideInInspector] m_end_asmodayarm ("", Float) = 0 
 
         [HideInInspector] m_start_fresnel("Fresnel--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#fresnel},hover:Wiki Documentation}}", Float) = 0
         [Toggle] _UseFresnel ("Enable Fresnel", Range(0.0, 1.0)) = 1.0
@@ -455,8 +511,22 @@
         Texture2D _CloudTex; 
         float4 _CloudTex_ST;
 
+        Texture2D _FlowMap;
+        Texture2D _FlowMap02;
+        Texture2D _NoiseMap;
+        SamplerState sampler_NoiseMap;
+        Texture2D _FlowMask;
+        float4 _FlowMap_ST;
+        float4 _FlowMap02_ST;
+        float4 _NoiseMap_ST;
+        float4 _FlowMask_ST;
+
         Texture2D _CausTexture;
         float4 _CausTexture_ST;
+
+        Texture2D _Mask; 
+        SamplerState sampler_Mask;
+        float4 _Mask_ST;
 
 
         UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
@@ -524,6 +594,20 @@
         float _CausExp;
         float _EnableSplit;
         float _CausSplit;
+
+
+        float4 _BottomColor01;
+        float4 _BottomColor02;
+        float _BottomScale;
+        float _BottomPower;
+        float _FlowMaskScale;
+        float _FlowMaskPower;
+        float4 _FlowColor;
+        float _FlowScale;
+        float4 _FlowMaskSpeed;
+        float4 _FlowMask02Speed;
+        float _NoiseScale;
+        float4 _NoiseSpeed;
 
         float _UseWeapon;
         float _UsePattern;
@@ -626,7 +710,9 @@
 
         float _StarCloakEnable;
         float _StarCloakBlendRate;
+        float _StarCockType;
         float _StarCloakOveride;
+        float _StarUVSource;
         float _StarBrightness;
         float _StarHeight;
         float _Star02Height;
@@ -645,6 +731,36 @@
         float _UVScrollY;
         float _EnableScrollXSwing;
         float _EnableScrollYSwing;
+
+        float _HandEffectEnable;
+        float4 _LineColor;
+        float4 _LightColor;
+        float4 _ShadowColor;
+        float _DownMaskRange;
+        float _TopMaskRange;
+        float _TopLineRange;
+        float4 _FresnelColor;
+        float _FresnelPower;
+        float _FresnelScale;
+        float _ShadowWidth;
+        float4 _Tex01_UV;
+        float _Tex01_Speed_U;
+        float _Tex01_Speed_V;
+        float4 _Tex02_UV;
+        float _Tex02_Speed_U;
+        float _Tex02_Speed_V;
+        float4 _Tex03_UV;
+        float _Tex03_Speed_U;
+        float _Tex03_Speed_V;
+        float4 _Tex04_UV;
+        float _Tex04_Speed_U;
+        float _Tex04_Speed_V;
+        float4 _Tex05_UV;
+        float _Tex05_Speed_U;
+        float _Tex05_Speed_V;
+        float _Mask_Speed_U;
+        float _GradientPower;
+        float _GradientScale;
 
         bool _EnableOutlineGlow;
         float _OutlineGlowInt;

@@ -2,7 +2,7 @@
 vsOut vert(vsIn v, uint id : SV_VertexID)
 {
     vsOut o = (vsOut)0.0f; // cast to 0 to avoid intiailization warnings
-    if(_OutlineType == 0)
+    if(_OutlineType == 0 || _HandEffectEnable)
     {
         return (vsOut)0.0f; // return every value as zero if outline type is set to none
     }
