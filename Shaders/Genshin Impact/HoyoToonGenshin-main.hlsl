@@ -420,77 +420,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
 
     if(_HandEffectEnable)
     {
-        // float2 mask_uv = i.uvb.xy * _Mask_ST.xy + _Mask_ST.zw;
-        // mask_uv = _Time.yy * float2(_Mask_Speed_U, 0.0f) + mask_uv.xy;
-        // float3 masktex = _Mask.Sample(sampler_Mask, mask_uv);
-
-        // float2 uv_1 = i.uvb.xy * _Tex01_UV.xy + _Tex01_UV.zw;
-        // uv_1 = _Time.yy * float2(_Tex01_Speed_U, _Tex01_Speed_V) + uv_1;
-        // float2 uv_2 = i.uvb.xy * _Tex02_UV.xy + _Tex02_UV.zw;
-        // uv_2 = _Time.yy * float2(_Tex02_Speed_U, _Tex02_Speed_V) + uv_2;
-        // float2 uv_3 = i.uvb.xy * _Tex03_UV.xy + _Tex03_UV.zw;
-        // uv_3 = _Time.yy * float2(_Tex03_Speed_U, _Tex03_Speed_V) + uv_3;
-        // float2 uv_4 = i.uvb.xy * _Tex04_UV.xy + _Tex04_UV.zw;
-        // uv_4 = _Time.yy * float2(_Tex04_Speed_U, _Tex04_Speed_V) + uv_4;
-        // float2 uv_5 = i.uvb.xy * _Tex05_UV.xy + _Tex05_UV.zw;
-        // uv_5 = _Time.yy * float2(_Tex05_Speed_U, _Tex05_Speed_V) + uv_5;
-
-        // float3 eff1 = _MainTex.Sample(sampler_MainTex, uv_1).xyw;
-        // float3 eff2 = _MainTex.Sample(sampler_MainTex, uv_2).xyw;
-        // float3 eff3 = _MainTex.Sample(sampler_MainTex, uv_3).xyw;
-        // float3 eff4 = _MainTex.Sample(sampler_MainTex, uv_4).zzz;
-        // float3 eff5 = _MainTex.Sample(sampler_MainTex, uv_5).zzz;
-
-        // float3 effmax = max(eff1.y, eff2.y);
-        // effmax = max(effmax.x, eff3.y);
-        // float2 effmul = masktex.xz * eff3.zx;
-        // effmax = max(effmax, effmul.y);
-        // effmul.xy = eff1.zx * eff2.zx + effmul;
-        // effmax = -effmul.y * effmax;
-
-        // bool downrange = i.uv.xy >= _DownMaskRange; 
-
-        // effmul = effmul * downrange; 
-
-        // float eff9 = eff4 * eff5;
-        // float toprange = eff9 >= _TopMaskRange;
-        // toprange = (toprange) ? 1.0f : 0.0f;
-        // float linerange = eff9 >= _TopLineRange;
-        // linerange = (linerange) ? -1.0f : 0.0f;
-
-        // float topline = toprange * effmul;
-        // linerange = linerange + toprange; 
-        // linerange = topline * linerange;
-
-        // effmax = max(linerange, effmax.x);
-        // effmax = saturate(effmax);
-        
-        // float3 effline = lerp(_LineColor, _LightColor, effmax);
-        // float3 effshdw = lerp(_ShadowColor, _LineColor, effmax);
-
-        // float3 effcol = -effshdw + effline;
-
-        // float shadoweff = ndoth * 0.5 + 0.5f;
-        // shadoweff = -shadoweff + 1.0f;
-
-        // shadoweff = (_ShadowWidth >= shadoweff) ? 1.0f : 0.0f;
-
-        // effshdw = shadoweff * effcol + effshdw;
-
-        // float3 efffrsn = 1.0f - ndotv; 
-        // efffrsn = pow(max(efffrsn, 0.0001f), _FresnelPower) * _FresnelScale;
-        // efffrsn = saturate(efffrsn);
-
-        // float3 eff = _FresnelColor * efffrsn + effshdw;
-
-        // float3 gradient = pow(max(i.uvb.y, 0.0001f), _GradientPower) * _GradientScale;
-
-
-        // return float4(eff, 1.0f);     
-
         float2 mask_uv = i.uvb.xy * _Mask_ST.xy + _Mask_ST.zw;
-        // u_xlat1.x = _Time.y * _Mask_Speed_U;
-        // u_xlat1.y = 0.0;
         mask_uv.xy = _Time.y * float2(_Mask_Speed_U, 0.0f) + mask_uv;
         float3 masktex = _Mask.Sample(sampler_Mask, mask_uv.xy).xyz;
 
@@ -561,7 +491,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         effmax.x = effmax.x * _GradientScale;
         outeff.w = saturate(effmax.x * effmul.x); 
 
-        clip(outeff.w - _MainTexAlphaCutoff);
+        // clip(outeff.w - _MainTexAlphaCutoff);
         clip(saturate(1.0f - (i.uvb.y > 0.995f)) - 0.1f);
         
 
