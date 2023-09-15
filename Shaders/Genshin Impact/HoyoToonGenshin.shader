@@ -286,17 +286,17 @@
         [HideInInspector] m_start_starcock("Star Cloak--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#star-cloak},hover:Wiki Documentation}}", Float) = 0 //tribute to the starcock 
         [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
         [Enum(Paimon, 0, Asmoday, 1)] _StarCockType ("Star Cloak Type Override--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
-        [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
-        [Enum(UV0, 0, UV1, 1, UV2, 2 )] _StarUVSource ("Star Cloak Shading Only--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
-        _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Range(0.0, 2.0)) = 1.0
-        _StarTex ("Star Texture 1--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { } // cock 
-        _Star02Tex ("Star Texture 2--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", 2D) = "black" { }
-        _Star01Speed ("Star 1 Scroll Speed--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
-        _StarBrightness ("Star Brightness--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 60
-        _StarHeight ("Star Texture Height--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 14.89
-        _Star02Height ("Star Texture 2 Height--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
+        [Enum(UV0, 0, UV1, 1, UV2, 2 )] _StarUVSource ("UV Source--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
+        [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0.0
+        _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Range(0.0, 2.0)) = 1.0
+        _StarTex ("Star Texture 1--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", 2D) = "black" { } // cock 
+        _Star02Tex ("Star Texture 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", 2D) = "black" { }
+        _Star01Speed ("Star 1 Scroll Speed--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0
+        _StarBrightness ("Star Brightness--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 60
+        _StarHeight ("Star Texture Height--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 14.89
+        _Star02Height ("Star Texture 2 Height--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0
 
-        [HideInInspector] m_start_starcocknoise("Noise--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#noise},hover:Wiki Documentation}}}", Float) = 0 //starcock: the phantom cock
+        [HideInInspector] m_start_starcocknoise("Noise--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==0},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#noise},hover:Wiki Documentation}}}", Float) = 0 //starcock: the phantom cock
 
         _NoiseTex01 ("Noise Texture 1", 2D) = "white" { }
         _NoiseTex02 ("Noise Texture 2", 2D) = "white" { }
@@ -306,21 +306,21 @@
 
         [HideInInspector] m_end_starcocknoise("", Float) = 0 //starcock: attack of the cocks
 
-        [HideInInspector] m_start_starcockcolorpallete("Color Pallete--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},,button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#color-pallete},hover:Wiki Documentation}}}", Float) = 0 //starcock: revenge of the cock
+        [HideInInspector] m_start_starcockcolorpallete("Color Pallete--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}},,button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#color-pallete},hover:Wiki Documentation}}}", Float) = 0 //starcock: revenge of the cock
 
         _ColorPaletteTex ("Color Palette Texture", 2D) = "white" { }
         _ColorPalletteSpeed ("Color Palette Scroll Speed", Float) = -0.1
 
         [HideInInspector] m_end_starcockcolorpallete("", Float) = 0 //starcock: the cock awakens
         
-        [HideInInspector] m_start_starcockconstellation("Constellation--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#constellation},hover:Wiki Documentation}}}", Float) = 0 //starcock: the last cock
+        [HideInInspector] m_start_starcockconstellation("Constellation--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#constellation},hover:Wiki Documentation}}}", Float) = 0 //starcock: the last cock
         _ConstellationTex ("Constellation Texture", 2D) = "white" { }
         _ConstellationHeight ("Constellation Texture Height", Float) = 1.2
         _ConstellationBrightness ("Constellation Brightness", Float) = 5
 
         [HideInInspector] m_end_starcockconstellation("", Float) = 0 //starcock: a starcock story
 
-        [HideInInspector] m_start_starcockcloud("Cloud--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
+        [HideInInspector] m_start_starcockcloud("Cloud--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
 
         _CloudTex ("Cloud Texture", 2D) = "white" { }
         _CloudBrightness ("Cloud Texture Brightness", Float) = 1
@@ -328,65 +328,76 @@
 
         [HideInInspector] m_end_starcockcloud("", Float) = 0 //starcock: the cock strikes back
 
-        [HideInInspector] m_start_starcockasmoday("Asmoday--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
+        // [HideInInspector] m_start_starcockasmoday("Asmoday--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#cloud},hover:Wiki Documentation}}}", Float) = 0 //starcock: the rise of cock
+        _FlowMap ("Star Texture--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", 2D) = "white" { }
+        _FlowMap02 ("Star Texture 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", 2D) = "white" { }
+        _NoiseMap ("Noise Map--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", 2D) = "white" { }
+        _FlowMask ("Flow Mask--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", 2D) = "white" { }
 
-        _BottomColor01 ("BottomColor01", Color) = (0,0,0,0)
-        _BottomColor02 ("BottomColor02", Color) = (1,0,0,0)
-        _BottomScale ("BottomScale", Float) = 1
-        _BottomPower ("BottomPower", Float) = 1
-        _FlowMap ("FlowMap", 2D) = "white" { }
-        _FlowMaskScale ("FlowMaskScale", Float) = 1
-        _FlowMaskPower ("FlowMaskPower", Float) = 1
-        _FlowColor ("FlowColor", Color) = (1,1,1,0)
-        _FlowScale ("FlowScale", Float) = 1
-        _FlowMaskSpeed ("FlowMaskSpeed", Vector) = (0,0,0,0)
-        _FlowMap02 ("FlowMap02", 2D) = "white" { }
-        _FlowMask02Speed ("FlowMask02Speed", Vector) = (0,0,0,0)
-        _NoiseMap ("NoiseMap", 2D) = "white" { }
-        _NoiseScale ("NoiseScale", Range(0, 1)) = 0
-        _NoiseSpeed ("NoiseSpeed", Vector) = (0,0,0,0)
-        _FlowMask ("FlowMask", 2D) = "white" { }
+        [HideInInspector] m_start_starcockgrad ("Gradient--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 0
+        _BottomColor01 ("Top Color", Color) = (0,0,0,0)
+        _BottomColor02 ("Bottom Color", Color) = (1,0,0,0)
+        _BottomScale ("Gradient Scale", Float) = 1
+        _BottomPower ("Gradient Power", Float) = 1
+        [HideInInspector] m_end_starcockgrad ("", Float) = 0
+        
+        [HideInInspector] m_start_starcockflow ("Star Controls--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 0
+        _FlowColor ("Star Color", Color) = (1,1,1,0)
+        _FlowMaskScale ("Star Texture Scale", Float) = 1 
+        _FlowMaskPower ("Star Texture Power", Float) = 1
+        _FlowScale ("Star Intensity", Float) = 1
+        _FlowMaskSpeed ("Star Texture Speed", Vector) = (0,0,0,0)
+        _FlowMask02Speed ("Star Texture 02 Speed", Vector) = (0,0,0,0)
+        [HideInInspector] m_end_starcockflow ("", Float) = 0
+        [HideInInspector] m_start_starcockasmodaynoise ("Noise Controls--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 0
+        _NoiseScale ("Noise Scale", Range(0, 1)) = 0
+        _NoiseSpeed ("Noise Speed", Vector) = (0,0,0,0)
+        [HideInInspector] m_end_starcockasmodaynoise ("", Float) = 0
 
-        [HideInInspector] m_end_starcockasmoday("", Float) = 0
+        // [HideInInspector] m_end_starcockasmoday("", Float) = 0
 
         [HideInInspector] m_end_starcock ("", Float) = 0
 
         [HideInInspector] m_start_asmodayarm("Asmoday Arm Effect", Float) = 0
         [Toggle] _HandEffectEnable ("Enable Asmoday Arm Effect", Float) = 0
-        _LineColor ("LineColor", Color) = (1,1,1,0)
-        _LightColor ("LightColor", Color) = (0.4117647,0.1665225,0.1665225,0)
-        _ShadowColor ("ShadowColor", Color) = (0.2941176,0.1319204,0.1319204,0)
+        _LightColor ("Light Color", Color) = (0.4117647,0.1665225,0.1665225,0)
+        _ShadowColor ("Shadow Color", Color) = (0.2941176,0.1319204,0.1319204,0)
         _ShadowWidth ("Shadow Width", Range(0, 1)) = 0.5764706
-        _DownMaskRange ("DownMaskRange", Range(0, 1)) = 0.3058824
-        _TopMaskRange ("TopMaskRange", Range(0, 1)) = 0.1147379
-        _TopLineRange ("TopLineRange", Range(0, 1)) = 0.2101024
-        _FresnelColor ("FresnelColor", Color) = (1,0.7573529,0.7573529,0)
-        _FresnelPower ("FresnelPower", Float) = 5
-        _FresnelScale ("FresnelScale", Range(-1, 1)) = -0.4970588
-        _GradientPower ("GradientPower", Float) = 1
-        _GradientScale ("GradientScale", Float) = 1
+        _LineColor ("Line Color", Color) = (1,1,1,0)
+        _TopLineRange ("Line Range", Range(0, 1)) = 0.2101024
+        [HideInInspector] m_start_asmogayfresnel ("Fresnel", Float) = 0
+        _FresnelColor ("Fresnel Color", Color) = (1,0.7573529,0.7573529,0)
+        _FresnelPower ("Fresnel Power", Float) = 5
+        _FresnelScale ("Fresnel Scale", Range(-1, 1)) = -0.4970588
+        [HideInInspector] m_end_asmogayfresnel ("", Float) = 0
+        [HideInInspector] m_start_asmodaygradient ("Alpha Gradients", Float) = 0
+        _GradientPower ("Gradient Power", Float) = 1
+        _GradientScale ("Gradient Scale", Float) = 1
+        [HideInInspector] m_end_asmodaygradient ("", Float) = 0
         [HideInInspector] m_start_asmodaymask ("Mask Values", Float) = 0
         _Mask ("Mask", 2D) = "white" { }
-        _Mask_Speed_U ("Mask_Speed_U", Float) = -0.1
+        _DownMaskRange ("Down Mask Range", Range(0, 1)) = 0.3058824
+        _TopMaskRange ("Top Mask Range", Range(0, 1)) = 0.1147379
+        _Mask_Speed_U ("Mask X Scroll Speed", Float) = -0.1
         [HideInInspector] m_end_asmodaymask ("", Float) = 0
-        [HideInInspector] m_start_asmodayuv ("UV Offsets", Float) = 0
-        _Tex01_UV ("Tex01_UV", Vector) = (1,1,0,0)
-        _Tex02_UV ("Tex02_UV", Vector) = (1,1,0,0)
-        _Tex03_UV ("Tex03_UV", Vector) = (1,1,0,0)
-        _Tex04_UV ("Tex04_UV", Vector) = (1,1,0,-0.01)
-        _Tex05_UV ("Tex05_UV", Vector) = (1,1,0,0)
+        [HideInInspector] m_start_asmodayuv ("UV Scales & Offsets", Float) = 0
+        _Tex01_UV ("Mask 1 UV Scale and Offset", Vector) = (1,1,0,0)
+        _Tex02_UV ("Mask 2 UV Scale and Offset", Vector) = (1,1,0,0)
+        _Tex03_UV ("Mask 3 UV Scale and Offset", Vector) = (1,1,0,0)
+        _Tex04_UV ("Mask 4 UV Scale and Offset", Vector) = (1,1,0,-0.01)
+        _Tex05_UV ("Mask 5 UV Scale and Offset", Vector) = (1,1,0,0)
         [HideInInspector] m_end_asmodayuv ("", Float) = 0
         [HideInInspector] m_start_asmodayspeed ("UV Scrolling Speeds", Float) = 0
-        _Tex01_Speed_U ("Tex01_Speed_U", Float) = 0.1
-        _Tex01_Speed_V ("Tex01_Speed_V", Float) = 0
-        _Tex02_Speed_U ("Tex02_Speed_U", Float) = -0.1
-        _Tex02_Speed_V ("Tex02_Speed_V", Float) = 0
-        _Tex03_Speed_U ("Tex03_Speed_U", Float) = 0
-        _Tex03_Speed_V ("Tex03_Speed_V", Float) = -0.5
-        _Tex04_Speed_U ("Tex04_Speed_U", Float) = 0
-        _Tex04_Speed_V ("Tex04_Speed_V", Float) = 0
-        _Tex05_Speed_U ("Tex05_Speed_U", Float) = 0
-        _Tex05_Speed_V ("Tex05_Speed_V", Float) = 0 
+        _Tex01_Speed_U ("Mask 1 X Scroll Speed", Float) = 0.1
+        _Tex01_Speed_V ("Mask 1 Y Scroll Speed", Float) = 0
+        _Tex02_Speed_U ("Mask 2 X Scroll Speed", Float) = -0.1
+        _Tex02_Speed_V ("Mask 2 Y Scroll Speed", Float) = 0
+        _Tex03_Speed_U ("Mask 3 X Scroll Speed", Float) = 0
+        _Tex03_Speed_V ("Mask 3 Y Scroll Speed", Float) = -0.5
+        _Tex04_Speed_U ("Mask 4 X Scroll Speed", Float) = 0
+        _Tex04_Speed_V ("Mask 4 Y Scroll Speed", Float) = 0
+        _Tex05_Speed_U ("Mask 5 X Scroll Speed", Float) = 0
+        _Tex05_Speed_V ("Mask 5 Y Scroll Speed", Float) = 0 
         [HideInInspector] m_end_asmodayspeed ("", Float) = 0
         
         
