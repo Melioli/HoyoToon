@@ -873,18 +873,19 @@
 
             ENDHLSL
         }
-        Pass
-        {
-            Tags {"LightMode"="ShadowCaster"}
+        // Pass
+        // {
+        //     Tags {"LightMode"="ShadowCaster"}
 
-            Cull [_Cull]
+        //     Cull [_Cull]
 
-            HLSLPROGRAM
-            #pragma multi_compile_shadowcaster
-            #include "UnityCG.cginc"
-            #include "HoyoToonGenshin-shadows.hlsl"
-            ENDHLSL
-        }
+        //     HLSLPROGRAM
+        //     #pragma multi_compile_shadowcaster
+        //     #include "UnityCG.cginc"
+        //     #include "HoyoToonGenshin-shadows.hlsl"
+        //     ENDHLSL
+        // }
+        UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
     CustomEditor "Hoyo.ShaderEditor"
 }
