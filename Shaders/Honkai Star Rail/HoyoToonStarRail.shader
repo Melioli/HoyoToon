@@ -307,6 +307,38 @@ Shader "HoyoToon/StarRail"
         [Toggle] _EnableSplit ("Enable Caustic RGB Split--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
         _CausSplit ("Caustic RGB Split--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_CausToggle==1},condition2:{type:PROPERTY_BOOL,data:_EnableSplit==1}}}", Range(0.0, 1.0)) = 0.0
         [HideInInspector] m_end_caustic ("", Float) = 0 
+        [HideInInspector] m_start_liquid ("Liquid In A Bottle", Float) = 0
+        [Toggle] _UseGlass ("Enable Glass & Liquid", Float) = 0
+        _FillAmount1 ("Fill Amount Part 1", Range(-10, 10)) = 0
+		_FillAmount2 ("Fill Amount Part 2", Range(-10, 10)) = 0
+		_WobbleX ("WobbleX", Range(-1, 1)) = 0
+		_WobbleZ ("WobbleZ", Range(-1, 1)) = 0
+        _PosY0 ("Liquid Y Position 0", Float) = 0.5 
+        _PosY1 ("Liquid Y Position 1", Float) = 0.5
+        _PosY2 ("Liquid Y Position 2", Float) = 0.5
+        _MaskTex ("Range Texture", 2D) = "black" {}
+		_MainTexSpeed ("Main Texture Flow Speed", Vector) = (0,0,0,0)
+		[HDR] _BrightColor ("Liquid Color Bright", Vector) = (1,1,1,1)
+		[HDR] _DarkColor ("Liquid Color Dark", Vector) = (1,1,1,1)
+		[HDR] _FoamColor ("Liquid Surface Eddge Color", Vector) = (1,1,1,1)
+		_FoamWidth ("Liquid Edge Width", Range(0, 5)) = 0.1
+		[HDR] _SurfaceColor ("Liquid Surface Color", Vector) = (1,1,1,1)
+		_SurfaceLighted ("Liquid Surface Intensty", Range(0, 10)) = 3
+		[HDR] _RimColor ("Rim Color", Vector) = (1,1,1,1)
+		_RimPower ("Rim Power", Range(0.5, 4)) = 1
+		_LiquidOpaqueness ("Liquid Transparency", Range(0, 1)) = 1
+        [HideInInspector] m_start_glass ("Glass Controls", Float) = 0
+		[MHYHeaderBox(Glass Colors)] [HDR] _GlassColorA ("Above Liquid Glass Color", Vector) = (1,1,1,1)
+		_GlassFrsnIn ("Glass Fresnel Inside", Range(0.1, 8)) = 1
+		_Opaqueness ("Glass Transparency", Range(0, 1)) = 0.1
+		[HDR] _GlassColorU ("Specular Color", Vector) = (1,1,1,1)
+		_SpecularShininess ("Glass Specular Shininess", Range(0.1, 64)) = 4
+		_SpecularThreshold ("Glass Specular Threshold", Range(0, 1)) = 0
+		_SpecularIntensity ("Glass Specular Intensity", Range(0, 5)) = 1
+		_SPDir ("Glass Specular Direction", Vector) = (0,0,0,1)
+		_EdgeWidth ("Glass Volume Offset", Range(-1, 1)) = 0
+        [HideInInspector] m_end_glass ("", Float) = 0
+        [HideInInspector] m_end_liquid ("", Float) = 0
         [HideInInspector] m_end_specialeffects("", Float) = 0
 
 
@@ -384,6 +416,7 @@ Shader "HoyoToon/StarRail"
         Texture2D _MaterialValuesPackLUT;
         Texture2D _EmissionTex; 
         Texture2D _CausTexture;
+        Texture2D _MaskTex;
         float4 _CausTexture_ST;
         SamplerState sampler_MaterialValuesPackLUT;
         SamplerState sampler_MainTex;
@@ -599,6 +632,35 @@ Shader "HoyoToon/StarRail"
         float _CausExp;
         float _EnableSplit;
         float _CausSplit;
+
+        // liquid properties
+        float _UseGlass;
+        float _FillAmount1;
+        float _FillAmount2;
+        float _WobbleX;
+        float _WobbleZ;
+        float _PosY0;
+        float _PosY1;
+        float _PosY2;
+        float _MainTexSpeed;
+        float4 _BrightColor;
+        float4 _DarkColor;
+        float4 _FoamColor;
+        float _FoamWidth;
+        float4 _SurfaceColor;
+        float _SurfaceLighted;
+        float _RimColor;
+        float _RimPower;
+        float _LiquidOpaqueness;
+        float4 _GlassColorA;
+        float _GlassFrsnIn;
+        float _Opaqueness;
+        float4 _GlassColorU;
+        float _SpecularShininess;
+        float _SpecularThreshold;
+        float _SpecularIntensity;
+        float4 _SPDir;
+        float _EdgeWidth;
 
 
         // outline properties 

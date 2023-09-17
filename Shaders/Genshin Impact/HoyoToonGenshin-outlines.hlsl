@@ -12,6 +12,8 @@ vsOut vert(vsIn v, uint id : SV_VertexID)
     // float wig_y = cos(v.vertex.y * 0.001f + _Time.y * (id * 0.001f)) * 0.001f;
     // v.vertex.x = v.vertex.x + wig_x;
     // v.vertex.y = v.vertex.y + wig_y;
+
+    // v.vertexcol.xyzw = 1.0f;
         
     float3 outline_normal;
     outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, v.tangent.xyz);

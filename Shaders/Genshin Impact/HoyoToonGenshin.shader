@@ -486,7 +486,7 @@
         #pragma fragment frag
 
         #pragma multi_compile _ UNITY_HDR_ON
-        // #pragma multi_compile_fog
+        #pragma multi_compile_fog
 
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
@@ -866,6 +866,7 @@
             HLSLPROGRAM
 
             #pragma multi_compile_fwdbase
+            
 
             #include "HoyoToonGenshin-outlines.hlsl"
 
