@@ -498,7 +498,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         return outeff; 
     }
 
-    diffuse = diffuse * color;
+    // diffuse = diffuse * color;
     // ========================================================= //
     // shadow 
     float litFactor = 1.0f;

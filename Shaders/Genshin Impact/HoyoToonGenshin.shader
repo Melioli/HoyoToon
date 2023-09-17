@@ -485,13 +485,12 @@
         #pragma vertex vert
         #pragma fragment frag
 
-        // #pragma multi_compile _ UNITY_HDR_ON
+        #pragma multi_compile _ UNITY_HDR_ON
         // #pragma multi_compile_fog
 
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
         #include "UnityShaderVariables.cginc"
-        #include "AutoLight.cginc"
         #include "HoyoToonGenshin-inputs.hlsli"
 
         /* properties */
@@ -867,25 +866,23 @@
             HLSLPROGRAM
 
             #pragma multi_compile_fwdbase
-            
 
             #include "HoyoToonGenshin-outlines.hlsl"
 
             ENDHLSL
         }
-        // Pass
-        // {
-        //     Tags {"LightMode"="ShadowCaster"}
+        Pass
+        {
+            Tags {"LightMode"="ShadowCaster"}
 
-        //     Cull [_Cull]
+            Cull [_Cull]
 
-        //     HLSLPROGRAM
-        //     #pragma multi_compile_shadowcaster
-        //     #include "UnityCG.cginc"
-        //     #include "HoyoToonGenshin-shadows.hlsl"
-        //     ENDHLSL
-        // }
-        UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
+            HLSLPROGRAM
+            #pragma multi_compile_shadowcaster
+            #include "UnityCG.cginc"
+            #include "HoyoToonGenshin-shadows.hlsl"
+            ENDHLSL
+        }
     }
     CustomEditor "Hoyo.ShaderEditor"
 }
