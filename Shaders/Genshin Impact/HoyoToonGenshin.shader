@@ -485,7 +485,7 @@
         #pragma vertex vert
         #pragma fragment frag
 
-        #pragma multi_compile _ UNITY_HDR_ON
+        // #pragma multi_compile _ UNITY_HDR_ON
         #pragma multi_compile_fog
 
         #include "UnityCG.cginc"
