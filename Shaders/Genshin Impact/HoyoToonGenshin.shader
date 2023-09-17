@@ -486,11 +486,12 @@
         #pragma fragment frag
 
         // #pragma multi_compile _ UNITY_HDR_ON
-        #pragma multi_compile_fog
+        // #pragma multi_compile_fog
 
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
         #include "UnityShaderVariables.cginc"
+        #include "AutoLight.cginc"
         #include "HoyoToonGenshin-inputs.hlsli"
 
         /* properties */
