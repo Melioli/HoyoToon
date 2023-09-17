@@ -26,6 +26,7 @@
         [Enum(UV0, 0, UV1, 1)] _UseBackFaceUV2("Backface UV", int) = 1.0
         [Toggle] _VertexColorLinear ("Enable Linear Vertex Colors", Range(0.0, 1.0)) = 0.0
         [Toggle]_DayOrNight ("Enable Nighttime", Range(0.0, 1.0)) = 0.0
+        [Toggle] _DisableColors ("Disable Material Color", Float) = 0
         [HideInInspector] m_start_maincolor ("Color Options--{button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#color-options},hover:Wiki Documentation}}", Float) = 0
         [HideInInspector] m_start_colormask ("Color Mask", Float) = 0
         [Toggle] _UseMaterialMasksTex("Enable Material Color Mask", Int) = 0
@@ -552,6 +553,7 @@
 
 
         bool _UseMaterialMasksTex;
+        float _DisableColors;
         float4 _Color;
         float4 _Color2;
         float4 _Color3;

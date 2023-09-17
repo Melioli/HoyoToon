@@ -485,7 +485,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         efflight.x = efflight.x + _FresnelScale;
         efflight.x = saturate(efflight.x);
         float4 outeff;
-        outeff.xyz = _FresnelColor.xyz * efflight.xxx + effmax;
+        outeff.xyz = _FresnelColor.xyz * efflight.xxx + effmax; 
+        outeff.xyz = outeff * lerp(1.0f, environmentLighting, _EnvironmentLightingStrength).xyz;
         effmax.x = max(i.uvb.y, 0.0001f);
         effmax.x = pow(effmax.x, _GradientPower);
         effmax.x = effmax.x * _GradientScale;
@@ -498,7 +499,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
         return outeff; 
     }
 
-    // diffuse = diffuse * color;
+    if(!_DisableColors) diffuse = diffuse * color;
     // ========================================================= //
     // shadow 
     float litFactor = 1.0f;
