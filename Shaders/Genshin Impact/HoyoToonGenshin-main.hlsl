@@ -81,7 +81,7 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     // sample textures : 
     float4 diffuse   = _MainTex.Sample(sampler_MainTex, uv * _MainTex_ST.xy + _MainTex_ST.zw);
     float4 lightmap  = _LightMapTex.Sample(sampler_LightMapTex, uv);
-    float4 facemap   = _FaceMap.Sample(sampler_LightMapTex, uv);
+    float4 facemap   = _FaceMapTex.Sample(sampler_LightMapTex, uv);
     float4 normalmap = _BumpMap.Sample(sampler_BumpMap, uv);
     float4 matmask   = _MaterialMasksTex.Sample(sampler_LightMapTex, uv);
 

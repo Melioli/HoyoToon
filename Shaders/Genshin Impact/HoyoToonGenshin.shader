@@ -79,7 +79,7 @@
         //Face Shading
         [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_UseFaceMapNew==1.0},button_help:{text:Tutorial,action:{type:URL,data:https://github.com/Melioli/HoyoToon/wiki/Using-the-Genshin-Shader#face},hover:Wiki Documentation}} ", Float) = 0
         [Toggle] _flipFaceLighting ("Flip Face Lighting", Range(0.0, 1.0)) = 0.0
-        [SmallTexture]_FaceMap ("Face Shadow",2D)= "white"{ }
+        [SmallTexture]_FaceMapTex ("Face Shadow",2D)= "white"{ }
         [HideInInspector] _UseFaceMapNew ("Enable Face Shader", Range(0.0, 1.0)) = 0.0
         _FaceMapSoftness ("Face Lighting Softness", Range(0.0, 1.0)) = 0.001
         [IntRange] _MaterialID ("Face Material ID", Range(1.0, 5.0)) = 2.0
@@ -498,7 +498,7 @@
         Texture2D _MainTex;                 SamplerState sampler_MainTex;
         float4 _MainTex_ST;
         Texture2D _LightMapTex;             SamplerState sampler_LightMapTex;
-        Texture2D _FaceMap;                 
+        Texture2D _FaceMapTex;                 
         Texture2D _BumpMap;                 SamplerState sampler_BumpMap;
         Texture2D _PackedShadowRampTex;     SamplerState sampler_PackedShadowRampTex;
         Texture2D _MTSpecularRamp;          SamplerState sampler_MTSpecularRamp;
