@@ -29,7 +29,7 @@ vsOut vert(vsIn v, uint id : SV_VertexID)
     }
     else
     {
-        _OutlineWidthAdjustScales.w = 1.0f; // this is causing mad problems when you zoom out too far from the model
+        // _OutlineWidthAdjustScales.w = 1.0f; // this is causing mad problems when you zoom out too far from the model
         float3 view = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz);
         float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
         o.pos = wv_pos;
@@ -60,7 +60,21 @@ vsOut vert(vsIn v, uint id : SV_VertexID)
         offset = offset * 0.414f * v.vertexcol.w * (_OutlineWidth * _Scale * 100.0f);
         // normal.z = 0.1f;
         // outline_normal = normalize(normal);
-        o.pos.xyz = o.pos.xyz + outline_normal * offset ;
+
+
+        // I'm not enabling this, it breaks compatibility with models released before 3.7 and theres no clean way for me implement it 
+        // without adding another toggle but that seems stupid to me because it would have to default to being off, have to be MANUALLY toggled on since there
+        // are no accompanying json values to piggyback off of to determine if a model comes from 3.7 or higher, and ultimately would require the user to be 
+        // able to understand what the purpose of the lightmap blue channel was 
+        // which is hard to expect since previously it was used in primotoon as some kind of nose blush.
+        // and it's not worth trying to correct misinfo caused by primotoon, see: using shadow ramps on the face, having the lightmap and faceshadow texture slots
+        // completely swapped.
+        // anyway, since i stupidly combed through almost 3 million lines of decompiled code for this, i'm going to document it's use:
+        // the Tex_FaceLightmap texture's blue channel was updated for version 3.7. It gave the blue channel a use in that it functions as an additional outline
+        // mask / threshold value similar to the vertex colors. 
+        // if(_UseFaceMapNew) outline_normal = outline_normal * _LightMapTex.SampleLevel(sampler_LightMapTex, v.uv0, 0).z;
+        
+        o.pos.xyz = offset * outline_normal + o.pos.xyz ;
         
         o.pos = mul(UNITY_MATRIX_P, o.pos);
     }
@@ -82,8 +96,8 @@ float4 frag(vsOut i, bool frontFacing : SV_IsFrontFace) : SV_Target
     float2 newUVs = (frontFacing) ? i.uv.xy : i.uv.zw;
 
     // sample textures to objects
-    float4 mainTex = _MainTex.Sample(sampler_MainTex, vector<half, 2>(i.uv.xy));
-    float4 lightmapTex = _LightMapTex.Sample(sampler_LightMapTex, vector<half, 2>(i.uv.xy));
+    float4 mainTex = _MainTex.Sample(sampler_MainTex, float2(i.uv.xy));
+    float4 lightmapTex = _LightMapTex.Sample(sampler_LightMapTex, float2(i.uv.xy));
 
 
     /* MATERIAL IDS */
