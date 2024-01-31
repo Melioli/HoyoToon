@@ -25,7 +25,7 @@
 > [!IMPORTANT]
 > The Built-in Rendering Pipeline in Unity projects uses the Gamma option for color management by default, which is **different** from what Hoyoverse uses. To ensure that colors are accurate, it is recommended to **set the Color Space to Linear** in the Project Settings. **Edit > Project Settings > Player > Other Settings > Color Space** You can find more information on how to do this in the [Unity documentation.](https://docs.unity3d.com/Manual/LinearRendering-LinearOrGammaWorkflow.html#:~:text=To%20do%20this%2C%20set%20Color,in%20the%20gamma%20color%20space.
 )
-> These shaders are designed to work with the datamined models only. MMD or other sources may not work properly with these shaders. However, we do not condone datamining and encourage users to respect the intellectual property rig
+> These shaders are designed to work with the datamined models only. MMD or other sources may not work properly with these shaders. However, we do not condone datamining and encourage users to respect the intellectual property
 
 
 
