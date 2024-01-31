@@ -1,6 +1,6 @@
 <br>
 <p align="center">
-    <a href="https://github.com/Melioli/HoyoToon"><img src="https://hoyotoon.com/images/banner.png" alt="HoyoToon"/></a>
+    <a href="https://github.com/Melioli/HoyoToon"><img src="https://hoyotoon.com/images/HoyoToonBannerLite.png" alt="HoyoToon"/></a>
 </p><br>
 
 <p align="center">
