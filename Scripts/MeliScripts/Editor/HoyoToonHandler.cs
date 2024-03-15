@@ -301,7 +301,6 @@ public class HoyoToonHandler
                            });
 
                         ApplyCustomSettingsToMaterial(newMaterial, jsonFileName);
-                        EditorUtility.SetDirty(newMaterial);
                         AssetDatabase.SaveAssets();
 
                         if (isNewMaterial)
@@ -610,9 +609,11 @@ public class HoyoToonHandler
 
     private static void SetTextureImportSettings(IEnumerable<string> paths)
     {
+        var pathsToReimport = new List<string>();
+
+        AssetDatabase.StartAssetEditing();
         try
         {
-            AssetDatabase.StartAssetEditing();
             foreach (var p in paths)
             {
                 var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(p);
@@ -621,38 +622,50 @@ public class HoyoToonHandler
                 TextureImporter importer = AssetImporter.GetAtPath(p) as TextureImporter;
                 if (!importer) continue;
 
-                if (importer.textureType == TextureImporterType.Default &&
-                    importer.textureCompression == TextureImporterCompression.Uncompressed &&
-                    importer.mipmapEnabled == false &&
-                    importer.streamingMipmaps == false &&
-                    (!clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) || importer.wrapMode == TextureWrapMode.Clamp) &&
-                    (!nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) || importer.sRGBTexture == false) &&
-                    (!NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) || importer.npotScale == TextureImporterNPOTScale.None))
+                bool settingsChanged = false;
+
+                if (importer.textureType != TextureImporterType.Default ||
+                    importer.textureCompression != TextureImporterCompression.Uncompressed ||
+                    importer.mipmapEnabled != false ||
+                    importer.streamingMipmaps != false ||
+                    (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.wrapMode != TextureWrapMode.Clamp) ||
+                    (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.sRGBTexture != false) ||
+                    (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.npotScale != TextureImporterNPOTScale.None))
                 {
-                    continue;
+                    importer.textureType = TextureImporterType.Default;
+                    importer.textureCompression = TextureImporterCompression.Uncompressed;
+                    importer.mipmapEnabled = false;
+                    importer.streamingMipmaps = false;
+
+                    if (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
+                        importer.wrapMode = TextureWrapMode.Clamp;
+
+                    if (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
+                        importer.sRGBTexture = false;
+
+                    if (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
+                        importer.npotScale = TextureImporterNPOTScale.None;
+
+                    settingsChanged = true;
                 }
 
-                importer.textureType = TextureImporterType.Default;
-                importer.textureCompression = TextureImporterCompression.Uncompressed;
-                importer.mipmapEnabled = false;
-                importer.streamingMipmaps = false;
-
-                if (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
-                    importer.wrapMode = TextureWrapMode.Clamp;
-
-                if (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
-                    importer.sRGBTexture = false;
-
-                if (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
-                    importer.npotScale = TextureImporterNPOTScale.None;
-
-                importer.SaveAndReimport();
+                if (settingsChanged)
+                {
+                    pathsToReimport.Add(p);
+                }
             }
         }
         finally
         {
             AssetDatabase.StopAssetEditing();
         }
+
+        foreach (var p in pathsToReimport)
+        {
+            AssetDatabase.ImportAsset(p, ImportAssetOptions.ForceUpdate);
+        }
+
+        AssetDatabase.SaveAssets();
     }
 
     #endregion
@@ -662,9 +675,9 @@ public class HoyoToonHandler
     [MenuItem("Assets/HoyoToon/Setup FBX")]
     private static void SetFBXImportSettings(IEnumerable<string> paths)
     {
+        AssetDatabase.StartAssetEditing();
         try
         {
-            AssetDatabase.StartAssetEditing();
             foreach (var p in paths)
             {
                 var fbx = AssetDatabase.LoadAssetAtPath<Mesh>(p);
@@ -682,40 +695,24 @@ public class HoyoToonHandler
                     importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
                 }
 
-                EditorUtility.SetDirty(importer);
-
-                importer.SaveAndReimport();
-            }
-
-            AssetDatabase.StopAssetEditing();
-            AssetDatabase.Refresh();
-
-            AssetDatabase.StartAssetEditing();
-
-            foreach (var p in paths)
-            {
-                var fbx = AssetDatabase.LoadAssetAtPath<Mesh>(p);
-                if (!fbx) continue;
-
-                ModelImporter importer = AssetImporter.GetAtPath(p) as ModelImporter;
-                if (!importer) continue;
-
                 ModifyAndSaveHumanoidBoneMapping(importer);
 
                 string pName = "legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes";
                 PropertyInfo prop = importer.GetType().GetProperty(pName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 prop.SetValue(importer, true);
-
-                EditorUtility.SetDirty(importer);
-
-                importer.SaveAndReimport();
             }
-            AssetDatabase.SaveAssets();
         }
         finally
         {
             AssetDatabase.StopAssetEditing();
         }
+
+        foreach (var p in paths)
+        {
+            AssetDatabase.ImportAsset(p, ImportAssetOptions.ForceUpdate);
+        }
+
+        AssetDatabase.SaveAssets();
     }
 
     private static void ModifyAndSaveHumanoidBoneMapping(ModelImporter importer)
