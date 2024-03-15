@@ -171,26 +171,31 @@ public class HoyoToonHandler
     [MenuItem("Assets/HoyoToon/Generate Materials")]
     public static void GenerateMaterialsFromJson()
     {
-        DetermineBodyType();
-        var textureCache = new Dictionary<string, Texture>();
-        UnityEngine.Object selectedObject = Selection.activeObject;
-        string selectedFBXPath = AssetDatabase.GetAssetPath(selectedObject);
-        string materialsFolderPath = Path.GetDirectoryName(selectedFBXPath) + "/Materials";
+        // Start asset editing
+        AssetDatabase.StartAssetEditing();
 
-        List<string> loadedTexturePaths = new List<string>();
-        if (materialsFolderPath != null)
+        try
         {
-            if (Directory.Exists(materialsFolderPath))
-            {
-                string[] jsonFiles = Directory.GetFiles(materialsFolderPath, "*.json");
-                foreach (string jsonFile in jsonFiles)
-                {
-                    TextAsset jsonTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(jsonFile);
-                    string jsonContent = jsonTextAsset.text;
-                    JObject jsonObject = JObject.Parse(jsonContent);
-                    string jsonFileName = Path.GetFileNameWithoutExtension(jsonFile);
+            DetermineBodyType();
+            var textureCache = new Dictionary<string, Texture>();
+            UnityEngine.Object selectedObject = Selection.activeObject;
+            string selectedFBXPath = AssetDatabase.GetAssetPath(selectedObject);
+            string materialsFolderPath = Path.GetDirectoryName(selectedFBXPath) + "/Materials";
 
-                    Dictionary<string, string> shaderKeys = new Dictionary<string, string>
+            List<string> loadedTexturePaths = new List<string>();
+            if (materialsFolderPath != null)
+            {
+                if (Directory.Exists(materialsFolderPath))
+                {
+                    string[] jsonFiles = Directory.GetFiles(materialsFolderPath, "*.json");
+                    foreach (string jsonFile in jsonFiles)
+                    {
+                        TextAsset jsonTextAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(jsonFile);
+                        string jsonContent = jsonTextAsset.text;
+                        JObject jsonObject = JObject.Parse(jsonContent);
+                        string jsonFileName = Path.GetFileNameWithoutExtension(jsonFile);
+
+                        Dictionary<string, string> shaderKeys = new Dictionary<string, string>
                 {
                     { "_UtilityDisplay1", GIShader },
                     {"_DisableCGP", GIShader},
@@ -201,124 +206,133 @@ public class HoyoToonHandler
                     { "_MiscGrp", Hi3P2Shader}
                 };
 
-                    Shader shaderToApply = null;
+                        Shader shaderToApply = null;
 
-                    foreach (var shaderKey in shaderKeys)
-                    {
-                        JToken texEnvsToken = jsonObject["m_SavedProperties"]["m_TexEnvs"];
-                        JToken floatsToken = jsonObject["m_SavedProperties"]["m_Floats"];
-
-                        bool texEnvsContainsKey = ContainsKey(texEnvsToken, shaderKey.Key);
-                        bool floatsContainsKey = ContainsKey(floatsToken, shaderKey.Key);
-
-                        if (texEnvsContainsKey || floatsContainsKey)
+                        foreach (var shaderKey in shaderKeys)
                         {
-                            Shader shader = Shader.Find(shaderKey.Value);
-                            if (shader != null)
+                            JToken texEnvsToken = jsonObject["m_SavedProperties"]["m_TexEnvs"];
+                            JToken floatsToken = jsonObject["m_SavedProperties"]["m_Floats"];
+
+                            bool texEnvsContainsKey = ContainsKey(texEnvsToken, shaderKey.Key);
+                            bool floatsContainsKey = ContainsKey(floatsToken, shaderKey.Key);
+
+                            if (texEnvsContainsKey || floatsContainsKey)
                             {
-                                shaderToApply = shader;
-                                break;
+                                Shader shader = Shader.Find(shaderKey.Value);
+                                if (shader != null)
+                                {
+                                    shaderToApply = shader;
+                                    break;
+                                }
                             }
                         }
-                    }
 
-                    if (shaderToApply != null)
-                    {
-                        string materialPath = materialsFolderPath + "/" + Path.GetFileNameWithoutExtension(jsonFile) + ".mat";
-
-                        Material newMaterial = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
-                        bool isNewMaterial = false;
-                        if (newMaterial == null)
+                        if (shaderToApply != null)
                         {
-                            newMaterial = new Material(shaderToApply);
-                            isNewMaterial = true;
-                        }
+                            string materialPath = materialsFolderPath + "/" + Path.GetFileNameWithoutExtension(jsonFile) + ".mat";
 
-                        ProcessProperties(jsonObject["m_SavedProperties"]["m_Floats"], newMaterial, (propertyName, propertyValue) =>
-                        {
-                            if (newMaterial.HasProperty(propertyName) && propertyValue.Type == JTokenType.Float)
+                            Material newMaterial = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+                            bool isNewMaterial = false;
+                            if (newMaterial == null)
                             {
-                                newMaterial.SetFloat(propertyName, propertyValue.Value<float>());
+                                newMaterial = new Material(shaderToApply);
+                                isNewMaterial = true;
                             }
-                        });
 
-                        ProcessProperties(jsonObject["m_SavedProperties"]["m_Colors"], newMaterial, (propertyName, propertyValue) =>
-                        {
-                            if (newMaterial.HasProperty(propertyName))
+                            ProcessProperties(jsonObject["m_SavedProperties"]["m_Floats"], newMaterial, (propertyName, propertyValue) =>
                             {
-                                JObject colorObject = propertyValue.ToObject<JObject>();
-                                Color color = new Color(colorObject["r"].Value<float>(), colorObject["g"].Value<float>(), colorObject["b"].Value<float>(), colorObject["a"].Value<float>());
-                                newMaterial.SetColor(propertyName, color);
-                            }
-                        });
+                                if (newMaterial.HasProperty(propertyName) && propertyValue.Type == JTokenType.Float)
+                                {
+                                    newMaterial.SetFloat(propertyName, propertyValue.Value<float>());
+                                }
+                            });
 
-                        ProcessProperties(jsonObject["m_SavedProperties"]["m_TexEnvs"], newMaterial, (propertyName, propertyValue) =>
-                           {
-                               if (newMaterial.HasProperty(propertyName))
+                            ProcessProperties(jsonObject["m_SavedProperties"]["m_Colors"], newMaterial, (propertyName, propertyValue) =>
+                            {
+                                if (newMaterial.HasProperty(propertyName))
+                                {
+                                    JObject colorObject = propertyValue.ToObject<JObject>();
+                                    Color color = new Color(colorObject["r"].Value<float>(), colorObject["g"].Value<float>(), colorObject["b"].Value<float>(), colorObject["a"].Value<float>());
+                                    newMaterial.SetColor(propertyName, color);
+                                }
+                            });
+
+                            ProcessProperties(jsonObject["m_SavedProperties"]["m_TexEnvs"], newMaterial, (propertyName, propertyValue) =>
                                {
-                                   JObject textureObject = propertyValue["m_Texture"].ToObject<JObject>();
-                                   string textureName = textureObject["Name"].Value<string>();
-
-                                   if (!string.IsNullOrEmpty(textureName))
+                                   if (newMaterial.HasProperty(propertyName))
                                    {
-                                       Texture texture = null;
+                                       JObject textureObject = propertyValue["m_Texture"].ToObject<JObject>();
+                                       string textureName = textureObject["Name"].Value<string>();
 
-                                       // Check if the texture is in the cache
-                                       if (textureCache.ContainsKey(textureName))
+                                       if (!string.IsNullOrEmpty(textureName))
                                        {
-                                           texture = textureCache[textureName];
-                                       }
-                                       else
-                                       {
-                                           string[] textureGUIDs = AssetDatabase.FindAssets(textureName + " t:texture");
+                                           Texture texture = null;
 
-                                           if (textureGUIDs.Length > 0)
+                                           // Check if the texture is in the cache
+                                           if (textureCache.ContainsKey(textureName))
                                            {
-                                               string texturePath = AssetDatabase.GUIDToAssetPath(textureGUIDs[0]);
-                                               texture = AssetDatabase.LoadAssetAtPath<Texture>(texturePath);
+                                               texture = textureCache[textureName];
+                                           }
+                                           else
+                                           {
+                                               string[] textureGUIDs = AssetDatabase.FindAssets(textureName + " t:texture");
 
-                                               // Add the texture to the cache
-                                               if (texture != null)
+                                               if (textureGUIDs.Length > 0)
                                                {
-                                                   textureCache.Add(textureName, texture);
+                                                   string texturePath = AssetDatabase.GUIDToAssetPath(textureGUIDs[0]);
+                                                   texture = AssetDatabase.LoadAssetAtPath<Texture>(texturePath);
+
+                                                   // Add the texture to the cache
+                                                   if (texture != null)
+                                                   {
+                                                       textureCache.Add(textureName, texture);
+                                                   }
                                                }
                                            }
-                                       }
 
-                                       if (texture != null)
-                                       {
-                                           newMaterial.SetTexture(propertyName, texture);
-                                           string texturePath = AssetDatabase.GetAssetPath(texture);
-                                           loadedTexturePaths.Add(texturePath);
+                                           if (texture != null)
+                                           {
+                                               newMaterial.SetTexture(propertyName, texture);
+                                               string texturePath = AssetDatabase.GetAssetPath(texture);
+                                               loadedTexturePaths.Add(texturePath);
 
-                                           Vector2 scale = new Vector2(propertyValue["m_Scale"]["X"].Value<float>(), propertyValue["m_Scale"]["Y"].Value<float>());
-                                           Vector2 offset = new Vector2(propertyValue["m_Offset"]["X"].Value<float>(), propertyValue["m_Offset"]["Y"].Value<float>());
-                                           newMaterial.SetTextureScale(propertyName, scale);
-                                           newMaterial.SetTextureOffset(propertyName, offset);
+                                               Vector2 scale = new Vector2(propertyValue["m_Scale"]["X"].Value<float>(), propertyValue["m_Scale"]["Y"].Value<float>());
+                                               Vector2 offset = new Vector2(propertyValue["m_Offset"]["X"].Value<float>(), propertyValue["m_Offset"]["Y"].Value<float>());
+                                               newMaterial.SetTextureScale(propertyName, scale);
+                                               newMaterial.SetTextureOffset(propertyName, offset);
+                                           }
                                        }
                                    }
-                               }
-                           });
+                               });
 
-                        ApplyCustomSettingsToMaterial(newMaterial, jsonFileName);
-                        AssetDatabase.SaveAssets();
+                            ApplyCustomSettingsToMaterial(newMaterial, jsonFileName);
 
-                        if (isNewMaterial)
-                        {
-                            HardSetTextures(newMaterial, loadedTexturePaths);
-                            AssetDatabase.CreateAsset(newMaterial, materialPath);
+                            if (isNewMaterial)
+                            {
+                                HardSetTextures(newMaterial, loadedTexturePaths);
+                                AssetDatabase.CreateAsset(newMaterial, materialPath);
+                            }
                         }
-                    }
-                    else
-                    {
-                        Debug.LogError("No matching shader found for " + jsonFileName);
+                        else
+                        {
+                            Debug.LogError("No matching shader found for " + jsonFileName);
+                        }
                     }
                 }
             }
+            else
+            {
+                Debug.LogError("Materials folder path is null.");
+            }
         }
-        else
+        finally
         {
-            Debug.LogError("Materials folder path is null.");
+            // Stop asset editing
+            AssetDatabase.StopAssetEditing();
+
+            // Save assets and refresh the asset database once
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 
@@ -666,6 +680,7 @@ public class HoyoToonHandler
         }
 
         AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 
     #endregion
@@ -675,6 +690,8 @@ public class HoyoToonHandler
     [MenuItem("Assets/HoyoToon/Setup FBX")]
     private static void SetFBXImportSettings(IEnumerable<string> paths)
     {
+        bool changesMade = false;
+
         AssetDatabase.StartAssetEditing();
         try
         {
@@ -693,9 +710,13 @@ public class HoyoToonHandler
                 {
                     importer.animationType = ModelImporterAnimationType.Human;
                     importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+                    changesMade = true;
                 }
 
-                ModifyAndSaveHumanoidBoneMapping(importer);
+                if (ModifyAndSaveHumanoidBoneMapping(importer))
+                {
+                    changesMade = true;
+                }
 
                 string pName = "legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes";
                 PropertyInfo prop = importer.GetType().GetProperty(pName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -707,25 +728,26 @@ public class HoyoToonHandler
             AssetDatabase.StopAssetEditing();
         }
 
-        foreach (var p in paths)
+        if (changesMade)
         {
-            AssetDatabase.ImportAsset(p, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
-
-        AssetDatabase.SaveAssets();
     }
 
-    private static void ModifyAndSaveHumanoidBoneMapping(ModelImporter importer)
+    private static bool ModifyAndSaveHumanoidBoneMapping(ModelImporter importer)
     {
         HumanDescription humanDescription = importer.humanDescription;
         List<HumanBone> humanBones = new List<HumanBone>(humanDescription.human);
 
+        bool changesMade = false;
 
         for (int i = 0; i < humanBones.Count; i++)
         {
             if (humanBones[i].humanName == "Jaw")
             {
                 humanBones.RemoveAt(i);
+                changesMade = true;
                 break;
             }
         }
@@ -756,20 +778,30 @@ public class HoyoToonHandler
                 HumanBone bone = humanBones[i];
                 bone.boneName = leftEyeBoneName;
                 humanBones[i] = bone;
+                changesMade = true;
             }
             else if (humanBones[i].humanName == "RightEye")
             {
                 HumanBone bone = humanBones[i];
                 bone.boneName = rightEyeBoneName;
                 humanBones[i] = bone;
+                changesMade = true;
             }
         }
 
-        humanDescription.human = humanBones.ToArray();
+        if (changesMade)
+        {
+            humanDescription.human = humanBones.ToArray();
+            importer.humanDescription = humanDescription;
+        }
 
-        importer.humanDescription = humanDescription;
+        if (changesMade)
+        {
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
 
-        importer.SaveAndReimport();
+        return changesMade;
     }
 
     #endregion
