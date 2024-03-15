@@ -8,14 +8,21 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Mat_FaceMask
-  m_Shader: {fileID: 4800000, guid: 0b765976d9827464281ad4eaf6aa2c34, type: 3}
+  m_Shader: {fileID: 4800000, guid: 9dcddbc35905ef44fa2e2ad4fd00c258, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _ENABLEBACKRIMLIGHT_ON
+  - _DISSOLVEPOSMASKGLOBALONM_ON
+  - _DISSOLVEPOSMASKONM_ON
+  - _DISSOLVEPOSMASKWORLDONM_ON
+  - _ENABLECOLORHUE_ON
+  - _ENABLEEMISSIONHUE_ON
   - _ENABLEFOVWIDTH_ON
+  - _ENABLEOUTLINEHUE_ON
+  - _ENABLERIMHUE_ON
   - _FACEMATERIAL_ON
+  - _FILTERLIGHT_ON
   - _USEHAIRSIDEFADE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -59,6 +66,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _HueMaskTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _LightMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -84,6 +95,10 @@ Material:
     - _AlphaCutoff: 0.5
     - _AlphaTestThreshold: 0
     - _AnisotropySpecular: 0
+    - _AutomaticColorShift: 0
+    - _AutomaticEmissionShift: 0
+    - _AutomaticOutlineShift: 0
+    - _AutomaticRimShift: 0
     - _BaseMaterial: 0
     - _CausExp: 1
     - _CausInt: 1
@@ -92,32 +107,84 @@ Material:
     - _CausSplit: 0
     - _CausToggle: 0
     - _CausUV: 0
+    - _ColorHue: 0
+    - _ColorHue2: 0
+    - _ColorHue3: 0
+    - _ColorHue4: 0
+    - _ColorHue5: 0
+    - _ColorHue6: 0
+    - _ColorHue7: 0
+    - _ColorHue8: 0
     - _CullMode: 0
+    - _DebugDiffuse: 0
+    - _DebugEmission: 0
+    - _DebugFaceExp: 0
+    - _DebugFaceMap: 0
+    - _DebugFaceVector: 0
+    - _DebugHairFade: 0
+    - _DebugLightMap: 0
+    - _DebugLights: 0
+    - _DebugMLut: 0
+    - _DebugMLutChannel: 0
+    - _DebugMaterialIDs: 0
+    - _DebugMode: 0
+    - _DebugNormalVector: 0
+    - _DebugRimLight: 0
+    - _DebugSpecular: 0
+    - _DebugTangent: 0
+    - _DebugVertexColor: 0
+    - _DiffuseMaskSource: 0
     - _DissolveDistortionIntensity: 0.01
+    - _DissolveDistortionIntensityM: 0.5
     - _DissolveMapAdd: 0
+    - _DissolveMapAddM: 0.83
     - _DissolveOutlineOffset: 0
+    - _DissolveOutlineOffsetM: 1
     - _DissolveOutlineSize1: 0.05
+    - _DissolveOutlineSize1M: 0.02
     - _DissolveOutlineSize2: 0
+    - _DissolveOutlineSize2M: -0.02
     - _DissolvePosMaskFilpOn: 0
+    - _DissolvePosMaskFilpOnM: 0
     - _DissolvePosMaskGlobalOn: 0
+    - _DissolvePosMaskGlobalOnM: 1
     - _DissolvePosMaskOn: 0
+    - _DissolvePosMaskOnM: 1
     - _DissolvePosMaskWorldON: 0
+    - _DissolvePosMaskWorldONM: 1
     - _DissolveRate: 0
+    - _DissolveRateM: 0
     - _DissolveUV: 0
+    - _DissolveUVM: 0
     - _DissolveUseDirection: 0
     - _DissoveDirecMask: 2
+    - _DissoveDirecMaskM: -0.36
     - _DissoveON: 0
+    - _DissoveONM: 0
     - _DstBlend: 0
     - _ES_Rimintensity: 0.1
     - _ES_SPIntensity: 0.5
     - _EdgeWidth: 0
+    - _EmissionHue: 0
+    - _EmissionHue2: 0
+    - _EmissionHue3: 0
+    - _EmissionHue4: 0
+    - _EmissionHue5: 0
+    - _EmissionHue6: 0
+    - _EmissionHue7: 0
+    - _EmissionHue8: 0
     - _EmissionIntensity: 1
+    - _EmissionMaskSource: 0
     - _EmissionThreshold: 0.5
     - _EnableAlphaCutoff: 0
     - _EnableBackRimLight: 1
+    - _EnableColorHue: 1
     - _EnableEmission: 0
+    - _EnableEmissionHue: 1
     - _EnableFOVWidth: 1
     - _EnableOutline: 0
+    - _EnableOutlineHue: 1
+    - _EnableRimHue: 1
     - _EnableSplit: 0
     - _EnableStocking: 0
     - _EnvironmentLightingStrength: 1
@@ -130,9 +197,14 @@ Material:
     - _FaceMaterial: 1
     - _FillAmount1: 0
     - _FillAmount2: 0
+    - _FilterLight: 1
     - _FixLipOutline: 0
     - _FoamWidth: 0.1
     - _GlassFrsnIn: 1
+    - _GlobalColorHue: 0
+    - _GlobalEmissionHue: 0
+    - _GlobalOutlineHue: 0
+    - _GlobalRimHue: 0
     - _HairBlendSilhouette: 0.5
     - _HairMaterial: 0
     - _IsTransparent: 0
@@ -145,6 +217,15 @@ Material:
     - _OutlineFixRange3: 0.1
     - _OutlineFixRange4: 0.1
     - _OutlineFixSide: 0.6
+    - _OutlineHue: 0
+    - _OutlineHue2: 0
+    - _OutlineHue3: 0
+    - _OutlineHue4: 0
+    - _OutlineHue5: 0
+    - _OutlineHue6: 0
+    - _OutlineHue7: 0
+    - _OutlineHue8: 0
+    - _OutlineMaskSource: 0
     - _OutlineScale: 0.187
     - _OutlineWidth: 0
     - _PosY0: 0.5
@@ -166,7 +247,16 @@ Material:
     - _RimEdgeSoftness5: 0.1
     - _RimEdgeSoftness6: 0.1
     - _RimEdgeSoftness7: 0.1
+    - _RimHue: 0
+    - _RimHue2: 0
+    - _RimHue3: 0
+    - _RimHue4: 0
+    - _RimHue5: 0
+    - _RimHue6: 0
+    - _RimHue7: 0
+    - _RimHue8: 0
     - _RimLightMode: 1
+    - _RimMaskSource: 0
     - _RimPower: 1
     - _RimShadowCt: 1
     - _RimShadowFeather0: 0.01
@@ -197,6 +287,10 @@ Material:
     - _RimWidth: 1
     - _Rimintensity: 1
     - _ShadowRamp: 1
+    - _ShiftColorSpeed: 0
+    - _ShiftEmissionSpeed: 0
+    - _ShiftOutlineSpeed: 0
+    - _ShiftRimSpeed: 0
     - _SpecularIntensity: 1
     - _SpecularIntensity0: 1
     - _SpecularIntensity1: 1
@@ -239,16 +333,24 @@ Material:
     - _SurfaceLighted: 3
     - _UseGlass: 0
     - _UseHairSideFade: 1
+    - _UseHueMask: 0
     - _UseMaterialValuesLUT: 0
     - _WobbleX: 0
     - _WobbleZ: 0
     - footer_discord: 0
     - footer_github: 0
     - m_end_caustic: 0
+    - m_end_colorhue: 0
+    - m_end_debugOptions: 0
+    - m_end_disoutline: 0
+    - m_end_disposition: 0
+    - m_end_dissolve: 0
     - m_end_faceexpression: 0
     - m_end_faceshading: 0
     - m_end_glass: 0
+    - m_end_glowhue: 0
     - m_end_hair: 0
+    - m_end_hueshift: 0
     - m_end_lightandshadow: 0
     - m_end_lighting: 0
     - m_end_lightingrim: 0
@@ -261,9 +363,11 @@ Material:
     - m_end_mainalpha: 0
     - m_end_maincolor: 0
     - m_end_outlinecolor: 0
+    - m_end_outlinehue: 0
     - m_end_outlinelip: 0
     - m_end_outlines: 0
     - m_end_renderingOptions: 0
+    - m_end_rimhue: 0
     - m_end_specialeffects: 0
     - m_end_specialeffectsemission: 0
     - m_end_specular: 0
@@ -274,10 +378,17 @@ Material:
     - m_end_stockings: 0
     - m_end_weapondissolve: 0
     - m_start_caustic: 0
+    - m_start_colorhue: 0
+    - m_start_debugOptions: 0
+    - m_start_disoutline: 0
+    - m_start_disposition: 0
+    - m_start_dissolve: 0
     - m_start_faceexpression: 0
     - m_start_faceshading: 0
     - m_start_glass: 0
+    - m_start_glowhue: 0
     - m_start_hair: 0
+    - m_start_hueshift: 0
     - m_start_lightandshadow: 0
     - m_start_lighting: 0
     - m_start_lightingrim: 0
@@ -290,9 +401,11 @@ Material:
     - m_start_mainalpha: 0
     - m_start_maincolor: 0
     - m_start_outlinecolor: 0
+    - m_start_outlinehue: 0
     - m_start_outlinelip: 0
     - m_start_outlines: 0
     - m_start_renderingOptions: 0
+    - m_start_rimhue: 0
     - m_start_specialeffects: 0
     - m_start_specialeffectsemission: 0
     - m_start_specular: 0
@@ -325,15 +438,24 @@ Material:
     - _DarkColor: {r: 1, g: 1, b: 1, a: 1}
     - _DissolveCenter: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveComponent: {r: 1, g: 0, b: 0, a: 0}
+    - _DissolveComponentM: {r: 1, g: 1, b: 0, a: 0}
     - _DissolveDiretcionXYZ: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveOutlineColor1: {r: 1, g: 1, b: 1, a: 1}
+    - _DissolveOutlineColor1M: {r: 0.4663585, g: 3.1038074, b: 4.2416425, a: 1}
     - _DissolveOutlineColor2: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveOutlineColor2M: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveOutlineSmoothStep: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveOutlineSmoothStepM: {r: 0, g: 0, b: 0, a: 0}
     - _DissolvePosMaskPos: {r: 1, g: 0, b: 0, a: 1}
+    - _DissolvePosMaskPosM: {r: 1, g: 0, b: 0, a: 1}
     - _DissolvePosMaskRootOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolvePosMaskRootOffsetM: {r: 0, g: 1, b: 0, a: 0}
+    - _DissolveSMT: {r: 2, g: 2, b: 0, a: 0}
     - _DissolveST: {r: 1, g: 1, b: 0, a: 0}
     - _DissolveUVSpeed: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveUVSpeedM: {r: 0, g: 0.1, b: 0, a: -0.1}
     - _DistortionST: {r: 1, g: 1, b: 0, a: 0}
+    - _DistortionSTM: {r: 2, g: 2, b: 0, a: 0}
     - _ES_RimLightOffset: {r: 0, g: 0, b: 0, a: 0}
     - _ES_SPColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _EmissionTintColor: {r: 1, g: 1, b: 1, a: 1}
