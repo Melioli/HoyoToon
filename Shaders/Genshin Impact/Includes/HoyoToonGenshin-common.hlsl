@@ -675,7 +675,7 @@ void weapon_shit(inout float3 diffuse_color, float diffuse_alpha, float2 uv, flo
     diffuse_diss.x = max(weapon_color.z, weapon_color.y);
     diffuse_diss.w = max(weapon_color.x, diffuse_diss.x);
 
-    float3 color = (1.0f < diffuse_diss.w) ? weapon_color.xyz / diffuse_diss.w : weapon_color.xyz;
+    float3 color = weapon_color.xyz;
 
     diffuse_color = color;
 
