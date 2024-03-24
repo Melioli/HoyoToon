@@ -65,13 +65,17 @@ vs_out vs_edge(vs_in v)
         float3 view = _WorldSpaceCameraPos.xyz - (float3)mul(v.vertex.xyz, unity_ObjectToWorld);
         o.view = normalize(view);
         float3 ws_normal = mul(outline_normal, (float3x3)unity_ObjectToWorld);
-        float3 v_normal = mul(ws_normal, (float3x3)UNITY_MATRIX_V);
+
+        outline_normal = mul((float3x3)UNITY_MATRIX_MV, outline_normal);
+        outline_normal.z = 0.01f;
+        outline_normal.xy = normalize(outline_normal.xyz).xy;
 
         if(!_FallbackOutlines)
         {
             float fov_matrix = unity_CameraProjection[1].y;
 
-            float fov = 1.0f / fov_matrix;
+            float fov = 2.414f / fov_matrix; // may need to come back in and change this back to 1.0f
+            // can't remember in what vrchat mode this was messing up 
 
             float depth = -wv_pos.z * fov;
 
@@ -94,7 +98,7 @@ vs_out vs_edge(vs_in v)
             if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_FaceMapTex, v.uv_0.xy, 0.0f).z;
 
             float offset_depth = saturate(1.0f - depth);
-            float max_offset = lerp(_MaxOutlineZOffset * 0.5f, _MaxOutlineZOffset, offset_depth);
+            float max_offset = lerp(_MaxOutlineZOffset * 0.1, _MaxOutlineZOffset, offset_depth);
 
             float3 z_offset = (wv_pos.xyz) * (float3)max_offset * (float3)_Scale;
             // the above version of the line causes a floating point division by zero warning in unity even though it didnt used to do that
@@ -104,12 +108,12 @@ vs_out vs_edge(vs_in v)
             // it always breaks things
 
             o.pos = wv_pos;
-            o.pos.xyz = (o.pos.xyz + (z_offset)) + (v_normal.xyz * outline_scale);
+            o.pos.xyz = (o.pos.xyz + (z_offset)) + (outline_normal.xyz * outline_scale);
         }
         else
         {
             o.pos = wv_pos;
-            o.pos.xyz = o.pos.xyz + (v_normal.xyz * (_OutlineWidth * 100.0f * _Scale * 0.414f * v.v_col.w));
+            o.pos.xyz = o.pos.xyz + (outline_normal.xyz * (_OutlineWidth * 100.0f * _Scale * 0.414f * v.v_col.w));
         }
 
         o.ws_pos = o.pos;
@@ -173,6 +177,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv_a);
     float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv_a);
+    float customao  = _CustomAO.Sample(sampler_LightMapTex, uv_a);
     float4 normalmap = _BumpMap.Sample(sampler_BumpMap, uv_a);
     float4 facemap = _FaceMapTex.Sample(sampler_FaceMapTex, uv_a);
 
@@ -247,7 +252,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float3 shadow;
         float3 metalshadow;
         float3 s_color;
-        shadow_color(lightmap.y, i.v_col.x, i.v_col.y, ndotl, material_id, i.uv_a.xy, shadow, metalshadow, s_color, light);
+        shadow_color(lightmap.y, i.v_col.x, customao, i.v_col.y, ndotl, material_id, i.uv_a.xy, shadow, metalshadow, s_color, light);
         // SPECULAR : 
         float3 specular = (float3)0.0f;
         if(_SpecularHighlights) specular_color(ndoth, shadow, lightmap.x, lightmap.z, material_id, specular);
@@ -296,18 +301,17 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         
         out_color.xyz = out_color.xyz * light_color;
 
-        out_color.xyz = lerp(out_color.xyz, emis_color, (mask * emis_check));
-        out_color.xyz = lerp(out_color.xyz, emis_color_eye, (eye_mask * emis_check_eye));
+        
         
         float3 rim_light = rimlighting(i.ss_pos, normal, i.ws_pos, light, material_id, out_color.xyz, view);
         if(_UseFaceMapNew) normal = float3(0.5f, 0.5f, 1.0f);
         if(_EnableRimHue) rim_light.xyz = hue_shift(rim_light.xyz, material_id, _RimHue, _RimHue2, _RimHue3, _RimHue4, _RimHue5, _GlobalRimHue, _AutomaticRimShift, _ShiftRimSpeed, rim_mask);
         if(_UseRimLight) out_color.xyz = out_color.xyz + rim_light;
-
-        
-
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
 
+        if(_UseWeapon) weapon_shit(out_color.xyz, diffuse.w, i.uv_a.zw, normal, view, i.ws_pos);
+        out_color.xyz = lerp(out_color.xyz, emis_color, (mask * emis_check));
+        out_color.xyz = lerp(out_color.xyz, emis_color_eye, (eye_mask * emis_check_eye));
         // basic ass transparency
         if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;        
         if(_DebugMode) // debuuuuuug
@@ -378,6 +382,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             }
             if(_DebugLights == 1) return float4((float3)0.0f, 1.0f);
         }
+        
     #endif
     #ifdef _IS_PASS_LIGHT // Lighting shading pass, should only include the necessary lighting things needed
         if(_UseFaceMapNew) normal = float3(0.5f, 0.5f, 1.0f);
@@ -408,8 +413,9 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         #elif defined(DIRECTIONAL)
         out_color.xyz = 0.0f; // dont let extra directional lights add onto the model, this will fuck a lot of shit up
         #endif
+        if(_UseWeapon) weapon_shit(out_color.xyz, diffuse.w, i.uv_a.zw, normal, view, i.ws_pos);
     #endif
-    if(_UseWeapon) weapon_shit(out_color.xyz, diffuse.w, i.uv_a.zw, normal, view, i.ws_pos);
+    
     return out_color; 
 }
 

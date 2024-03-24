@@ -25,7 +25,7 @@ vs_out vs_base(vs_in v)
 
     o.uv_2 = float4(v.uv_2.xy, v.uv_3.xy);
 
-    dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_2.xy, o.dis_pos, o.dis_uv);
+    dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_1.xy, o.dis_pos, o.dis_uv);
     TRANSFER_SHADOW(o)
     return o;
 }

@@ -308,8 +308,12 @@ float shadow_area_transition(float lightmapao, float vertexao, float ndotl, floa
     return shadow;
 }
 
-void shadow_color(in float lightmapao, in float vertexao, in float vertexwidth, in float ndotl, in float material_id, in float2 uv, inout float3 shadow, inout float3 metalshadow, inout float3 color, float3 light)
+void shadow_color(in float lightmapao, in float vertexao, in float customao, in float vertexwidth, in float ndotl, in float material_id, in float2 uv, inout float3 shadow, inout float3 metalshadow, inout float3 color, float3 light)
 {
+    if(_CustomAOEnable)
+    {
+        ndotl = ndotl * customao;
+    }
     float3 outcolor = (float3)1.0f;
     float4 warm_shadow_array[5] = 
     {
@@ -331,11 +335,16 @@ void shadow_color(in float lightmapao, in float vertexao, in float vertexwidth, 
     
     float3 outshadow = (float3)1.0f;
     if(_UseShadowRamp) outshadow = shadow_area_ramp(lightmapao, vertexao, vertexwidth, ndotl, material_id);
-    if(!_UseShadowRamp) outshadow = shadow_area_transition(lightmapao, vertexao, ndotl, material_id);
+    if(!_UseShadowRamp) outshadow = shadow_area_transition(lightmapao, vertexao, ndotl, material_id);  
 
-    if(_UseFaceMapNew) outshadow = shadow_area_face(uv, light).xxx;
+    if(_UseFaceMapNew)
+    {
+        outshadow = shadow_area_face(uv, light).xxx;
+        if(_CustomAOEnable) outshadow = outshadow * customao;        
+    }
     shadow = outshadow;
     metalshadow = outshadow;
+
     
 
     if(_UseShadowRamp)

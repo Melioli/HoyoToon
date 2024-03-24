@@ -135,10 +135,12 @@ Shader "HoyoToon/Genshin"
         [Toggle] _UseShadowRamp ("Enable Shadow Ramp Texture", Float) = 1.0
         [Toggle] _UseVertexColorAO ("Enable Vertex Color Ambient Occlusion", Range(0.0, 1.0)) = 1.0
         [Toggle] _UseVertexRampWidth ("Use Vertex Shadow Ramp Width", Float) = 0
-        [Toggle] _MultiLight ("Enable Multi Light Source Mode", float) = 1
+        [Toggle] _MultiLight ("Enable Multi Light Source Mode", float) = 1.0
         //_EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
         _LightArea ("Shadow Position", Range(0.0, 2.0)) = 0.55
         _ShadowRampWidth ("Ramp Width", Range(0.2, 3.0)) = 1.0
+        [Toggle] _CustomAOEnable ("Enable Custom AO", Float) = 0	
+        [SmallTexture]_CustomAO ("Custom AO Texture--{condition_show:{type:PROPERTY_BOOL,data:_CustomAOEnable==1.0}}",2D)= "white"{ }
         // Shadow Transition
         [HideInInspector] m_start_shadowtransitions("Shadow Transitions", Float) = 0
         [Toggle] _UseShadowTransition ("Use Shadow Transition (only work when shadow ramp is off)", Float) = 0
@@ -560,6 +562,7 @@ Shader "HoyoToon/Genshin"
         Texture2D _LightMapTex; // this is both the body/hair lightmap texture and the faceshadow texture
         Texture2D _FaceMapTex; // this is the facelightmap texture
         Texture2D _PackedShadowRampTex;
+        Texture2D _CustomAO;
         Texture2D _BumpMap;
         Texture2D _MTMap;
         Texture2D _MTSpecularRamp;
@@ -717,6 +720,8 @@ Shader "HoyoToon/Genshin"
         float4 _CoolShadowMultColor3;
         float4 _CoolShadowMultColor4;
         float4 _CoolShadowMultColor5;
+        float _CustomAOEnable;
+
 
         // metal properties : 
         float _MetalMaterial;
