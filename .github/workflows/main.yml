@@ -12,7 +12,7 @@ jobs:
       uses: VRLabs/extract-unity-package-action@v1.2.1
       with:
         #Specify the unity project path, relative to the repo root.
-        unityProjectPath: '*'
+        unityProjectPath: ''
         #Optional: Set the directory to package, relative to the project.
         #packagePath: 'Assets'
         #Optional: Set the output path for the package.
@@ -20,5 +20,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: Output package
+        name: HoyoToon
         path: ${{ steps.extract_unity_package.outputs.artifactsPath }}
