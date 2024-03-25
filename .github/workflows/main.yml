@@ -7,18 +7,16 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Create package directory
+      run: mkdir -p packages
     - name: VRLabs Unity Exporter
       id: extract_unity_package
       uses: VRLabs/extract-unity-package-action@v1.2.1
       with:
-        #Specify the unity project path, relative to the repo root.
-        unityProjectPath: ''
-        #Optional: Set the directory to package, relative to the project.
-        #packagePath: 'Assets'
-        #Optional: Set the output path for the package.
-        #outputPackagePath: './artifacts/output.unitypackage'
+        unityProjectPath: '' # Root of the repository
+        outputPackagePath: './packages/HoyoToon.unitypackage' # Specify the output path
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: HoyoToon
-        path: ${{ steps.extract_unity_package.outputs.artifactsPath }}
+        path: './packages/HoyoToon.unitypackage' # Adjust the path to match the outputPackagePath
