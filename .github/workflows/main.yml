@@ -1,22 +1,30 @@
-on: [push]
+name: Package Entire Repository into UnityPackage
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  extract_unity_package:
+  package_repository:
     runs-on: ubuntu-latest
-    name: extract_unity_package
+    name: Package Entire Repository
     steps:
-    - name: Checkout
+    - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Create package directory
-      run: mkdir -p packages
-    - name: VRLabs Unity Exporter
-      id: extract_unity_package
-      uses: VRLabs/extract-unity-package-action@v1.2.1
-      with:
-        unityProjectPath: '' # Root of the repository
-        outputPackagePath: './packages/HoyoToon.unitypackage' # Specify the output path
-    - name: Upload artifact
+
+    - name: Install Unity Hub
+      run: |
+        wget -nv https://public-cdn.cloud.unity3d.com/hub/prod/UnityHub.AppImage -O UnityHub.AppImage
+        chmod +x UnityHub.AppImage
+        ./UnityHub.AppImage install-editor --channel=beta --version=2020.3.12f1
+
+    - name: Run Unity command to create UnityPackage
+      run: |
+        ./Unity/Editor/Unity -quit -batchmode -createProjectPackage HoyoToon.unitypackage .
+
+    - name: Upload UnityPackage artifact
       uses: actions/upload-artifact@v2
       with:
         name: HoyoToon
-        path: './packages/HoyoToon.unitypackage' # Adjust the path to match the outputPackagePath
+        path: HoyoToon.unitypackage
