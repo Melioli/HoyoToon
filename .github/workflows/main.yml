@@ -7,12 +7,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Extract unity package
+    - name: VRLabs Unity Exporter
       id: extract_unity_package
-      uses: FrostBanditTeam/extract-unity-package-action@1
+      uses: VRLabs/extract-unity-package-action@v1.2.1
       with:
         #Specify the unity project path, relative to the repo root.
-        unityProjectPath: ''
+        unityProjectPath: '*'
         #Optional: Set the directory to package, relative to the project.
         #packagePath: 'Assets'
         #Optional: Set the output path for the package.
