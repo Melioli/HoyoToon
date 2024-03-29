@@ -61,22 +61,21 @@ float4 coloring(float region, float4 mask)
     };
 
     float4 color = _Color;
-    if(_UseMaterialMasksTex) 
-    // Material masks are swizzled so r = material3, g = material4, b = material5, a = material2
-    {
-        mask = mask *float4(_UseMaterial3, _UseMaterial4, _UseMaterial5, _UseMaterial2);
-        float3 color = lerp(_Color, _Color2, mask.w);
-        color = lerp(_Color, _Color3, mask.x);
-        color = lerp(_Color, _Color4, mask.y);
-        color = lerp(_Color, _Color5, mask.z);
-    }
-    else
-    {
-        color = colors[region - 1.0f];
-    }
+    color = colors[region - 1.0f];
 
     color = (!_DisableColors) ? color : (float4)1.0f;
     return color;
+}
+
+float4 material_mask_coloring(float4 mask)
+{
+
+    mask = mask * float4(_UseMaterial3, _UseMaterial4, _UseMaterial5, _UseMaterial2);
+    float3 color = lerp(_Color, _Color2, mask.w);
+    color = lerp(color, _Color3, mask.x);
+    color = lerp(color, _Color4, mask.y);
+    color = lerp(color, _Color5, mask.z);
+    return float4(color, 1.0f);
 }
 
 float packed_channel_picker(SamplerState texture_sampler, Texture2D texture_2D, float2 uv, float channel)

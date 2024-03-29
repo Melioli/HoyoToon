@@ -124,7 +124,7 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
     // textures
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
     float4 Alpha = _MaskDisTex.Sample(sampler_MaskDisTex, uv);
-    float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv);
+    float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv); 
 
     // shadow stuff
     float shadow_right = (_FaceMapTex.Sample(sampler_FaceMapTex, float2(      uv.x, uv.y)).a);
@@ -252,7 +252,6 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
         #elif defined(DIRECTIONAL)
         out_col.xyz = 0.0f; // dont let extra directional lights add onto the model, this will fuck a lot of shit up
         #endif
-
     #endif
 
 

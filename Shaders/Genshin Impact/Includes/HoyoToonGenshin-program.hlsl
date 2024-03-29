@@ -262,6 +262,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         if(_DebugMode && (_DebugMetal == 1)) return float4(diffuse.xyz, 1.0f);
         // moving these after the metal so the metal can also be recolored
         if(!_DisableColors) diffuse = diffuse * coloring(material_id, material_mask);
+        if(_UseMaterialMasksTex && !_DisableColors) diffuse = diffuse * material_mask_coloring(material_mask);
         if(_EnableColorHue) diffuse.xyz = hue_shift(diffuse.xyz, material_id, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
         out_color = diffuse;
         out_color.w = 1.0f;
@@ -311,6 +312,8 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 
         out_color.xyz = lerp(out_color.xyz, emis_color, (mask * emis_check));
         out_color.xyz = lerp(out_color.xyz, emis_color_eye, (eye_mask * emis_check_eye));
+        
+        // out_color.xyz = material_mask;
         // basic ass transparency
         if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;        
         if(_DebugMode) // debuuuuuug
