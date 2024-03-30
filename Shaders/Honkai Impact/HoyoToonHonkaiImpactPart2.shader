@@ -1,4 +1,4 @@
-Shader "HoyoToon/Honkai Impact Part 2"
+Shader "HoyoToon/Honkai Impact/Character Part 2"
 {
     Properties
     {

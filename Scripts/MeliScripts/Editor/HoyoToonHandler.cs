@@ -16,10 +16,10 @@ using System.Text.RegularExpressions;
 public class HoyoToonHandler
 {
     #region Constants
-    public const string HSRShader = "HoyoToon/StarRail";
-    private const string GIShader = "HoyoToon/Genshin";
-    private const string Hi3Shader = "HoyoToon/Honkai Impact";
-    private const string Hi3P2Shader = "HoyoToon/Honkai Impact Part 2";
+    public const string HSRShader = "HoyoToon/Star Rail/Character";
+    private const string GIShader = "HoyoToon/Genshin/Character";
+    private const string Hi3Shader = "HoyoToon/Honkai Impact/Character Part 1";
+    private const string Hi3P2Shader = "HoyoToon/Honkai Impact/Character Part 2";
     private static readonly string[] clampKeyword = { "Dissolve", "ramp", "Star" };
     private static readonly string[] nonSRGBKeywords = { "normalmap", "lightmap", "face_shadow", "specular_ramp", "gradient", "Grain", "Dissolve", "Repeat", "Stockings", "ExpressionMap", "FaceMap", "materialidvalueslut", "ColorMask", "_Mask", "_Normal" };
     private static readonly string[] NonPower2Keywords = { "materialidvalueslut" };

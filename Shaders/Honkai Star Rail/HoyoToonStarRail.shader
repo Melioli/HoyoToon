@@ -1,4 +1,4 @@
-Shader "HoyoToon/StarRail"
+Shader "HoyoToon/Star Rail/Character"
 {
     Properties
     {

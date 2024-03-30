@@ -1,4 +1,4 @@
-Shader "HoyoToon/Genshin"
+Shader "HoyoToon/Genshin/Character"
 {
     Properties
     {
