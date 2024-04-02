@@ -23,7 +23,8 @@ vs_out vs_base(vs_in v)
     // its more efficient to do this in the vertex shader instead of trying to calculate the view vector for every pixel 
     o.v_col = v.v_col;    
 
-    o.uv_2 = float4(v.uv_2.xy, v.uv_3.xy);
+    // o.uv_2 = float4(v.uv_2.xy, v.uv_3.xy);
+    o.vertex = v.vertex;
 
     dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_1.xy, o.dis_pos, o.dis_uv);
     TRANSFER_SHADOW(o)
@@ -122,7 +123,7 @@ vs_out vs_edge(vs_in v)
     o.v_col = v.v_col; 
     o.ws_pos = mul(unity_ObjectToWorld, v.vertex);
 
-    dissolve_vertex(o.ws_pos, o.pos, v.uv_0, v.uv_2, o.dis_pos, o.dis_uv);
+    dissolve_vertex(o.ws_pos, o.pos, v.uv_0, v.uv_0, o.dis_pos, o.dis_uv);
 
     return o;
 }
@@ -138,7 +139,7 @@ shadow_out vs_shadow(shadow_in v)
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
     o.pos = pos_wvp;
     o.uv_a = float4(v.uv_0.xy, v.uv_1.xy);
-    dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_2, o.dis_pos, o.dis_uv);
+    dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_0, o.dis_pos, o.dis_uv);
     TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
     return o;
 } 
@@ -576,7 +577,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             out_color.xyz = out_color.xyz + caus;
         }
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
-        
+
         if(_DebugMode && (_DebugLights == 1)) out_color.xyz = 0.0f;
     #endif
     #ifdef _IS_PASS_LIGHT
@@ -610,9 +611,13 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     #ifdef is_stencil // so the hair and eyes dont lose their shading
         if(_FaceMaterial)
         {
-            
-            clip(saturate(facemap.y + diffuse.a) - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
+            float side_mask = 1.0f;
+            if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
+            if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
+                       
+            clip(saturate(facemap.y + diffuse.a) * side_mask - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
             // but it looks weird if the eye shines are specifically omitted from the stencil
+            
             
         } 
         else if(_HairMaterial)
@@ -633,6 +638,11 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             hair_alpha = max(alpha_a, alpha_b);
             // out_color.xyz = hair_alpha;
             hair_alpha = (_UseHairSideFade) ? max(hair_alpha, _HairBlendSilhouette) : _HairBlendSilhouette;
+            
+            float side_mask = 1.0f;
+            if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
+            if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
+            hair_alpha = hair_alpha * saturate(side_mask);
             out_color.w = hair_alpha;
         }
         else

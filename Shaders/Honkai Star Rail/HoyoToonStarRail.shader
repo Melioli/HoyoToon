@@ -70,6 +70,11 @@ Shader "HoyoToon/Star Rail/Character"
         //_EnvColor ("Env Color", Color) = (1, 1, 1, 1)
         //_AddColor ("Add Color", Color) = (0, 0, 0, 0)
         [HideInInspector] m_end_maincolor ("", Float) = 0
+        [HideInInspector] m_start_facingdirection ("Facing Direction", Float) = 0
+        _headUpVector ("Up Vector | XYZ", Vector) = (0, 1, 0, 0)
+        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
+        _headRightVector ("Right Vector | XYZ ", Vector) = (-1, 0, 0, 0)
+        [HideInInspector] m_end_facingdirection ("", Float) = 0
         [HideInInspector] m_end_main ("", Float) = 0
         // -------------------------------------------
 
@@ -89,22 +94,21 @@ Shader "HoyoToon/Star Rail/Character"
         _ExShadowColor ("Expression Shadow Color", Color) = (1, 1, 1, 1)
         // _ExEyeColor ("Expression Eye Color", Color) = (1, 1, 1, 1)
         _ExShadowIntensity ("Expression Shadow Intensity", Range(0, 1)) = 0
-        _headUpVector ("Up Vector | XYZ", Vector) = (0, 1, 0, 0)
-        _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
-        _headRightVector ("Right Vector | XYZ ", Vector) = (-1, 0, 0, 0)
+        
         [HideInInspector] m_end_faceexpression("", Float) = 0
         [HideInInspector] m_end_faceshading("", Float) = 0 
 
-        // Hair Settings
-        [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0}}", Float) = 0
-        [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 0
-        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
-        [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
-        [HideInInspector] m_end_hair("", Float) = 0
+        // // Hair Settings
+        // [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0}}", Float) = 0
+        // [Enum(Off, 0, Right, 1, Left, 2)] _HairSideChoose ("Side Picker", Int) = 0
+        // [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 0
+        // _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
+        // [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
+        // [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
+        // [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
+        // [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
+        // [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
+        // [HideInInspector] m_end_hair("", Float) = 0
 
         // Lighting Options
         // -------------------------------------------
@@ -289,7 +293,33 @@ Shader "HoyoToon/Star Rail/Character"
 		// _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
         [HideInInspector] m_end_stockings("", Float) = 0
 
-        
+        [HideInInspector] m_start_outlines("Outlines", Float) = 0
+        [Toggle] _EnableOutline ("Enable Outlines", Float) = 1 // on by default
+        _AlphaCutoff ("Outline Alpha Cutoff", Range(0,1)) = 0.0
+        [Toggle]_EnableFOVWidth ("Enable FOV Scaling", Float) = 1
+        _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
+        _OutlineScale ("Outline Scale", Range(0, 1)) = 0.187
+        [HideInInspector] m_start_outlinecolor("Outline Color", Float) = 0
+        _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
+		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0, 0, 0, 1)
+		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0, 0, 0, 1)
+		_OutlineColor2 ("Outline Color 2 | (ID = 63)", Color) = (0, 0, 0, 1)
+		_OutlineColor3 ("Outline Color 3 | (ID = 95)", Color) = (0, 0, 0, 1)
+		_OutlineColor4 ("Outline Color 4 | (ID = 127)", Color) = (0, 0, 0, 1)
+		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0, 0, 0, 1)
+		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0, 0, 0, 1)
+		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0, 0, 0, 1)
+        [HideInInspector] m_end_outlinecolor("", Float) = 0
+        [HideInInspector] m_start_outlinelip("Lip Outlines", Float) = 0
+        _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
+        _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
+        _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
+        _OutlineFixRange4 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
+        _OutlineFixSide ("Outline Fix Star Side", Range(0, 1)) = 0.6
+		_OutlineFixFront ("Outline Fix Star Front", Range(0, 1)) = 0.05
+        _FixLipOutline ("TurnOn Temp Lip Outline", Range(0, 1)) = 0
+        [HideInInspector] m_end_outlinelip("", Float) = 0
+        [HideInInspector] m_end_outlines("", Float) = 0        
          
         [HideInInspector] m_start_specialeffects("Special Effects", Float) = 0
         [HideInInspector] m_start_specialeffectsemission("Emission", Float) = 0
@@ -299,6 +329,17 @@ Shader "HoyoToon/Star Rail/Character"
         _EmissionThreshold ("Emission Threshold--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Range(0,1)) = 0.5
         _EmissionIntensity ("Emission Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Float) = 1
         [HideInInspector] m_end_specialeffectsemission("", Float) = 0
+
+        [HideInInspector] m_start_stencilfade("Stencils", Float) = 0
+        [Enum(Off, 0, Right, 1, Left, 2)] _HairSideChoose ("Stencil Filter", Int) = 0
+        [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 0
+        _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
+        [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
+        [HideInInspector] m_end_stencilfade("", Float) = 0
 
         // CAUSTICS
         [HideInInspector] m_start_caustic("Caustics", Float) = 0
@@ -416,35 +457,6 @@ Shader "HoyoToon/Star Rail/Character"
         [HideInInspector] m_end_hueshift ("", float) = 0        
         [HideInInspector] m_end_specialeffects("", Float) = 0
 
-
-        [HideInInspector] m_start_outlines("Outlines", Float) = 0
-        [Toggle] _EnableOutline ("Enable Outlines", Float) = 1 // on by default
-        _AlphaCutoff ("Outline Alpha Cutoff", Range(0,1)) = 0.0
-        [Toggle]_EnableFOVWidth ("Enable FOV Scaling", Float) = 1
-        _OutlineWidth ("Outline Width", Range(0, 1)) = 0.1
-        _OutlineScale ("Outline Scale", Range(0, 1)) = 0.187
-        [HideInInspector] m_start_outlinecolor("Outline Color", Float) = 0
-        _OutlineColor ("Face Outline Color", Color) = (0, 0, 0, 1)
-		_OutlineColor0 ("Outline Color 0 | (ID = 0)", Color) = (0, 0, 0, 1)
-		_OutlineColor1 ("Outline Color 1 | (ID = 31)", Color) = (0, 0, 0, 1)
-		_OutlineColor2 ("Outline Color 2 | (ID = 63)", Color) = (0, 0, 0, 1)
-		_OutlineColor3 ("Outline Color 3 | (ID = 95)", Color) = (0, 0, 0, 1)
-		_OutlineColor4 ("Outline Color 4 | (ID = 127)", Color) = (0, 0, 0, 1)
-		_OutlineColor5 ("Outline Color 5 | (ID = 159)", Color) = (0, 0, 0, 1)
-		_OutlineColor6 ("Outline Color 6 | (ID = 192)", Color) = (0, 0, 0, 1)
-		_OutlineColor7 ("Outline Color 7 | (ID = 223)", Color) = (0, 0, 0, 1)
-        [HideInInspector] m_end_outlinecolor("", Float) = 0
-        [HideInInspector] m_start_outlinelip("Lip Outlines", Float) = 0
-        _OutlineFixRange1 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
-        _OutlineFixRange2 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
-        _OutlineFixRange3 ("Lip _Outline Show Start", Range(0, 1)) = 0.1
-        _OutlineFixRange4 ("Lip _Outline Show Max", Range(0, 1)) = 0.1
-        _OutlineFixSide ("Outline Fix Star Side", Range(0, 1)) = 0.6
-		_OutlineFixFront ("Outline Fix Star Front", Range(0, 1)) = 0.05
-        _FixLipOutline ("TurnOn Temp Lip Outline", Range(0, 1)) = 0
-        [HideInInspector] m_end_outlinelip("", Float) = 0
-        [HideInInspector] m_end_outlines("", Float) = 0
-
         //Rendering Options
         [HideInInspector] m_start_renderingOptions("Rendering Options", Float) = 0
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2
@@ -550,6 +562,7 @@ Shader "HoyoToon/Star Rail/Character"
         float3 _headRightVector;
         float _HairBlendSilhouette;
         bool _UseHairSideFade;
+        int _HairSideChoose;
         float3 _ShadowColor;
         float3 _NoseLineColor;
         float _NoseLinePower;

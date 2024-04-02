@@ -20,7 +20,7 @@ struct vs_out
     float3 view    : TEXCOORD1; // view vector
     float4 ws_pos  : TEXCOORD2; // world space position, this is used to sample the camera depth texture 
     float4 ss_pos  : TEXCOORD3;
-    float4 uv_2    : TEXCOORD4; // uv2 and uv3
+    float4 vertex    : TEXCOORD4; 
     float4 dis_uv  : TEXCOORD5; // dissolve uv and distortion uv
     float4 dis_pos : TEXCOORD6;
     float4 v_col   : COLOR0; // vertex color 
