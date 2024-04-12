@@ -176,6 +176,11 @@ bool isVR(){
     #endif
 }
 
+float remap(float value, float old_min, float old_max, float new_min, float new_max)
+{
+    return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min);
+}
+
 void dissolve_vertex(in float4 pos_ws, float4 pos,  in float2 uv_0, in float2 uv_2, out float4 dis_pos, out float4 dis_uv)
 {
     float3 dissolve_position;
@@ -219,7 +224,8 @@ void dissolve_vertex(in float4 pos_ws, float4 pos,  in float2 uv_0, in float2 uv
 void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in float2 uv)
 {
     _DissolveMapAddM = lerp(_DissolveMapAddM, 0.0f, _DissolveRateM);
-    float dissolve_rate = lerp(-0.5f, 1.5f, _DissolveRateM);
+    float dissolve_rate = _DissolveRateM;
+
     float2 dis_tex;
     float4 dis_pos_;
     float3 dissolve_map;
@@ -230,7 +236,7 @@ void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in flo
     float dis_map_add;
     float dis_clip;
     dis_tex.xy = dis_uv.zw + float2(3.00000011e-06, 3.00000011e-06);
-    dis_pos_.x = (-dis_pos.x) + _DissoveDirecMaskM;
+    dis_pos_.x = (-dis_pos.y) + _DissoveDirecMaskM;
     dis_pos_.x = min(abs(dis_pos_.x), 1.0f);
     dis_tex.xy = _DissolveUVSpeedM.zw * _Time.yy + dis_tex.xy;
     dissolve_map.xy = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).xy;
@@ -239,6 +245,7 @@ void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in flo
     dis_tex.xy = _DissolveUVSpeedM.xy * _Time.yy + distort.xy;
     dissolve_map_2 = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).x;
     dissolve_mask = _DissolveMask.Sample(sampler_DissolveMap, uv.xy);
+    if(_InvertDissovle) dissolve_mask = 1.0f - dissolve_mask;
 
     dissolve_comp = dot(dissolve_mask, _DissolveComponentM);     
     dis_map_add = dissolve_map_2 + _DissolveMapAddM; 
@@ -246,14 +253,19 @@ void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in flo
     dis_clip.x = dissolve_comp * dis_clip.x;
     dis_clip.x = dis_clip.x * dis_pos.y;
     dis_clip.x = dis_clip.x * 1.009f + -0.009f;
+    if(_DissolvePosMaskFilpOnM)
+    {
+        dissolve_rate = remap(dissolve_rate, 0.0f, 1.0f, 1.0f, 0.0f);   
+        dis_clip.x = 1.0f - dis_clip.x;
+    } 
     clip(dis_clip.x - dissolve_rate);   
 }
 
-float3 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, float4 color)
+float4 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, float4 color)
 {
     _DissolveMapAddM = lerp(_DissolveMapAddM, 0.0f, _DissolveRateM);
-    float dissolve_rate = lerp(-0.5f, 1.5f, _DissolveRateM);
-    float disolve_direct_mask = -dis_pos.x + _DissoveDirecMaskM;
+    float dissolve_rate = _DissolveRateM;
+    float disolve_direct_mask = -dis_pos.y + _DissoveDirecMaskM;
     float2 dis_tex;
     float4 dis_pos_;
     float3 dissolve_map;
@@ -263,7 +275,7 @@ float3 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, f
     float dissolve_comp;
     float dis_map_add;
     float dis_clip;
-    dis_pos_.x = (-dis_pos.x) + _DissoveDirecMaskM;
+    dis_pos_.x = (-dis_pos.y) + _DissoveDirecMaskM;
     dis_pos_.x = min(abs(dis_pos_.x), 1.0f);
     dis_tex.xy = _DissolveUVSpeedM.zw * _Time.yy + dis_uv.zw;
     dissolve_map.xy = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).xy;
@@ -271,14 +283,22 @@ float3 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, f
     distort = -(dis_tex.xy) * (float2)_DissolveDistortionIntensityM + dis_uv.xy;
     dis_tex.xy = _DissolveUVSpeedM.xy * _Time.yy + distort.xy;
     dissolve_map_2 = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).z;
-    dissolve_mask = _DissolveMask.Sample(sampler_DissolveMap, uv.xy); 
-    dissolve_comp = dot(dissolve_mask, _DissolveComponentM);       
+    dissolve_mask = _DissolveMask.Sample(sampler_DissolveMap, uv.xy);   
+    if(_InvertDissovle) dissolve_mask = 1.0f - dissolve_mask;
+    dissolve_comp = dot(dissolve_mask, _DissolveComponentM);     
     dis_map_add = dissolve_map_2 + _DissolveMapAddM; 
     dis_clip = dis_pos_.x * dis_map_add;
     dis_clip.x = dissolve_comp * dis_clip.x;
     dis_clip.x = dis_clip.x * dis_pos.y;
     dis_clip.x = dis_clip.x * 1.009f + -0.009f;
-    clip(dis_clip.x - dissolve_rate);   
+    
+    if(_DissolvePosMaskFilpOnM)
+    {
+        dissolve_rate = remap(1.0 - dissolve_rate, -1.0f, 0.0f, 1.0f, 0.0f);;   
+        dis_clip.x = 1.0f - dis_clip.x;
+    }  
+    
+    if(_DissolveClip) clip(dis_clip.x - dissolve_rate);   
     float dis_outline_1 = dissolve_rate + _DissolveOutlineSize1M;
     float dis_outline_2 = dis_outline_1 + (-_DissolveOutlineSize2M); 
     float2 dis_outline_size = dis_clip.xx - float2(dis_outline_1, dis_outline_2); 
@@ -291,8 +311,9 @@ float3 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, f
     float dis_alpha = dis_outline_size.x + 1.0f;
     dis_alpha = dis_alpha - _DissolveOutlineColor1M.w;
     dis_alpha = saturate(dis_alpha);    
-    float3 dis_color = color.xyz - dis_out_col;
-    dis_color = dis_alpha * color.xyz + dis_out_col;    
+    float4 dis_color;
+    dis_color.xyz = color.xyz - dis_out_col;
+    dis_color.xyz = dis_alpha * color.xyz + dis_out_col;    
     float3 u_xlat2 = dis_color.xyz * float3(278.508514f, 278.508514f, 278.508514f) + float3(10.7771997f, 10.7771997f, 10.7771997f);
     u_xlat2.xyz = u_xlat2.xyz * dis_color.xyz;
     float3 u_xlat4 = dis_color.xyz * float3(298.604492f, 298.604492f, 298.604492f) + float3(88.7121964f, 88.7121964f, 88.7121964f);
@@ -300,7 +321,58 @@ float3 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, f
     u_xlat2.xyz = u_xlat2.xyz / u_xlat4.xyz;
     u_xlat4.xyz = (-u_xlat2.xyz) + dis_color.xyz;
     dis_color.xyz = dis_alpha.xxx * u_xlat4.xyz + u_xlat2.xyz;  
-    return dis_color.xyz;
+    dis_color.w = color.w;
+    if(!_DissolveClip) 
+    {
+        if(_DissolvePosMaskFilpOnM)
+        {
+            dissolve_rate = remap(dissolve_rate, 1.0, 0.0f, 0.0f, 1.0f);;   
+        }  
+        
+        if((dissolve_rate > 0.85))
+        {
+            dis_color.w = color.w;
+        }
+        else if(dissolve_rate < 0.85)
+        {
+            dis_color.w = color.w * smoothstep(0.0,0.1,(dis_clip.x ) -  dissolve_rate);
+            dissolve_rate = smoothstep(-1.0f, 14.0f, dissolve_rate);
+            dis_color.w = lerp(dis_color.w, color.w, dissolve_rate);
+            dis_color.w = saturate(dis_color.w);
+        }
+
+    }
+
+    return dis_color;
+}
+
+void simple_dissolve(in float4 primary_diffuse, in float2 uv0, in float2 uv1, in float2 uv2, in float4 pos, inout float3 out_color, inout float out_alpha)
+{
+    float2 dissolve_uv[3] =
+    {
+        uv0,
+        uv1,
+        uv2
+    };
+
+    float gradient = _DissolveGradientMask.Sample(sampler_DissolveGradientMask, dissolve_uv[_DissolveUVChannel]).x + _DissolveGradientOffset;
+    if(_DisableDissolveGradient) gradient = 1.0f; // fail safe incase of missing texture or unity fuckery
+
+    float2 distortion_uv = _Time.yy * float2(_DissolveAnimDirection.xy * _DissolveAnimSpeed) + (_DissolveAnimSO.xy * dissolve_uv[_DissolveUVChannel] + _DissolveAnimSO.zw);
+    float distortion = _DissolveAnimTex.Sample(sampler_DissolveGradientMask, distortion_uv).x;
+
+    gradient = gradient + _DissolveGradientOffset;
+    gradient = gradient * distortion;
+    float dis_direction = dot(_DissolveFadeDirection.xyz, pos.xyz);
+    dis_direction = smoothstep(_DissovlePosFadeSmoothstep.x * _DissolveSimpleRate, _DissovlePosFadeSmoothstep.y * _DissolveSimpleRate, dis_direction - _DissolveSimpleRate);
+    if(_DissolveUsePosition) gradient = gradient * dis_direction;
+
+    gradient = smoothstep(_DissovleFadeSmoothstep.x * _DissolveSimpleRate, _DissovleFadeSmoothstep.y * _DissolveSimpleRate, gradient);
+    gradient = saturate(gradient);
+
+    if(_InvertGradient) gradient = 1.0f - gradient;
+    
+    out_alpha = gradient.x;
 }
 
 float3 DecodeLightProbe( float3 N )

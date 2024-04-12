@@ -50,6 +50,12 @@ Shader "HoyoToon/Star Rail/Character"
         [SmallTexture]_MaterialValuesPackLUT ("Mat Pack LUT--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialValuesLUT==1.0}}", 2D) = "white" {}
         [Toggle] _FilterLight ("Limit Spot/Point Light Intensity", Float) = 1 // because VRC world creators are fucking awful at lighting you need to do shit like this to not blow your models the fuck up
         // on by default >:(
+        [Toggle] _backfdceuv2 ("Back Face Use UV2", float) = 1
+        [HideInInspector] m_start_secondarymain("Secondary Texture", Float) = 0
+        [Toggle] _UseSecondaryTex ("Enable Secondary Diffuse", float) = 0
+        _SecondaryDiff ("Secondary Diffuse Texture", 2D) = "white" {}
+        _SecondaryFade ("Fade to Secondary", Range(0,1)) = 0
+        [HideInInspector] m_end_secondarymain("", Float) = 0
         [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
         [Toggle]_IsTransparent ("Enable Transparency", float) = 0
         [Toggle] _EnableAlphaCutoff ("Enable Alpha Cutoff", Float) = 0
@@ -358,17 +364,20 @@ Shader "HoyoToon/Star Rail/Character"
         [HideInInspector] m_end_caustic ("", Float) = 0 
         [HideInInspector] m_start_dissolve("Dissolve", Float) = 0
         [Toggle] _DissoveONM ("Enable Dissolve", Float) = 0.0
-        _DissolveRateM ("Dissolve Rate", Range(0.0, 1.0)) = 0.0
-        _DissolveMap ("Distortion Map", 2D) = "white" { }
-        _DissolveMask ("Dissolve Mask", 2D) = "white" { }
-        _DistortionSTM ("Distortion Scale/Offset", Vector) = (2.0, 2.0, 0.0, 0.0)
-        _DissolveSMT ("Dissolve Map Scale/Offset", Vector) = (2.0, 2.0, 0.0, 0.0)
-        _DissolveDistortionIntensityM ("Distortion Intensity", Float) = 0.5
-        _DissolveMapAddM ("Dissolve Map Threshold Offset", Float) = 0.83
-        _DissolveUVM ("Dissolve UV Offset", Range(0.0, 1.0)) = 0.0
-        _DissolveUVSpeedM ("Dissolve UV Speed ", Vector) = (0.0, 0.1, 0.0, -0.1)
-        _DissolveComponentM ("Mask Channel Selector", Vector) = (1.0, 1.0, 0.0, 0)
-        [HideInInspector]m_start_disposition("Dissolve Position & Offsets", Float) = 0
+        [Enum(Off, 0, Simple, 1, Advanced, 2)] _DissolveMode ("Dissolve Mode--{condition_show:{type:PROPERTY_BOOL,data:_DissoveONM==1.0}}", Float) = 0
+        [Toggle] _DissolveClip ("Enable Dissolve Clip--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0.0
+        _DissolveRateM ("Dissolve Rate--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Range(0.0, 1.0)) = 0.0
+        _DissolveMap ("Distortion Map--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", 2D) = "white" { }
+        _DissolveMask ("Dissolve Mask--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", 2D) = "white" { }
+        [Toggle] _InvertDissovle ("Invert Dissolve Mask--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0.0
+        _DistortionSTM ("Distortion Scale/Offset--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Vector) = (2.0, 2.0, 0.0, 0.0)
+        _DissolveSMT ("Dissolve Map Scale/Offset--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Vector) = (2.0, 2.0, 0.0, 0.0)
+        _DissolveDistortionIntensityM ("Distortion Intensity--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0.5
+        _DissolveMapAddM ("Dissolve Map Threshold Offset--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0.83
+        _DissolveUVM ("Dissolve UV Offset--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Range(0.0, 1.0)) = 0.0
+        _DissolveUVSpeedM ("Dissolve UV Speed--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Vector) = (0.0, 0.1, 0.0, -0.1)
+        _DissolveComponentM ("Mask Channel Selector--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Vector) = (1.0, 1.0, 0.0, 0)
+        [HideInInspector]m_start_disposition("Dissolve Position & Offsets--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0
         _DissoveDirecMaskM ("Dissolve Mask Direction", Float) = -0.36
         _DissolvePosMaskPosM ("Dissolve Mask Position", Vector) = (1.0, 0.0, 0.0, 1.0)
         [Toggle]_DissolvePosMaskWorldONM ("Dissolve Mask World Position", Float) = 1
@@ -377,7 +386,7 @@ Shader "HoyoToon/Star Rail/Character"
         [Toggle]_DissolvePosMaskFilpOnM ("Dissolve Position Mask Flip", Float) = 0.0
         [Toggle]_DissolvePosMaskOnM ("Dissolve Position Mask On", Float) = 1.0
         [HideInInspector]m_end_disposition("", Float) = 0
-        [HideInInspector] m_start_disoutline("Dissolve Border", Float) = 0
+        [HideInInspector] m_start_disoutline("Dissolve Border--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0
         [HDR] _DissolveOutlineColor1M (" Dissolve Outline Color 1", Color) = (0.466358513, 3.10380745, 4.24164248, 1.0)
         [HDR] _DissolveOutlineColor2M ("Dissolve Outline Color 2", Color) = (0.0, 0.0, 0.0, 0.0)
         _DissolveOutlineSize1M ("Dissolve Outline Size 1", Float) = 0.02
@@ -385,6 +394,26 @@ Shader "HoyoToon/Star Rail/Character"
         _DissolveOutlineSmoothStepM ("Dissolve Outline Smoothstep ", Vector) = (0.0, 0.0, 0.0, 0.0)
         _DissolveOutlineOffsetM ("Dissolve Outline Offset", Float) = 1.0
         [HideInInspector] m_end_disoutline("", Float) = 0.0
+       
+        // simple dissolve options
+        _DissolveSimpleRate ("Dissolve Rate--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Range(0.0, 1.0)) = 0.0
+        [Toggle] _SimpleDissolveClip ("Enable Dissolve Clip--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0.0
+        _DissolveClipRate ("Dissolve Clip Rate--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Range(0.0, 1.0)) = 0.0
+        [Enum(UV0, 0, UV1, 1, UV2, 2)] _DissolveUVChannel ("Dissolve UV Channel--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0
+        [Toggle] _DisableDissolveGradient ("Disable Dissolve Gradient--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0.0
+        [Toggle] _InvertGradient ("Invert Dissolve Gradient--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0.0
+        _DissolveGradientMask ("Dissolve Gradient Mask--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", 2D) = "white" {}
+        _DissolveAnimTex ("Dissolve Distortion Texture--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", 2D) = "white" {}	
+        _DissolveAnimSO ("Dissolve Distortion Scale|Offset--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (1.0, 1.0, 0.0, 0.0)
+        _DissolveAnimSpeed ("Dissolve Distortion Speed--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Range(-5.00, 5.00)) = 1.0
+        _DissolveGradientOffset ("Dissolve Gradient Offset--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0.0
+        _DissolveAnimDirection ("Dissolve Distortion Direction | XY --{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 0.0, 0.0, 0.0)
+        _DissovleFadeSmoothstep ("Dissolve Fade Smoothstep | X = min | Y = max--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 1.0, 0.0, 0.0)		
+        [Toggle]_DissolveUsePosition ("Dissolve Use Position--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0.0
+        [Toggle] _UseWorldPosDissolve ("Dissolve Use World Position--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_DissolveMode==1.0},condition2:{type:PROPERTY_BOOL,data:_DissolveUsePosition==1.0}}}", Float) = 0.0
+        _DissolveFadeDirection ("Dissolve Fade Direction | XYZ --{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 0.0, 0.0, 0.0)
+        _DissovlePosFadeSmoothstep ("Dissolve Position Fade Smoothstep | X = min | Y = max--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 1.0, 0.0, 0.0)		
+
         [HideInInspector] m_end_dissolve("", Float) = 0
         // Hue Controls
         [HideInInspector] m_start_hueshift("Hue Shifting", Float) = 0
@@ -505,6 +534,7 @@ Shader "HoyoToon/Star Rail/Character"
         // -------------------------------------------
         // TEXTURES AND SAMPLERS
         Texture2D _MainTex; 
+        Texture2D _SecondaryDiff; 
         Texture2D _LightMap;
         Texture2D _DiffuseRampMultiTex;
         Texture2D _DiffuseCoolRampMultiTex;
@@ -517,9 +547,13 @@ Shader "HoyoToon/Star Rail/Character"
         Texture2D _MaskTex;
         Texture2D _DissolveMap;
         Texture2D _DissolveMask;
+        Texture2D _DissolveGradientMask;
+        Texture2D _DissolveAnimTex;
         Texture2D _HueMaskTexture;
+
         float4 _CausTexture_ST;
         SamplerState sampler_DissolveMap;
+        SamplerState sampler_DissolveGradientMask;
         SamplerState sampler_MaterialValuesPackLUT;
         SamplerState sampler_MainTex;
         SamplerState sampler_LightMap;
@@ -527,6 +561,7 @@ Shader "HoyoToon/Star Rail/Character"
         SamplerState sampler_FaceMap;
 
         UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+
         
         // MATERIAL STATES
         bool _BaseMaterial;
@@ -550,6 +585,11 @@ Shader "HoyoToon/Star Rail/Character"
         float4 _Color5;
         float4 _Color6;
         float4 _Color7;
+        float _backfdceuv2;
+
+        // secondary 
+        float _UseSecondaryTex;
+        float _SecondaryFade;
 
         // alpha cutoff 
         float _EnableAlphaCutoff;
@@ -718,10 +758,13 @@ Shader "HoyoToon/Star Rail/Character"
         float _RimShadowFeather7;
 
         // dissolve
+        float  _DissolveMode;
         float _DissoveONM;
+        float _DissolveClip;
         float _DissolveRateM;
         float4 _DissolveSTM;
         float4 _DistortionSTM;
+        float _InvertDissovle;
         float _DissolveDistortionIntensityM;
         float _DissolveOutlineSize1M;
         float _DissolveOutlineSize2M;
@@ -743,6 +786,25 @@ Shader "HoyoToon/Star Rail/Character"
         float4 _DissolveDiretcionXYZM;
         float4 _DissolveCenterM;
         float _DissolvePosMaskGlobalOnM;
+
+        // simple dissolve paramaters`
+        float4 _DissolveAnimSO;
+        float _ReverseRate;
+        float _DisableDissolveGradient;
+        float _InvertGradient;
+        float _UseWorldPosDissolve;
+        float _DissolveSimpleRate;
+        float _DissolveUVChannel;
+        float _SimpleDissolveClip;
+        float _DissolveAnimSpeed;
+        float _DissolveGradientOffset;
+        float4 _DissolveAnimDirection;
+        float4 _DissovleFadeSmoothstep;
+        float4 _DissovlePosFadeSmoothstep;
+        float _DissolveUsePosition;
+        float4 _DissolveFadeDirection;
+        float _FadeToSecondary;
+        float _DissolveClipRate;
     
         // emission properties
         int _EnableEmission;
@@ -891,9 +953,12 @@ Shader "HoyoToon/Star Rail/Character"
         uniform float4x4 _LightMatrix0;
 
 
+
         #include "Includes/HoyoToonStarRail-common.hlsl"
 
         ENDHLSL
+
+  
 
         Pass
         {

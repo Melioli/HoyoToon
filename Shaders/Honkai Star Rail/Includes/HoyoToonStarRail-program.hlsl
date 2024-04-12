@@ -26,7 +26,17 @@ vs_out vs_base(vs_in v)
     // o.uv_2 = float4(v.uv_2.xy, v.uv_3.xy);
     o.vertex = v.vertex;
 
-    dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_1.xy, o.dis_pos, o.dis_uv);
+    if(_DissoveONM && (_DissolveMode == 2.0))
+    {
+        dissolve_vertex(pos_ws, v.vertex, v.uv_1, v.uv_1, o.dis_pos, o.dis_uv);
+    } 
+    else if(_DissoveONM && (_DissolveMode == 1.0))
+    {
+        o.dis_uv = float4(v.uv_2, v.uv_3);
+        o.dis_pos = v.vertex; // local pos first 
+        if(_UseWorldPosDissolve) o.dis_pos = pos_ws; // world pos if needed
+    }
+
     TRANSFER_SHADOW(o)
     return o;
 }
@@ -123,7 +133,16 @@ vs_out vs_edge(vs_in v)
     o.v_col = v.v_col; 
     o.ws_pos = mul(unity_ObjectToWorld, v.vertex);
 
-    dissolve_vertex(o.ws_pos, o.pos, v.uv_0, v.uv_0, o.dis_pos, o.dis_uv);
+    if(_DissoveONM && (_DissolveMode == 2.0))
+    {
+        dissolve_vertex(o.ws_pos, o.pos, v.uv_1, v.uv_1, o.dis_pos, o.dis_uv);
+    } 
+    else if(_DissoveONM && (_DissolveMode == 1.0))
+    {
+        o.dis_uv = float4(v.uv_2, v.uv_3);
+        o.dis_pos = v.vertex; // local pos first 
+        if(_UseWorldPosDissolve) o.dis_pos = o.ws_pos; // world pos if needed
+    }
 
     return o;
 }
@@ -139,7 +158,17 @@ shadow_out vs_shadow(shadow_in v)
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
     o.pos = pos_wvp;
     o.uv_a = float4(v.uv_0.xy, v.uv_1.xy);
-    dissolve_vertex(pos_ws, v.vertex, v.uv_0, v.uv_0, o.dis_pos, o.dis_uv);
+    if(_DissoveONM && (_DissolveMode == 2.0))
+    {
+        dissolve_vertex(pos_ws, v.vertex, v.uv_1, v.uv_1, o.dis_pos, o.dis_uv);
+    } 
+    else if(_DissoveONM && (_DissolveMode == 1.0))
+    {
+        o.dis_uv = float4(v.uv_2, (float2)0.0f);
+        o.dis_pos = v.vertex; // local pos first 
+        if(_UseWorldPosDissolve) o.dis_pos = o.ws_pos; // world pos if needed
+    }
+
     TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
     return o;
 } 
@@ -154,7 +183,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // FIX POTENTIAL ISSUES WITH ALPHA CLIPPING 
     if(_IsTransparent) _AlphaTestThreshold = 0.0f;
 
-    if(_DissoveONM) dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy);
+    if(_DissoveONM && (_DissolveMode == 2.0)) dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.zw);
 
     // INITIALIZE VERTEX SHADER INPUTS : 
     float3 normal    = normalize(i.normal);
@@ -173,7 +202,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     // MATERIAL COLOR :
     float4 color = (_HairMaterial) ? _Color0 * _Color : _Color;
 
-    if(!vface) // use uv2 if vface is false
+    if(!vface && _backfdceuv2) // use uv2 if vface is false
     { // so basically if its a backfacing face
         uv.xy = i.uv.zw;
         color = _BackColor;
@@ -196,11 +225,19 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
+    float4 secondary = _SecondaryDiff.Sample(sampler_MainTex, uv);
     float4 lightmap = _LightMap.Sample(sampler_LightMap, uv);
     float lightmap_alpha = _LightMap.Sample(sampler_LightMap, i.uv.xy).w;
     float4 facemap = _FaceMap.Sample(sampler_FaceMap, uv);
     float4 faceexp = _FaceExpression.Sample(sampler_LightMap, uv);
     float4 emistex = _EmissionTex.Sample(sampler_LightMap, uv);
+
+    if(_UseSecondaryTex)
+    {
+        diffuse = lerp(diffuse, secondary, _SecondaryFade);
+    }
+
+
 
     float diffuse_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _DiffuseMaskSource);
     float rim_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _RimMaskSource);
@@ -211,7 +248,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         rim_mask = 1.0f;
         emission_mask = 1.0f;
     }
-    
     
 
    
@@ -577,8 +613,8 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             out_color.xyz = out_color.xyz + caus;
         }
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
-
         if(_DebugMode && (_DebugLights == 1)) out_color.xyz = 0.0f;
+
     #endif
     #ifdef _IS_PASS_LIGHT
         if(_FaceMaterial) normal = float3(0.5f, 0.5f, 1.0f);
@@ -754,15 +790,21 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         if(_DebugFaceVector == 3) return float4(UnityObjectToWorldDir(_headUpVector.xyz), 1.0f);
         if(_DebugHairFade == 1) return float4(hair_alpha.xxx, 1.0f); 
     } 
-    if(_DissoveONM) out_color.xyz = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, uv, out_color);
+    if(_DissoveONM && (_DissolveMode == 2.0)) out_color.xyzw = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.zw, out_color);
+    if((_DissoveONM) && (_DissolveMode == 1.0f))
+    {
+        simple_dissolve(out_color.xyzw, i.uv.xy, i.uv.zw, i.dis_uv.xy, i.dis_pos, out_color.xyz, out_color.w);
+        clip(out_color.w - _DissolveClipRate);
+    }
+    
     return out_color;
 }
 
 float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
-    float2 uv      = i.uv.xy;
+    float2 uv  = i.uv.xy;
 
-    if(_DissoveONM) dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy);
+    if(_DissoveONM && (_DissolveMode == 2.0)) dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy);
 
     float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
     float alpha = _MainTex.Sample(sampler_MainTex, uv).w;
@@ -792,10 +834,16 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float outline_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _OutlineMaskSource);
     if(!_UseHueMask) outline_mask = 1.0f;
     if(_EnableOutlineHue) out_color.xyz = hue_shift(out_color.xyz, material, _OutlineHue, _OutlineHue2, _OutlineHue3, _OutlineHue4, _OutlineHue5, _OutlineHue6, _OutlineHue7, _OutlineHue8, _GlobalOutlineHue, _AutomaticOutlineShift, _ShiftOutlineSpeed, outline_mask);
-    if(_DissoveONM)out_color.xyz = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy, out_color);
+    if(_DissoveONM && (_DissolveMode == 2.0)) out_color.xyzw = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy, out_color);
+    if(_DissoveONM && (_DissolveMode == 1.0))
+    {
+        simple_dissolve(out_color.xyzw, i.uv.xy, i.uv.zw, i.dis_uv.xy, i.dis_pos, out_color.xyz, out_color.a);
+        clip(out_color.a - (_DissolveClipRate + 0.1f));
+    } 
     if(i.v_col.w < 0.05f) clip(-1); // discard all pixels with the a vertex color alpha value of less than 0.05f
     // this fixes double sided meshes for hsr having bad outlines
     if(_EnableAlphaCutoff) clip(alpha - _AlphaCutoff);
+    
     return out_color;
 }
 
@@ -808,12 +856,13 @@ float4 ps_shadow(shadow_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 
     float4 out_color = (float4)0.0f;
 
-    if(_DissoveONM)
+    if(_DissoveONM && (_DissolveMode == 2.0))
     {
         dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, uv);
         out_color.xyz = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, uv, out_color);
         out_color.xyz = (float3)0.0f;
     }
+   
 
     
     if(_EnableAlphaCutoff) clip(alpha - saturate(_AlphaTestThreshold));
