@@ -7,12 +7,11 @@ Shader "HoyoToon/Genshin/Character"
 		[HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
 		[HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
 		[HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
-        [HideInInspector] footer_discord ("{texture:{name:hoyomeliverse},action:{type:URL,data:https://vrchat.com/home/world/wrld_3921fce9-c4c6-4ea4-ad0d-83c6d16a9fbf},hover:Meliverse Avatars}", Float) = 0
         //Header End
         
 
         //Material Type
-        [HoyoWideEnum(Base, 0, Face, 1, Weapon, 2)]variant_selector("Material Type--{on_value_actions:[
+        [HoyoToonWideEnum(Base, 0, Face, 1, Weapon, 2)]variant_selector("Material Type--{on_value_actions:[
 		{value:0,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=0.0}]},
 		{value:1,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=1.0}, {type:SET_PROPERTY,data:_UseWeapon=0.0}]},
         {value:2,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=1.0}
@@ -539,7 +538,7 @@ Shader "HoyoToon/Genshin/Character"
         [Enum(Off, 0, Factor, 1, Color, 2, Both, 3)] _DebugEmission ("Emission Debug Mode", Float) = 0 
         [Enum(Off, 0, Forward, 1, Right, 2)] _DebugFaceVector ("Facing Vector Debug Mode", Float) = 0
         [Enum(Off, 0, On, 1)] _DebugLights ("Lights Debug Mode", Float) = 0
-        [HoyoWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, All(Color Coded), 6)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0
+        [HoyoToonWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, All(Color Coded), 6)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0
         [HideInInspector] m_end_debugOptions("Debug", Float) = 0
         [HideInInspector] m_end_renderingOptions("Rendering Options", Float) = 0
         //Rendering Options End
@@ -1034,5 +1033,5 @@ Shader "HoyoToon/Genshin/Character"
             ENDHLSL
         }   
     }
-    CustomEditor "Hoyo.ShaderEditor"
+    CustomEditor "HoyoToon.ShaderEditor"
 }

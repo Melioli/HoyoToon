@@ -8,10 +8,9 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
         [HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
         [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
         [HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
-        [HideInInspector] footer_discord ("{texture:{name:hoyomeliverse},action:{type:URL,data:https://vrchat.com/home/world/wrld_3921fce9-c4c6-4ea4-ad0d-83c6d16a9fbf},hover:Meliverse Avatars}", Float) = 0
         //Header End
 
-        [HoyoWideEnum(Base, 0, Face, 1, Hair, 2, Eye, 3)]variant_selector("Material Type--{on_value_actions:[
+        [HoyoToonWideEnum(Base, 0, Face, 1, Hair, 2, Eye, 3)]variant_selector("Material Type--{on_value_actions:[
             {value:0,actions:[{type:SET_PROPERTY,data:_StencilPassA=0}, {type:SET_PROPERTY,data:_StencilPassB=0}, {type:SET_PROPERTY,data:_StencilCompA=8}]},
             {value:0,actions:[{type:SET_PROPERTY,data:_StencilCompB=8}, {type:SET_PROPERTY,data:_StencilRef=0}, {type:SET_PROPERTY,data:render_queue=2000}, {type:SET_PROPERTY,data:render_type=Opaque}]},
 
@@ -370,7 +369,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugFaceMap ("Face Map Debug Mode", Float) = 0
                 [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugExpMap ("Face Expression Map Debug Mode", Float) = 0
                 [Enum(Off, 0, Bump, 1)] _DebugNormalMap ("Normal Map Debug Mode", Float) = 0
-                [HoyoWideEnum(Off, 0, R, 1, G, 2, B, 3, A, 4, RGB, 5)] _DebugVertexColor ("Vertex Color Debug Mode", Float) = 0
+                [HoyoToonWideEnum(Off, 0, R, 1, G, 2, B, 3, A, 4, RGB, 5)] _DebugVertexColor ("Vertex Color Debug Mode", Float) = 0
                 [Enum(Off, 0, On, 1)] _DebugRimLight ("Rim Light Debug Mode", Float) = 0
                 [Enum(Off, 0, Original (Encoded), 1, Original (Raw), 2, Bumped (Encoded), 3, Bumped (Raw), 4)] _DebugNormalVector ("Normals Debug Mode", Float) = 0 
                 [Enum(Off, 0, On, 1)] _DebugTangent ("Tangents/Secondary Normal Debug Mode", Float) = 0
@@ -379,7 +378,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 [Enum(Off, 0, Factor, 1, Color, 2, Both, 3)] _DebugEmission ("Emission Debug Mode", Float) = 0 
                 [Enum(Off, 0, Forward, 1, Right, 2, Up, 3)] _DebugFaceVector ("Facing Vector Debug Mode", Float) = 0
                 [Enum(Off, 0, On, 1)] _DebugLights ("Lights Debug Mode", Float) = 0
-                [HoyoWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, All(Color Coded), 6)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0
+                [HoyoToonWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, All(Color Coded), 6)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0
             [HideInInspector] m_end_debugOptions("Debug", Float) = 0
         
         [HideInInspector] m_end_renderingOptions("Rendering Options", Float) = 0
@@ -827,5 +826,5 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             ENDHLSL
         } 
     }
-    CustomEditor "Hoyo.ShaderEditor"
+    CustomEditor "HoyoToon.ShaderEditor"
 }

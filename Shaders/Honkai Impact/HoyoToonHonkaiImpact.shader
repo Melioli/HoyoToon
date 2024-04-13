@@ -7,11 +7,10 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
         [HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
         [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
         [HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
-        [HideInInspector] footer_discord ("{texture:{name:hoyomeliverse},action:{type:URL,data:https://vrchat.com/home/world/wrld_3921fce9-c4c6-4ea4-ad0d-83c6d16a9fbf},hover:Meliverse Avatars}", Float) = 0
         //Header End
 
         //Material Type
-        [HoyoWideEnum(Base, 0, Face, 1, Hair, 2, Eye, 3)]variant_selector("Material Type--{on_value_actions:[
+        [HoyoToonWideEnum(Base, 0, Face, 1, Hair, 2, Eye, 3)]variant_selector("Material Type--{on_value_actions:[
             {value:0,actions:[{type:SET_PROPERTY,data:_StencilPassA=0}, {type:SET_PROPERTY,data:_StencilPassB=0}, {type:SET_PROPERTY,data:_StencilCompA=8}]},
             {value:0,actions:[{type:SET_PROPERTY,data:_StencilCompB=8}, {type:SET_PROPERTY,data:_StencilRef=0}, {type:SET_PROPERTY,data:render_queue=2000}, {type:SET_PROPERTY,data:render_type=Opaque}]},
 
@@ -36,7 +35,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
         [HideInInspector] _BackColor ("Back Face Color", Color) = (1,1,1,1)
         // Main Alpha
         [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
-        [HoyoWideEnum(None, 0, Alpha, 1, Emission, 2)]_AlphaType("Transparency Type--{on_value_actions:[
+        [HoyoToonWideEnum(None, 0, Alpha, 1, Emission, 2)]_AlphaType("Transparency Type--{on_value_actions:[
             {value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=1}, {type:SET_PROPERTY,data:_DstBlend=0}, {type:SET_PROPERTY,data:render_queue=2000}, {type:SET_PROPERTY,data:render_type=Opaque}]},
 
             {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=5}, {type:SET_PROPERTY,data:_DstBlend=10}, {type:SET_PROPERTY,data:render_queue=2003}, {type:SET_PROPERTY,data:render_type=Opaque}]},
@@ -458,5 +457,5 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
             ENDHLSL
         }
     }
-    CustomEditor "Hoyo.ShaderEditor"
+    CustomEditor "HoyoToon.ShaderEditor"
 }

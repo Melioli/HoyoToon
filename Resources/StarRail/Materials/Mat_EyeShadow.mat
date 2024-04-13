@@ -8,11 +8,12 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Mat_EyeShadow
-  m_Shader: {fileID: 4800000, guid: 9dcddbc35905ef44fa2e2ad4fd00c258, type: 3}
+  m_Shader: {fileID: 4800000, guid: b196fee0fbabd494c81494f39a8192f4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _BACKFDCEUV2_ON
   - _DISSOLVEPOSMASKGLOBALONM_ON
   - _DISSOLVEPOSMASKONM_ON
   - _DISSOLVEPOSMASKWORLDONM_ON
@@ -44,6 +45,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DiffuseRampMultiTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DissolveAnimTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DissolveGradientMask:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -84,6 +93,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaterialValuesPackLUT:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SecondaryDiff:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -135,10 +148,16 @@ Material:
     - _DebugTangent: 0
     - _DebugVertexColor: 0
     - _DiffuseMaskSource: 0
+    - _DisableDissolveGradient: 0
+    - _DissolveAnimSpeed: 1
+    - _DissolveClip: 0
+    - _DissolveClipRate: 0
     - _DissolveDistortionIntensity: 0.01
     - _DissolveDistortionIntensityM: 0.5
+    - _DissolveGradientOffset: 0
     - _DissolveMapAdd: 0
     - _DissolveMapAddM: 0.83
+    - _DissolveMode: 0
     - _DissolveOutlineOffset: 0
     - _DissolveOutlineOffsetM: 1
     - _DissolveOutlineSize1: 0.05
@@ -155,9 +174,12 @@ Material:
     - _DissolvePosMaskWorldONM: 1
     - _DissolveRate: 0
     - _DissolveRateM: 0
+    - _DissolveSimpleRate: 0
     - _DissolveUV: 0
+    - _DissolveUVChannel: 0
     - _DissolveUVM: 0
     - _DissolveUseDirection: 0
+    - _DissolveUsePosition: 0
     - _DissoveDirecMask: 2
     - _DissoveDirecMaskM: -0.36
     - _DissoveON: 0
@@ -208,6 +230,9 @@ Material:
     - _GlobalRimHue: 0
     - _HairBlendSilhouette: 0.5
     - _HairMaterial: 0
+    - _HairSideChoose: 0
+    - _InvertDissovle: 0
+    - _InvertGradient: 0
     - _IsTransparent: 0
     - _LiquidOpaqueness: 1
     - _NoseLinePower: 1
@@ -287,11 +312,13 @@ Material:
     - _RimType7: 1
     - _RimWidth: 1
     - _Rimintensity: 1
+    - _SecondaryFade: 0
     - _ShadowRamp: 1
     - _ShiftColorSpeed: 0
     - _ShiftEmissionSpeed: 0
     - _ShiftOutlineSpeed: 0
     - _ShiftRimSpeed: 0
+    - _SimpleDissolveClip: 0
     - _SpecularIntensity: 1
     - _SpecularIntensity0: 1
     - _SpecularIntensity1: 1
@@ -336,8 +363,11 @@ Material:
     - _UseHairSideFade: 1
     - _UseHueMask: 0
     - _UseMaterialValuesLUT: 0
+    - _UseSecondaryTex: 0
+    - _UseWorldPosDissolve: 0
     - _WobbleX: 0
     - _WobbleZ: 0
+    - _backfdceuv2: 1
     - footer_discord: 0
     - footer_github: 0
     - m_end_caustic: 0
@@ -348,6 +378,7 @@ Material:
     - m_end_dissolve: 0
     - m_end_faceexpression: 0
     - m_end_faceshading: 0
+    - m_end_facingdirection: 0
     - m_end_glass: 0
     - m_end_glowhue: 0
     - m_end_hair: 0
@@ -369,6 +400,7 @@ Material:
     - m_end_outlines: 0
     - m_end_renderingOptions: 0
     - m_end_rimhue: 0
+    - m_end_secondarymain: 0
     - m_end_specialeffects: 0
     - m_end_specialeffectsemission: 0
     - m_end_specular: 0
@@ -376,6 +408,7 @@ Material:
     - m_end_specularintensity: 0
     - m_end_specularroughness: 0
     - m_end_specularshininess: 0
+    - m_end_stencilfade: 0
     - m_end_stockings: 0
     - m_end_weapondissolve: 0
     - m_start_caustic: 0
@@ -386,6 +419,7 @@ Material:
     - m_start_dissolve: 0
     - m_start_faceexpression: 0
     - m_start_faceshading: 0
+    - m_start_facingdirection: 0
     - m_start_glass: 0
     - m_start_glowhue: 0
     - m_start_hair: 0
@@ -407,6 +441,7 @@ Material:
     - m_start_outlines: 0
     - m_start_renderingOptions: 0
     - m_start_rimhue: 0
+    - m_start_secondarymain: 0
     - m_start_specialeffects: 0
     - m_start_specialeffectsemission: 0
     - m_start_specular: 0
@@ -414,10 +449,10 @@ Material:
     - m_start_specularintensity: 0
     - m_start_specularroughness: 0
     - m_start_specularshininess: 0
+    - m_start_stencilfade: 0
     - m_start_stockings: 0
     - m_start_weapondissolve: 0
-    - shader_is_using_hoyeditor: 69
-    - shader_is_using_thry_editor: 69
+
     - shader_master_label: 0
     - variant_selector: 2
     m_Colors:
@@ -437,10 +472,13 @@ Material:
     - _Color6: {r: 1, g: 1, b: 1, a: 1}
     - _Color7: {r: 1, g: 1, b: 1, a: 1}
     - _DarkColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DissolveAnimDirection: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveAnimSO: {r: 1, g: 1, b: 0, a: 0}
     - _DissolveCenter: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveComponent: {r: 1, g: 0, b: 0, a: 0}
     - _DissolveComponentM: {r: 1, g: 1, b: 0, a: 0}
     - _DissolveDiretcionXYZ: {r: 0, g: 0, b: 0, a: 0}
+    - _DissolveFadeDirection: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveOutlineColor1: {r: 1, g: 1, b: 1, a: 1}
     - _DissolveOutlineColor1M: {r: 0.4663585, g: 3.1038074, b: 4.2416425, a: 1}
     - _DissolveOutlineColor2: {r: 0, g: 0, b: 0, a: 0}
@@ -455,6 +493,8 @@ Material:
     - _DissolveST: {r: 1, g: 1, b: 0, a: 0}
     - _DissolveUVSpeed: {r: 0, g: 0, b: 0, a: 0}
     - _DissolveUVSpeedM: {r: 0, g: 0.1, b: 0, a: -0.1}
+    - _DissovleFadeSmoothstep: {r: 0, g: 1, b: 0, a: 0}
+    - _DissovlePosFadeSmoothstep: {r: 0, g: 1, b: 0, a: 0}
     - _DistortionST: {r: 1, g: 1, b: 0, a: 0}
     - _DistortionSTM: {r: 2, g: 2, b: 0, a: 0}
     - _ES_RimLightOffset: {r: 0, g: 0, b: 0, a: 0}

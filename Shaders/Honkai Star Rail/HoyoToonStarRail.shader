@@ -1,18 +1,19 @@
 Shader "HoyoToon/Star Rail/Character"
 {
-    Properties
-    {
+    Properties 
+  { 
+      [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
+      [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0
         
         //Header
         [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Star Rail</color></i></b>✧", Float) = 0
 		[HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
         [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
 		[HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
-        [HideInInspector] footer_discord ("{texture:{name:hoyomeliverse},action:{type:URL,data:https://vrchat.com/home/world/wrld_3921fce9-c4c6-4ea4-ad0d-83c6d16a9fbf},hover:Meliverse Avatars}", Float) = 0
         //Header End
 
         //Material Type
-        [HoyoWideEnum(Base, 0, Face, 1, EyeShadow, 2, Hair, 3)]variant_selector("Material Type--{on_value_actions:[
+        [HoyoToonWideEnum(Base, 0, Face, 1, EyeShadow, 2, Hair, 3)]variant_selector("Material Type--{on_value_actions:[
 		{value:0,actions:[{type:SET_PROPERTY,data:_BaseMaterial=1.0}, {type:SET_PROPERTY,data:_FaceMaterial=0.0}, {type:SET_PROPERTY,data:_EyeShadowMat=0.0}, {type:SET_PROPERTY,data:_HairMaterial=0.0}]},
         {value:0,actions:[{type:SET_PROPERTY,data:_CullMode=0}, {type:SET_PROPERTY,data:_SrcBlend=5}, {type:SET_PROPERTY,data:_DstBlend=10}]},
         {value:0,actions:[{type:SET_PROPERTY,data:_StencilPassA=2}, {type:SET_PROPERTY,data:_StencilPassB=0}, {type:SET_PROPERTY,data:_StencilCompA=0}]},
@@ -497,8 +498,8 @@ Shader "HoyoToon/Star Rail/Character"
         [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugLightMap ("Light Map Debug Mode", Float) = 0
         [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugFaceMap ("Face Map Debug Mode", Float) = 0
         [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugFaceExp ("Face Expression Map Debug Mode", Float) = 0
-        [HoyoWideEnum(Off, 0, 1st, 1, 2nd, 2, 3rd, 3, 4th, 4, 5th, 5, 6th, 6, 7th, 7, 8th, 8)] _DebugMLut ("Material LUT Debug Mode", Float) = 0
-        [HoyoWideEnum(Off, 0, R, 1, G, 2, B, 3, A, 4, RGB, 5, RGBA, 6)] _DebugMLutChannel ("Material LUT Channel Debug Mode", Float) = 0        
+        [HoyoToonWideEnum(Off, 0, 1st, 1, 2nd, 2, 3rd, 3, 4th, 4, 5th, 5, 6th, 6, 7th, 7, 8th, 8)] _DebugMLut ("Material LUT Debug Mode", Float) = 0
+        [HoyoToonWideEnum(Off, 0, R, 1, G, 2, B, 3, A, 4, RGB, 5, RGBA, 6)] _DebugMLutChannel ("Material LUT Channel Debug Mode", Float) = 0        
         [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugVertexColor ("Vertex Color Debug Mode", Float) = 0
         [Enum(Off, 0, On, 1)] _DebugRimLight ("Rim Light Debug Mode", Float) = 0
         [Enum(Off, 0, Original (Encoded), 1, Original (Raw), 2)] _DebugNormalVector ("Normals Debug Mode", Float) = 0 
@@ -506,7 +507,7 @@ Shader "HoyoToon/Star Rail/Character"
         [Enum(Off, 0, On, 1)] _DebugSpecular ("Specular Debug Mode", Float) = 0
         [Enum(Off, 0, Factor, 1, Color, 2, Both, 3)] _DebugEmission ("Emission Debug Mode", Float) = 0 
         [Enum(Off, 0, Forward, 1, Right, 2, Up, 3)] _DebugFaceVector ("Facing Vector Debug Mode", Float) = 0
-        [HoyoWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, Material ID 6, 6, Material ID 7, 7, Material ID 8, 8,All(Color Coded), 9)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0        
+        [HoyoToonWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, Material ID 6, 6, Material ID 7, 7, Material ID 8, 8,All(Color Coded), 9)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0        
         [Enum(Off, 0, On, 1)] _DebugLights ("Lights Debug Mode", Float) = 0
         [Enum(Off, 0, On, 1)] _DebugHairFade ("Hair Fade Debug Mode", Float) = 0
         [HideInInspector] m_end_debugOptions("Debug", Float) = 0
@@ -1073,5 +1074,5 @@ Shader "HoyoToon/Star Rail/Character"
         } 
         // UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
-        CustomEditor "Hoyo.ShaderEditor"
+        CustomEditor "HoyoToon.ShaderEditor"
 }
