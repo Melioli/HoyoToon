@@ -279,7 +279,14 @@ public class HoyoToonHandler
             {
                 if (newMaterial.HasProperty(propertyName))
                 {
+
                     JObject textureObject = propertyValue["m_Texture"].ToObject<JObject>();
+
+                    if (!textureObject.ContainsKey("Name"))
+                    {
+                        throw new Exception("You're using outdated materials. Please download/extract using the latest AssetStudio.");
+                    }
+
                     string textureName = textureObject["Name"].Value<string>();
 
                     if (!string.IsNullOrEmpty(textureName))
