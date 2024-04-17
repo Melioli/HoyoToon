@@ -191,7 +191,7 @@ public class HoyoToonHandler
                 }
                 else
                 {
-                    Debug.LogError("Materials folder path is null.");
+                    Debug.LogError("<color=purple>[Hoyotoon]</color> Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
                 }
             }
         }
@@ -340,7 +340,7 @@ public class HoyoToonHandler
         }
         else
         {
-            Debug.LogError("No matching shader found for " + jsonFileName);
+            Debug.LogError("<color=purple>[Hoyotoon]</color> No compatible shader found for " + jsonFileName);
         }
     }
 

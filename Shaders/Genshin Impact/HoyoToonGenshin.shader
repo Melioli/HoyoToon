@@ -1,7 +1,7 @@
 Shader "HoyoToon/Genshin/Character"
 {
-    Properties
-    {
+    Properties 
+  { 
         //Header
         [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Genshin Impact</color></i></b>✧", Float) = 0
 		[HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
