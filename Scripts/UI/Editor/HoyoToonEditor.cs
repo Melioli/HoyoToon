@@ -84,14 +84,6 @@ namespace HoyoToon
         private DefineableAction[] _onSwapToActions = null;
 
         public bool IsDrawing { get; private set; } = false;
-        public bool IsPresetEditor { get; private set; } = false;
-        public bool IsSectionedPresetEditor
-        {
-            get
-            {
-                return IsPresetEditor && Presets.IsMaterialSectionedPreset(Materials[0]);
-            }
-        }
 
         public bool HasMixedCustomPropertySuffix
         {
@@ -386,8 +378,6 @@ namespace HoyoToon
             RenamedPropertySuffix = ShaderOptimizer.GetRenamedPropertySuffix(Materials[0]);
             HasCustomRenameSuffix = ShaderOptimizer.HasCustomRenameSuffix(Materials[0]);
 
-            IsPresetEditor = Materials.Length == 1 && Presets.ArePreset(Materials);
-
             //collect shader properties
             CollectAllProperties();
 
@@ -508,7 +498,6 @@ namespace HoyoToon
 
             GUITopBar();
             GUISearchBar();
-            Presets.PresetEditorGUI(this);
             ShaderTranslator.SuggestedTranslationButtonGUI(this);
 
             //PROPERTIES

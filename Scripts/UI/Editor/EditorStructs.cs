@@ -117,7 +117,6 @@ namespace HoyoToon
         public bool DoesReferencePropertyExist = false;
         public bool IsHidden = false;
         public bool IsAnimatable = true;
-        public bool IsPreset = false;
         public bool ExemptFromLockedDisabling = false;
         public bool IsAnimated = false;
         public bool IsRenaming = false;
@@ -154,7 +153,6 @@ namespace HoyoToon
             this.XOffset = xOffset;
             this.Content = new GUIContent(displayName);
             this.tooltip = new BetterTooltips.Tooltip(tooltip);
-            this.IsPreset = shaderEditor.IsPresetEditor && Presets.IsPreset(shaderEditor.Materials[0], this);
         }
 
         public ShaderPart(ShaderEditor shaderEditor, MaterialProperty prop, int xOffset, string displayName, string optionsRaw, int propertyIndex)
@@ -164,7 +162,6 @@ namespace HoyoToon
             this.MaterialProperty = prop;
             this.XOffset = xOffset;
             this.Content = new GUIContent(displayName);
-            this.IsPreset = shaderEditor.IsPresetEditor && Presets.IsPreset(shaderEditor.Materials[0], this);
 
             if (MaterialProperty == null)
                 return;
@@ -398,11 +395,6 @@ namespace HoyoToon
                         contextMenu.AddItem(new GUIContent("Locking Explanation"), false, () => { Application.OpenURL("https://www.youtube.com/watch?v=asWeDJb5LAo&ab_channel=poiyomi"); });
                         contextMenu.AddSeparator("");
                     }
-                    if (ShaderEditor.Active.IsPresetEditor)
-                    {
-                        contextMenu.AddItem(new GUIContent("Is part of preset"), IsPreset, ToggleIsPreset);
-                        contextMenu.AddSeparator("");
-                    }
                     contextMenu.AddItem(new GUIContent("Copy Property Name"), false, () => { EditorGUIUtility.systemCopyBuffer = MaterialProperty.name; });
                     contextMenu.AddItem(new GUIContent("Copy Animated Property Name"), false, () => { EditorGUIUtility.systemCopyBuffer = GetAnimatedPropertyName(); });
                     contextMenu.AddItem(new GUIContent("Copy Animated Property Path"), false, CopyPropertyPath);
@@ -611,13 +603,6 @@ namespace HoyoToon
         }
 #endif
 
-        void ToggleIsPreset()
-        {
-            IsPreset = !IsPreset;
-            if (MaterialProperty != null) Presets.SetProperty(ActiveShaderEditor.Materials[0], this, IsPreset);
-            ShaderEditor.RepaintActive();
-        }
-
         void CopyPropertyPath()
         {
             string path = GetAnimatedPropertyName();
@@ -764,7 +749,6 @@ namespace HoyoToon
             }
 
             if (IsAnimatable && IsAnimated) DrawLockedAnimated();
-            if (IsPreset) DrawPresetProperty();
 
             tooltip.ConditionalDraw(DrawingData.TooltipCheckRect);
 
@@ -787,13 +771,6 @@ namespace HoyoToon
             //GUI.DrawTexture(r, is_renaming ? Styles.texture_animated_renamed : Styles.texture_animated, ScaleMode.StretchToFill, true);
             if (IsRenaming) GUI.Label(r, "RA", Styles.animatedIndicatorStyle);
             else GUI.Label(r, "A", Styles.animatedIndicatorStyle);
-        }
-
-        private void DrawPresetProperty()
-        {
-            Rect r = new Rect(3, DrawingData.IconsPositioningHeight, 8, 16);
-            //GUI.DrawTexture(r, Styles.texture_preset, ScaleMode.StretchToFill, true);
-            GUI.Label(r, "P", Styles.presetIndicatorStyle);
         }
 
         protected void ExecuteOnValueActions(Material[] targets)
@@ -1075,17 +1052,6 @@ namespace HoyoToon
             Rect headerRect = DrawingData.LastGuiObjectHeaderRect;
             if (IsExpanded)
             {
-                if (ShaderEditor.Active.IsSectionedPresetEditor)
-                {
-                    string presetName = Presets.GetSectionPresetName(ShaderEditor.Active.Materials[0], this.MaterialProperty.name);
-                    EditorGUI.BeginChangeCheck();
-                    presetName = EditorGUILayout.DelayedTextField("Preset Name:", presetName);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        Presets.SetSectionPreset(ShaderEditor.Active.Materials[0], this.MaterialProperty.name, presetName);
-                    }
-                }
-
                 EditorGUILayout.Space();
                 EditorGUI.BeginDisabledGroup(DoDisableChildren);
                 foreach (ShaderPart part in parts)
@@ -1171,8 +1137,6 @@ namespace HoyoToon
             buttonRect.width = buttonRect.height;
 
             float right = rect.x + rect.width;
-            buttonRect.x = right - 74;
-            DrawPresetButton(buttonRect, options, e);
             buttonRect.x = right - 56;
             DrawHelpButton(buttonRect, options, e);
             buttonRect.x = right - 38;
@@ -1190,19 +1154,6 @@ namespace HoyoToon
                 {
                     ShaderEditor.Input.Use();
                     if (button.action != null) button.action.Perform(ShaderEditor.Active?.Materials);
-                }
-            }
-        }
-
-        private void DrawPresetButton(Rect rect, PropertyOptions options, Event e)
-        {
-            bool hasPresets = Presets.DoesSectionHavePresets(this.MaterialProperty.name);
-            if (hasPresets)
-            {
-                if (GuiHelper.Button(rect, Styles.icon_style_presets))
-                {
-                    ShaderEditor.Input.Use();
-                    Presets.OpenPresetsMenu(rect, ActiveShaderEditor, true, this.MaterialProperty.name);
                 }
             }
         }

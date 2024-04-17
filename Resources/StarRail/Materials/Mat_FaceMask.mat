@@ -366,7 +366,7 @@ Material:
     - m_start_lightingrimdark: 0
     - m_start_lightingrimsoftness: 0
     - m_start_lightingrimtype: 0
-    - m_start_main: 0
+    - m_start_main: 1
     - m_start_mainalpha: 0
     - m_start_maincolor: 0
     - m_start_outlinecolor: 0

@@ -87,7 +87,7 @@ public class HoyoToonHandler
 
             if (mesh == null)
             {
-                throw new MissingComponentException("The GameObject or its children must have a MeshFilter or SkinnedMeshRenderer component.");
+                throw new MissingComponentException("<color=purple>[Hoyotoon]</color> The GameObject or its children must have a MeshFilter or SkinnedMeshRenderer component.");
             }
 
             selectedAssetPath = AssetDatabase.GetAssetPath(mesh);
@@ -284,7 +284,7 @@ public class HoyoToonHandler
 
                     if (!textureObject.ContainsKey("Name"))
                     {
-                        throw new Exception("You're using outdated materials. Please download/extract using the latest AssetStudio.");
+                        throw new Exception("<color=purple>[Hoyotoon]</color> You're using outdated materials. Please download/extract using the latest AssetStudio.");
                     }
 
                     string textureName = textureObject["Name"].Value<string>();
