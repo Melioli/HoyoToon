@@ -177,7 +177,10 @@ public class HoyoToonHandler
             }
             else
             {
-                string materialsFolderPath = Path.GetDirectoryName(selectedPath) + "/Materials";
+                string directoryName = Path.GetDirectoryName(selectedPath);
+                string materialsFolderPath = new[] { "Materials", "Material" }
+                    .Select(folder => Path.Combine(directoryName, folder))
+                    .FirstOrDefault(path => Directory.Exists(path) && Directory.GetFileSystemEntries(path).Any());
                 if (materialsFolderPath != null)
                 {
                     if (Directory.Exists(materialsFolderPath))

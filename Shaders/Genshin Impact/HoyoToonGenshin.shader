@@ -3,6 +3,7 @@ Shader "HoyoToon/Genshin/Character"
     Properties 
   { 
         //Header
+        [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
         [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Genshin Impact</color></i></b>✧", Float) = 0
 		[HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
 		[HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
