@@ -8,6 +8,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+
 public class HoyoToonHandler
 {
     #region Constants
