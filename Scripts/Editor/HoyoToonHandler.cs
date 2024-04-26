@@ -99,6 +99,10 @@ public class HoyoToonHandler
 
 
         string directoryPath = Path.GetDirectoryName(selectedAssetPath);
+        if (Path.GetExtension(selectedAssetPath) == ".json")
+        {
+            directoryPath = Directory.GetParent(directoryPath).FullName;
+        }
         string texturesPath = Path.Combine(directoryPath, "Textures");
 
         if (Directory.Exists(texturesPath))
