@@ -104,7 +104,10 @@ public class HoyoToonHandler
         {
             directoryPath = Directory.GetParent(directoryPath).FullName;
         }
-        string texturesPath = Path.Combine(directoryPath, "Textures");
+        string texturesPath = Directory.GetDirectories(directoryPath, "Textures", SearchOption.AllDirectories)
+            .FirstOrDefault(path => path.Equals("Textures", StringComparison.OrdinalIgnoreCase)
+                       || path.Contains("Texture", StringComparison.OrdinalIgnoreCase)
+                       || path.Contains("Tex", StringComparison.OrdinalIgnoreCase));
 
         if (Directory.Exists(texturesPath))
         {
