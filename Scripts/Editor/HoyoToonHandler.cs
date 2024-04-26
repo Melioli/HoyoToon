@@ -718,6 +718,9 @@ public class HoyoToonHandler
             outputPath = Path.Combine(outputPath, material.name + ".json");
             GenerateJsonFromMaterial(material, outputPath);
         }
+
+        // Refresh the folder to import the JSON files
+        AssetDatabase.Refresh();
     }
 
     private static void GenerateJsonFromMaterial(Material material, string outputPath)
