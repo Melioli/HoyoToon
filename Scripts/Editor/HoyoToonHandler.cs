@@ -166,35 +166,40 @@ public class HoyoToonHandler
         {
             DetermineBodyType();
             var textureCache = new Dictionary<string, Texture>();
-            UnityEngine.Object selectedObject = Selection.activeObject;
-            string selectedPath = AssetDatabase.GetAssetPath(selectedObject);
-
+            UnityEngine.Object[] selectedObjects = Selection.objects;
             List<string> loadedTexturePaths = new List<string>();
-            if (Path.GetExtension(selectedPath) == ".json")
+
+            foreach (var selectedObject in selectedObjects)
             {
-                // Process the selected JSON file
-                ProcessJsonFile(selectedPath, textureCache, loadedTexturePaths);
-            }
-            else
-            {
-                string directoryName = Path.GetDirectoryName(selectedPath);
-                string materialsFolderPath = new[] { "Materials", "Material" }
-                    .Select(folder => Path.Combine(directoryName, folder))
-                    .FirstOrDefault(path => Directory.Exists(path) && Directory.GetFileSystemEntries(path).Any());
-                if (materialsFolderPath != null)
+                string selectedPath = AssetDatabase.GetAssetPath(selectedObject);
+
+                if (Path.GetExtension(selectedPath) == ".json")
                 {
-                    if (Directory.Exists(materialsFolderPath))
-                    {
-                        string[] jsonFiles = Directory.GetFiles(materialsFolderPath, "*.json");
-                        foreach (string jsonFile in jsonFiles)
-                        {
-                            ProcessJsonFile(jsonFile, textureCache, loadedTexturePaths);
-                        }
-                    }
+                    // Process the selected JSON file
+                    ProcessJsonFile(selectedPath, textureCache, loadedTexturePaths);
                 }
                 else
                 {
-                    Debug.LogError("<color=purple>[Hoyotoon]</color> Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
+                    string directoryName = Path.GetDirectoryName(selectedPath);
+                    string materialsFolderPath = new[] { "Materials", "Material" }
+                        .Select(folder => Path.Combine(directoryName, folder))
+                        .FirstOrDefault(path => Directory.Exists(path) && Directory.GetFileSystemEntries(path).Any());
+
+                    if (materialsFolderPath != null)
+                    {
+                        if (Directory.Exists(materialsFolderPath))
+                        {
+                            string[] jsonFiles = Directory.GetFiles(materialsFolderPath, "*.json");
+                            foreach (string jsonFile in jsonFiles)
+                            {
+                                ProcessJsonFile(jsonFile, textureCache, loadedTexturePaths);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("<color=purple>[Hoyotoon]</color> Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
+                    }
                 }
             }
         }
@@ -217,32 +222,37 @@ public class HoyoToonHandler
         string jsonFileName = Path.GetFileNameWithoutExtension(jsonFile);
 
         Dictionary<string, string> shaderKeys = new Dictionary<string, string>
-    {
-        { "_UtilityDisplay1", GIShader },
-        {"_DisableCGP", GIShader},
-        { "_SPCubeMapIntensity", Hi3Shader },
-        { "_DissolveDistortionIntensity", HSRShader },
-        { "_ScreenLineInst", HSRShader},
-        { "_RampTexV", Hi3P2Shader},
-        { "_MiscGrp", Hi3P2Shader}
-    };
+        {
+            { "_UtilityDisplay1", GIShader },
+            {"_DisableCGP", GIShader},
+            { "_SPCubeMapIntensity", Hi3Shader },
+            { "_DissolveDistortionIntensity", HSRShader },
+            { "_ScreenLineInst", HSRShader},
+            { "_RampTexV", Hi3P2Shader},
+            { "_MiscGrp", Hi3P2Shader}
+        };
 
         Shader shaderToApply = null;
 
-        foreach (var shaderKey in shaderKeys)
+        JToken shaderToken = jsonObject["m_Shader"];
+        if (shaderToken != null && shaderToken["Name"] != null && !string.IsNullOrEmpty(shaderToken["Name"].Value<string>()))
         {
-            JToken texEnvsToken = jsonObject["m_SavedProperties"]["m_TexEnvs"];
-            JToken floatsToken = jsonObject["m_SavedProperties"]["m_Floats"];
+            shaderToApply = Shader.Find(shaderToken["Name"].Value<string>());
+        }
 
-            bool texEnvsContainsKey = ContainsKey(texEnvsToken, shaderKey.Key);
-            bool floatsContainsKey = ContainsKey(floatsToken, shaderKey.Key);
-
-            if (texEnvsContainsKey || floatsContainsKey)
+        if (shaderToApply == null)
+        {
+            foreach (var shaderKey in shaderKeys)
             {
-                Shader shader = Shader.Find(shaderKey.Value);
-                if (shader != null)
+                JToken texEnvsToken = jsonObject["m_SavedProperties"]["m_TexEnvs"];
+                JToken floatsToken = jsonObject["m_SavedProperties"]["m_Floats"];
+
+                bool texEnvsContainsKey = ContainsKey(texEnvsToken, shaderKey.Key);
+                bool floatsContainsKey = ContainsKey(floatsToken, shaderKey.Key);
+
+                if (texEnvsContainsKey || floatsContainsKey)
                 {
-                    shaderToApply = shader;
+                    shaderToApply = Shader.Find(shaderKey.Value);
                     break;
                 }
             }
@@ -692,6 +702,99 @@ public class HoyoToonHandler
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+    }
+
+    [MenuItem("Assets/HoyoToon/Generate Jsons")]
+    public static void GenerateJsonsFromMaterials()
+    {
+        // Get the selected materials
+        Material[] selectedMaterials = Selection.GetFiltered<Material>(SelectionMode.Assets);
+
+        // Iterate over the selected materials
+        foreach (Material material in selectedMaterials)
+        {
+            // Generate the JSON file for each material
+            string outputPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(material));
+            outputPath = Path.Combine(outputPath, material.name + ".json");
+            GenerateJsonFromMaterial(material, outputPath);
+        }
+    }
+
+    private static void GenerateJsonFromMaterial(Material material, string outputPath)
+    {
+        JObject jsonObject = new JObject();
+        JObject m_SavedProperties = new JObject();
+        JObject m_TexEnvs = new JObject();
+        JObject m_Floats = new JObject();
+        JObject m_Colors = new JObject();
+
+        // Save shader name
+        jsonObject["m_Shader"] = new JObject
+        {
+            { "m_FileID", material.shader.GetInstanceID() },
+            { "Name", material.shader.name },
+            { "IsNull", false }
+        };
+
+        // Iterate over the shader properties
+        Shader shader = material.shader;
+        int propertyCount = ShaderUtil.GetPropertyCount(shader);
+        for (int i = 0; i < propertyCount; i++)
+        {
+            string propertyName = ShaderUtil.GetPropertyName(shader, i);
+            ShaderUtil.ShaderPropertyType propertyType = ShaderUtil.GetPropertyType(shader, i);
+
+            // Ignore properties that start with m_start or m_end
+            if (propertyName.StartsWith("m_start") || propertyName.StartsWith("m_end"))
+            {
+                continue;
+            }
+
+            // Depending on the property type, get the value from the material and add it to the JObject
+            switch (propertyType)
+            {
+                case ShaderUtil.ShaderPropertyType.TexEnv:
+                    Texture texture = material.GetTexture(propertyName);
+                    if (texture != null)
+                    {
+                        JObject textureObject = new JObject
+                        {
+                            { "m_Texture", new JObject { { "m_FileID", 0 }, { "m_PathID", 0 }, { "Name", texture.name }, { "IsNull", false } } },
+                            { "m_Scale", new JObject { { "X", material.GetTextureScale(propertyName).x }, { "Y", material.GetTextureScale(propertyName).y } } },
+                            { "m_Offset", new JObject { { "X", material.GetTextureOffset(propertyName).x }, { "Y", material.GetTextureOffset(propertyName).y } } }
+                        };
+                        m_TexEnvs[propertyName] = textureObject;
+                    }
+                    break;
+                case ShaderUtil.ShaderPropertyType.Float:
+                case ShaderUtil.ShaderPropertyType.Range: // Treat Range as Float
+                    float floatValue = material.GetFloat(propertyName);
+                    m_Floats[propertyName] = floatValue;
+                    break;
+                case ShaderUtil.ShaderPropertyType.Color:
+                    Color colorValue = material.GetColor(propertyName);
+                    JObject colorObject = new JObject
+                    {
+                        { "r", colorValue.r },
+                        { "g", colorValue.g },
+                        { "b", colorValue.b },
+                        { "a", colorValue.a }
+                    };
+                    m_Colors[propertyName] = colorObject;
+                    break;
+            }
+        }
+
+        m_SavedProperties["m_TexEnvs"] = m_TexEnvs;
+        m_SavedProperties["m_Floats"] = m_Floats;
+        m_SavedProperties["m_Colors"] = m_Colors;
+        jsonObject["m_SavedProperties"] = m_SavedProperties;
+
+        // Serialize the JObject to a JSON string
+        string jsonContent = jsonObject.ToString(Formatting.Indented);
+
+        // Write the JSON string to a file
+        File.WriteAllText(outputPath, jsonContent);
     }
 
     #endregion
