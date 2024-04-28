@@ -466,7 +466,7 @@ namespace HoyoToon
             GUIShaderVersioning();
 
             // Add a logo to the top of the inspector
-            Texture2D logo = Resources.Load<Texture2D>("hoyotoon");
+            Texture2D logo = Resources.Load<Texture2D>("UI/hoyotoon");
             GUIContent guiContent = new GUIContent(logo);
             GUIStyle styll = new GUIStyle(); styll.fixedHeight = 145.0f;
             styll.margin = new RectOffset(105, 0, 0, 0);
