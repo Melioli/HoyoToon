@@ -1,8 +1,7 @@
 Shader "HoyoToon/Honkai Impact/Character Part 2"
 {
-    Properties
-    {
-
+    Properties 
+  { 
         //Header
         [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Impact Part 2</color></i></b>✧", Float) = 0
         [HideInInspector] shader_is_using_hoyeditor ("", Float) = 0

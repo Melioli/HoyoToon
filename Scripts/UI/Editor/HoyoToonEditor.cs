@@ -22,7 +22,6 @@ namespace HoyoToon
         public const string PROPERTY_NAME_LOCALE = "shader_locale";
         public const string PROPERTY_NAME_ON_SWAP_TO_ACTIONS = "shader_on_swap_to";
         public const string PROPERTY_NAME_SHADER_VERSION = "shader_version";
-        public const string PROPERTY_NAME_EDITOR_DETECT = "shader_is_using_HoyoToon_editor";
 
         //Static
         private static string s_edtiorDirectoryPath;
@@ -416,18 +415,6 @@ namespace HoyoToon
             return null;
         }
 
-        private void AddResetProperty()
-        {
-            if (Materials[0].HasProperty(PROPERTY_NAME_EDITOR_DETECT) == false)
-            {
-                string path = AssetDatabase.GetAssetPath(Materials[0].shader);
-                UnityHelper.AddShaderPropertyToSourceCode(path, "[HideInInspector] shader_is_using_HoyoToon_editor(\"\", Float)", "0");
-            }
-            Materials[0].SetFloat(PROPERTY_NAME_EDITOR_DETECT, 69);
-        }
-
-
-
         public override void OnClosed(Material material)
         {
             base.OnClosed(material);
@@ -724,17 +711,6 @@ namespace HoyoToon
                 foreach (DefineableAction a in _onSwapToActions)
                     a.Perform(Materials);
                 _onSwapToActions = null;
-            }
-
-            //test if material has been reset
-            if (_wasUsed && e.type == EventType.Repaint)
-            {
-                if (Materials[0].HasProperty("shader_is_using_HoyoToon_editor") && Materials[0].GetFloat("shader_is_using_HoyoToon_editor") != 69)
-                {
-                    _doReloadNextDraw = true;
-                    HandleReset();
-                    _wasUsed = true;
-                }
             }
 
             if (e.type == EventType.Used) _wasUsed = true;

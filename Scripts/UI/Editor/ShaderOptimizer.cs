@@ -260,7 +260,6 @@ namespace HoyoToon
         public static readonly HashSet<string> PropertiesToSkipInMaterialEquallityComparission = new HashSet<string>
         {
             "shader_master_label",
-            "shader_is_using_HoyoToon_editor"
         };
 
         public enum PropertyType
@@ -2061,10 +2060,9 @@ namespace HoyoToon
                     return;
 
                 // Strip shaders from the build under the following conditions:
-                // - Has the property "shader_is_using_HoyoToon_editor", which should be present on all shaders using HoyoToonEditor (even if it's not using the optimizer)
                 // - Has the property "_ShaderOptimizerEnabled", indicating the shader is using the optimizer
                 // - Doesn't have a name starting with "Hidden/Locked/", indicating the shader is unlocked
-                bool shouldStrip = shader.FindPropertyIndex("shader_is_using_HoyoToon_editor") >= 0 && shader.FindPropertyIndex("_ShaderOptimizerEnabled") >= 0 && !shader.name.StartsWith("Hidden/Locked/");
+                bool shouldStrip = shader.FindPropertyIndex("_ShaderOptimizerEnabled") >= 0 && !shader.name.StartsWith("Hidden/Locked/");
 
                 if (shouldStrip)
                 {
