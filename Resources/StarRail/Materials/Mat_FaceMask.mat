@@ -29,7 +29,8 @@ Material:
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2010
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -297,7 +298,7 @@ Material:
     - _StencilCompB: 5
     - _StencilPassA: 0
     - _StencilPassB: 2
-    - _StencilRef: 100
+    - _StencilRef: 97
     - _StockDarkWidth: 0.5
     - _StockRoughness: 1
     - _StockSP: 0.25
@@ -376,14 +377,14 @@ Material:
     - m_start_renderingOptions: 0
     - m_start_rimhue: 0
     - m_start_secondarymain: 0
-    - m_start_specialeffects: 0
+    - m_start_specialeffects: 1
     - m_start_specialeffectsemission: 0
     - m_start_specular: 0
     - m_start_specularcolor: 0
     - m_start_specularintensity: 0
     - m_start_specularroughness: 0
     - m_start_specularshininess: 0
-    - m_start_stencilfade: 0
+    - m_start_stencilfade: 1
     - m_start_stockings: 0
     - shader_is_using_HoyoToon_editor: 69
     - shader_is_using_hoyeditor: 0

@@ -16,6 +16,9 @@ public class HoyoToonPostProcessEditor : Editor
     {
         HoyoToonPostProcess script = (HoyoToonPostProcess)target;
 
+        // Record the target object before making changes
+        Undo.RecordObject(script, "Modify HoyoToonPostProcess");
+
         // Load and draw logo;
         Texture2D logo = Resources.Load<Texture2D>("UI/hoyotoon");
         if (logo != null)
@@ -38,6 +41,8 @@ public class HoyoToonPostProcessEditor : Editor
             script.bloomIntensity = EditorGUILayout.FloatField("Bloom Intensity", script.bloomIntensity);
             script.bloomWeights = EditorGUILayout.Vector4Field("Bloom Weights", script.bloomWeights);
             script.bloomColor = EditorGUILayout.ColorField("Bloom Color", script.bloomColor);
+            script.blurSamples = EditorGUILayout.FloatField("Blur Samples", script.blurSamples);
+            script.blurWeight = EditorGUILayout.FloatField("Blur Weight", script.blurWeight);
             script.downsampleValue = EditorGUILayout.Slider("Downsample Value", script.downsampleValue, 0.1f, 1.0f);
 
             EditorGUI.indentLevel--;

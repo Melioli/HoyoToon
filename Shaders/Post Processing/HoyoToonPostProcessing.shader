@@ -144,6 +144,38 @@ Shader "Hidden/HoyoToon/Post Processing"
 		return f_x;
 	}
 
+    float _BlurSamples;
+    static float pi = 3.1415926;
+    static int samples = _BlurSamples;
+    static float sigma = (float)samples * 0.25;
+    static float s = 2 * sigma * sigma; 
+
+    float gauss(float2 i)
+    {
+        return exp(-(i.x * i.x + i.y * i.y) / s) / (pi * s);
+    }
+
+    float3 gaussianBlur(SamplerState sp, Texture2D tx,  float2 uv, float2 scale)
+    {
+        float3 pixel = (float3)0.0f;
+        float weightSum = 0.0f;
+        float weight;
+        float2 offset;
+
+
+        for(int i = -samples / 2; i < samples / 2; i++)
+        {
+            for(int j = -samples / 2; j < samples / 2; j++)
+            {
+                offset = float2(i, j);
+                weight = gauss(offset);
+                pixel += tx.Sample(sp, float4(uv + scale * offset, 0.0f, 1.0f)).rgb * weight;
+                weightSum += weight;
+            }
+        }
+        return pixel / weightSum;
+    }
+
     // basic vertex program and structs since they will all use the same ones : 
     struct VertexData {
         float4 vertex : POSITION;
@@ -180,80 +212,6 @@ Shader "Hidden/HoyoToon/Post Processing"
         return color;
     }
 
-    float4 fp_hora(v2f i) : SV_TARGET
-    {
-        float2 uv = (i.uv);
-        float2 offset = _BlurWeight * _MainTex_TexelSize * float2(1.0f, 0.0); 
-        half4 color = 0.0;
-
-        [unroll]
-        for (int i = 0; i < kernelSize; i++)
-        {
-            float2 sampleUV = uv + kernelOffsets[i] * offset;
-            color += kernel[i] * _MainTex.Sample(sampler_MainTex, sampleUV);
-        }
-
-        return color;
-    }
-    
-    float4 fp_horb(v2f i) : SV_TARGET
-    {
-        float2 uv = (i.uv);
-        float2 offset = _BlurWeight * _MainTex_TexelSize * float2(2.0f, 0.0); 
-        half4 color = 0.0;
-        [unroll]
-        for (int i = 0; i < kernelSize; i++)
-        {
-            float2 sampleUV = uv + kernelOffsets[i] * offset;
-            color += kernel[i] * _MainTex.Sample(sampler_MainTex, sampleUV);
-        }
-
-        return color;
-    }
-
-    float4 fp_vera(v2f i) : SV_TARGET
-    {
-        float2 uv = (i.uv);
-        float2 offset = _BlurWeight * _MainTex_TexelSize * float2(0.0f, 1.0); 
-        half4 color = 0.0;
-
-        [unroll]
-        for (int i = 0; i < kernelSize; i++)
-        {
-            float2 sampleUV = uv + kernelOffsets[i] * offset;
-            color += kernel[i] * _MainTex.Sample(sampler_MainTex, sampleUV);
-        }
-
-        return color;
-    }
-
-    float4 fp_verb(v2f i) : SV_TARGET
-    {
-        float2 uv = (i.uv);
-        float2 offset = _BlurWeight * _MainTex_TexelSize * float2(0.0f, 2.0); 
-        half4 color = 0.0;
-        [unroll]
-        for (int i = 0; i < kernelSize; i++)
-        {
-            float2 sampleUV = uv + kernelOffsets[i] * offset;
-            color += kernel[i] * _MainTex.Sample(sampler_MainTex, sampleUV);
-        }
-
-        return color;
-    }
-
-    float4 fp_up(v2f i) : SV_TARGET
-    {
-        float2 uv = i.uv;
-        float4 color = (float4)0.0f;
-
-        color = color + _BloomTextureA.Sample(sampler_BloomTextureA, uv) * _BloomWeights.x;
-        color = color + _BloomTextureB.Sample(sampler_BloomTextureB, uv) * _BloomWeights.y;
-        color = color + _BloomTextureC.Sample(sampler_BloomTextureC, uv) * _BloomWeights.z;
-        color = color + _BloomTextureD.Sample(sampler_BloomTextureD, uv) * _BloomWeights.w;
-        
-        return color;
-    }
 
     float4 fp_tone(v2f i) : SV_TARGET
     {
@@ -264,11 +222,13 @@ Shader "Hidden/HoyoToon/Post Processing"
         float4 toned = (float4)1.0f;
         toned.xyz = original;
 
+        float3 bloom = 0.0f;
+
         if(_BloomMode > 0 && !(_UseTonemap == 3)) 
         {
-            float3 bloomed = _BloomTextureUp.Sample(sampler_BloomTextureUp, uv);
-            bloomed = bloomed * _BloomIntensity * _BloomColor;
-            toned.xyz = toned.xyz + bloomed;
+            bloom = gaussianBlur(sampler_BloomTexturePre, _BloomTexturePre, uv, _BlurWeight * _MainTex_TexelSize);
+            bloom = (bloom * _BloomIntensity) * _BloomColor;
+            toned.xyz = toned.xyz + bloom;
         }
 
         toned.xyz = toned.xyz * _Exposure;
@@ -286,9 +246,9 @@ Shader "Hidden/HoyoToon/Post Processing"
             toned.xyz = CustomACESTonemapping(toned.xyz);
             if(_BloomMode > 0) 
             {
-                float3 bloomed = _BloomTextureUp.Sample(sampler_BloomTextureUp, uv);
-                bloomed = bloomed * _BloomIntensity * _BloomColor;
-                toned.xyz = toned.xyz + bloomed;
+                bloom = gaussianBlur(sampler_BloomTexturePre, _BloomTexturePre, uv, _BlurWeight * _MainTex_TexelSize);
+                bloom = (bloom * _BloomIntensity) * _BloomColor;
+                toned.xyz = toned.xyz + bloom;
             }
         }
 
@@ -315,51 +275,6 @@ Shader "Hidden/HoyoToon/Post Processing"
             HLSLPROGRAM
             #pragma vertex vp
             #pragma fragment fp_pre
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "Bloom Horizontal A"
-            HLSLPROGRAM
-            #pragma vertex vp
-            #pragma fragment fp_hora
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "Bloom Horizontal B"
-            HLSLPROGRAM
-            #pragma vertex vp
-            #pragma fragment fp_horb
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "Bloom Vertical A"
-            HLSLPROGRAM
-            #pragma vertex vp
-            #pragma fragment fp_vera
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "Bloom Vertical B"
-            HLSLPROGRAM
-            #pragma vertex vp
-            #pragma fragment fp_verb
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "Bloom Upsample"
-            HLSLPROGRAM
-            #pragma vertex vp
-            #pragma fragment fp_up
             ENDHLSL
         }
 

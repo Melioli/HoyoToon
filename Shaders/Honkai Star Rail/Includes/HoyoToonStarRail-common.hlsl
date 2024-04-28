@@ -372,7 +372,7 @@ void simple_dissolve(in float4 primary_diffuse, in float2 uv0, in float2 uv1, in
 
     if(_InvertGradient) gradient = 1.0f - gradient;
     
-    out_alpha = gradient.x;
+    out_alpha = out_alpha * gradient.x;
 }
 
 float3 DecodeLightProbe( float3 N )

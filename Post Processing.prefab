@@ -112,9 +112,10 @@ MonoBehaviour:
   bloomIntensity: 1
   bloomWeights: {x: 0.1, y: 0.2, z: 0.3, w: 0.4}
   bloomColor: {r: 1, g: 1, b: 1, a: 0}
+  blurSamples: 10
   blurWeight: 1
   downsampleValue: 0.5
-  toneMode: 3
+  toneMode: 1
   exposure: 1
   contrast: 1
   saturation: 1

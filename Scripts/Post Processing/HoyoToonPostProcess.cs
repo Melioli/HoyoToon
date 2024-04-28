@@ -26,6 +26,7 @@ public class HoyoToonPostProcess : MonoBehaviour
     public float bloomIntensity = 1.5f;
     public Vector4 bloomWeights = new(0.1f, 0.2f, 0.3f, 0.4f);
     public Color bloomColor = Color.white;
+    public float blurSamples = 10;
     public float blurWeight = 0.5f;
     [Range(0.1f, 1.0f)]
     public float downsampleValue = 0.5f;
@@ -77,6 +78,7 @@ public class HoyoToonPostProcess : MonoBehaviour
         postMaterial.SetFloat("_BloomIntensity", bloomIntensity);
         postMaterial.SetVector("_BloomWeights", bloomWeights);
         postMaterial.SetColor("_BloomColor", bloomColor);
+        postMaterial.SetFloat("_BlurSamples", blurSamples);
         postMaterial.SetFloat("_BlurWeight", blurWeight);
         postMaterial.SetFloat("_Exposure", exposure);
         postMaterial.SetFloat("_Contrast", contrast);
@@ -92,41 +94,17 @@ public class HoyoToonPostProcess : MonoBehaviour
 
         int width = Mathf.RoundToInt(source.width * downsampleValue);
         int height = Mathf.RoundToInt(source.height * downsampleValue);
-        var bloomPre = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
-        var bloomA = RenderTexture.GetTemporary(width, height, 0, source.format);
-        var bloomB = RenderTexture.GetTemporary(width, height, 0, source.format);
-        var bloomC = RenderTexture.GetTemporary(width, height, 0, source.format);
-        var bloomD = RenderTexture.GetTemporary(width, height, 0, source.format);
-        var bloomUp = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
+        var bloomPre = RenderTexture.GetTemporary(width, height, 0, source.format);
 
         Graphics.Blit(source, bloomPre);
         Graphics.Blit(null, bloomPre);
-        Graphics.Blit(null, bloomA);
-        Graphics.Blit(null, bloomB);
-        Graphics.Blit(null, bloomC);
-        Graphics.Blit(null, bloomD);
-        Graphics.Blit(null, bloomUp);
 
         Graphics.Blit(source, bloomPre, postMaterial, 0); // prefilter
         postMaterial.SetTexture("_BloomTexturePre", bloomPre);
         RenderTexture.ReleaseTemporary(bloomPre);
-        Graphics.Blit(bloomPre, bloomA, postMaterial, 1); // prefilter
-        postMaterial.SetTexture("_BloomTextureA", bloomA);
-        RenderTexture.ReleaseTemporary(bloomA);
-        Graphics.Blit(bloomA, bloomB, postMaterial, 2); // horizontal A
-        postMaterial.SetTexture("_BloomTextureB", bloomB);
-        RenderTexture.ReleaseTemporary(bloomB);
-        Graphics.Blit(bloomB, bloomC, postMaterial, 3); // horisontal B
-        postMaterial.SetTexture("_BloomTextureC", bloomC);
-        RenderTexture.ReleaseTemporary(bloomC);
-        Graphics.Blit(bloomC, bloomD, postMaterial, 4); // vertical A
-        postMaterial.SetTexture("_BloomTextureD", bloomD);
-        RenderTexture.ReleaseTemporary(bloomD);
-        Graphics.Blit(bloomD, bloomUp, postMaterial, 5); // vertical A
-        postMaterial.SetTexture("_BloomTextureUp", bloomUp);
-        RenderTexture.ReleaseTemporary(bloomUp);
 
-        Graphics.Blit(source, destination, postMaterial, 6);
+
+        Graphics.Blit(source, destination, postMaterial, 1);
     }
 
     void OnDisable()

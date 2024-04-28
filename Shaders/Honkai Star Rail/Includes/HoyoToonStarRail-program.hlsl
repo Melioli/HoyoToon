@@ -793,8 +793,11 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(_DissoveONM && (_DissolveMode == 2.0)) out_color.xyzw = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.zw, out_color);
     if((_DissoveONM) && (_DissolveMode == 1.0f))
     {
-        simple_dissolve(out_color.xyzw, i.uv.xy, i.uv.zw, i.dis_uv.xy, i.dis_pos, out_color.xyz, out_color.w);
+        float alpha = 1.0f;
+        simple_dissolve(out_color.xyzw, i.uv.xy, i.uv.zw, i.dis_uv.xy, i.dis_pos, out_color.xyz, alpha);
         clip(out_color.w - _DissolveClipRate);
+        out_color.w = out_color.w * alpha;
+
     }
     
     return out_color;
