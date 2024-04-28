@@ -46,7 +46,6 @@ namespace HoyoToon
 
         // sates
         private bool _isFirstOnGUICall = true;
-        private bool _wasUsed = false;
         private bool _doReloadNextDraw = false;
         private bool _didSwapToShader = false;
 
@@ -391,8 +390,6 @@ namespace HoyoToon
             ShaderParts.Add(_renderQueueProperty);
             ShaderParts.Add(_vRCFallbackProperty);
 
-            AddResetProperty();
-
             if (Config.Singleton.forceAsyncCompilationPreview)
             {
                 ShaderUtil.allowAsyncCompilation = true;
@@ -604,7 +601,7 @@ namespace HoyoToon
         private void DoVariantWarning()
         {
 #if UNITY_2022_1_OR_NEWER
-            if(Materials[0].isVariant)
+            if (Materials[0].isVariant)
             {
                 EditorGUILayout.HelpBox("This material is a variant. It cannot be locked or uploaded to VRChat.", MessageType.Warning);
             }
@@ -713,7 +710,7 @@ namespace HoyoToon
                 _onSwapToActions = null;
             }
 
-            if (e.type == EventType.Used) _wasUsed = true;
+            // if (e.type == EventType.Used) _wasUsed = true;
             if (Input.HadMouseDownRepaint) Input.HadMouseDown = false;
             Input.HadMouseDownRepaint = false;
             IsFirstCall = false;

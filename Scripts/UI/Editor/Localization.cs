@@ -315,7 +315,6 @@ namespace HoyoToon
                     if (key == ShaderEditor.PROPERTY_NAME_LOCALE) continue;
                     if (key == ShaderEditor.PROPERTY_NAME_ON_SWAP_TO_ACTIONS) continue;
                     if (key == ShaderEditor.PROPERTY_NAME_SHADER_VERSION) continue;
-                    if (key == ShaderEditor.PROPERTY_NAME_EDITOR_DETECT) continue;
                     if (!string.IsNullOrWhiteSpace(value) && !locale._localizedStrings.ContainsKey(key))
                     {
                         locale._localizedStrings.Add(key, new string[locale.Languages.Length]);
