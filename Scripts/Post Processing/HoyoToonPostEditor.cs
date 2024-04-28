@@ -10,15 +10,14 @@ public class HoyoToonPostProcessEditor : Editor
     private bool showBloomSettings = true;
     private bool showColorGrading = true;
     private bool showToneMapping = true;
-    
+
 
     public override void OnInspectorGUI()
     {
         HoyoToonPostProcess script = (HoyoToonPostProcess)target;
 
-        // Load and draw logo
-        string logoPath = "Assets/Hoyoverse/Shaders/HoyoToon/Resources/UI/hoyotoon.png";
-        Texture2D logo = AssetDatabase.LoadAssetAtPath<Texture2D>(logoPath);
+        // Load and draw logo;
+        Texture2D logo = Resources.Load<Texture2D>("UI/hoyotoon");
         if (logo != null)
         {
             GUILayout.BeginHorizontal();
@@ -27,7 +26,7 @@ public class HoyoToonPostProcessEditor : Editor
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
-        
+
         // Bloom settings
         showBloomSettings = EditorGUILayout.BeginFoldoutHeaderGroup(showBloomSettings, "Bloom Settings");
         if (showBloomSettings)
@@ -62,11 +61,11 @@ public class HoyoToonPostProcessEditor : Editor
             showToneMapping = EditorGUILayout.BeginFoldoutHeaderGroup(showToneMapping, "Tone Mapping Settings");
             if (showToneMapping)
             {
-            script.ACESParamA = EditorGUILayout.FloatField("ACES Param A", script.ACESParamA);
-            script.ACESParamB = EditorGUILayout.FloatField("ACES Param B", script.ACESParamB);
-            script.ACESParamC = EditorGUILayout.FloatField("ACES Param C", script.ACESParamC);
-            script.ACESParamD = EditorGUILayout.FloatField("ACES Param D", script.ACESParamD);
-            script.ACESParamE = EditorGUILayout.FloatField("ACES Param E", script.ACESParamE);
+                script.ACESParamA = EditorGUILayout.FloatField("ACES Param A", script.ACESParamA);
+                script.ACESParamB = EditorGUILayout.FloatField("ACES Param B", script.ACESParamB);
+                script.ACESParamC = EditorGUILayout.FloatField("ACES Param C", script.ACESParamC);
+                script.ACESParamD = EditorGUILayout.FloatField("ACES Param D", script.ACESParamD);
+                script.ACESParamE = EditorGUILayout.FloatField("ACES Param E", script.ACESParamE);
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
