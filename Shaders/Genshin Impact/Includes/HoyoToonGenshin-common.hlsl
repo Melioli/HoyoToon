@@ -371,6 +371,7 @@ void shadow_color(in float lightmapao, in float vertexao, in float customao, in 
 void metalics(in float3 shadow, in float3 normal, float3 ndoth, float speculartex, float backfacing, inout float3 color)
 {
     float shadow_transition = ((bool)shadow.y) ? shadow.z : 0.0f;
+    shadow_transition = saturate(shadow_transition);
     float2 ugh = backfacing ? 1.0f : shadow.y;
 
     // calculate centered sphere coords for spheremapping
