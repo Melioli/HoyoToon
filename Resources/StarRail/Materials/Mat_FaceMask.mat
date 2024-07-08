@@ -263,6 +263,9 @@ Material:
     - _RimWidth: 1
     - _Rimintensity: 1
     - _SecondaryFade: 0
+    - _SelfShadowDarken: 0
+    - _SelfShadowDepthOffset: 0
+    - _SelfShadowSampleOffset: 0
     - _ShadowRamp: 1
     - _ShiftColorSpeed: 0
     - _ShiftEmissionSpeed: 0
@@ -297,19 +300,22 @@ Material:
     - _StencilCompA: 5
     - _StencilCompB: 5
     - _StencilPassA: 0
-    - _StencilPassB: 2
-    - _StencilRef: 97
+    - _StencilPassB: 0
+    - _StencilRef: 100
     - _StockDarkWidth: 0.5
     - _StockRoughness: 1
     - _StockSP: 0.25
     - _Stockpower: 1
     - _Stockpower1: 1
+    - _UseDifAlphaStencil: 2
     - _UseHairSideFade: 0
     - _UseHueMask: 0
     - _UseMaterialValuesLUT: 0
     - _UseSecondaryTex: 0
+    - _UseSelfShadow: 0
     - _UseWorldPosDissolve: 0
     - _backfdceuv2: 1
+    - _testA: 0.5
     - footer_discord: 0
     - footer_github: 0
     - m_end_caustic: 0
@@ -340,6 +346,7 @@ Material:
     - m_end_renderingOptions: 0
     - m_end_rimhue: 0
     - m_end_secondarymain: 0
+    - m_end_selfshadow: 0
     - m_end_specialeffects: 0
     - m_end_specialeffectsemission: 0
     - m_end_specular: 0
@@ -347,6 +354,7 @@ Material:
     - m_end_specularintensity: 0
     - m_end_specularroughness: 0
     - m_end_specularshininess: 0
+    - m_end_stencilalpha: 0
     - m_end_stencilfade: 0
     - m_end_stockings: 0
     - m_start_caustic: 0
@@ -374,9 +382,10 @@ Material:
     - m_start_outlinehue: 0
     - m_start_outlinelip: 0
     - m_start_outlines: 0
-    - m_start_renderingOptions: 0
+    - m_start_renderingOptions: 1
     - m_start_rimhue: 0
     - m_start_secondarymain: 0
+    - m_start_selfshadow: 0
     - m_start_specialeffects: 1
     - m_start_specialeffectsemission: 0
     - m_start_specular: 0
@@ -384,11 +393,14 @@ Material:
     - m_start_specularintensity: 0
     - m_start_specularroughness: 0
     - m_start_specularshininess: 0
+    - m_start_stencilalpha: 0
     - m_start_stencilfade: 1
     - m_start_stockings: 0
     - shader_is_using_HoyoToon_editor: 69
     - shader_is_using_hoyeditor: 0
+    - shader_master_bg: 0
     - shader_master_label: 0
+    - shader_master_logo: 0
     - variant_selector: 1
     m_Colors:
     - _BackColor: {r: 1, g: 1, b: 1, a: 1}
