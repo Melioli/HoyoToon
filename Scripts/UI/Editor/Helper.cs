@@ -794,7 +794,10 @@ namespace HoyoToon
                         TextureImporter textureImporter = (TextureImporter)assetImporter;
                         TextureImporterFormat textureFormat = textureImporter.GetPlatformTextureSettings("PC").format;
 #pragma warning disable CS0618
-                        if (textureFormat == TextureImporterFormat.AutomaticCompressed) textureFormat = textureImporter.GetAutomaticFormat("PC");
+                        if (textureImporter.textureCompression == TextureImporterCompression.Compressed)
+                        {
+                            textureFormat = textureImporter.GetAutomaticFormat("PC");
+                        }
 #pragma warning restore CS0618
 
                         if (BPP.ContainsKey(textureFormat))
@@ -1297,7 +1300,7 @@ namespace HoyoToon
             else
             {
 #if SYSTEM_DRAWING
-                Texture2D[] wew = paths.Where(p=> AssetDatabase.GetMainAssetTypeAtPath(p).IsAssignableFrom(typeof(Texture2D))).Select(p => AssetDatabase.LoadAssetAtPath<Texture2D>(p)).ToArray();
+                Texture2D[] wew = paths.Where(p => AssetDatabase.GetMainAssetTypeAtPath(p).IsAssignableFrom(typeof(Texture2D))).Select(p => AssetDatabase.LoadAssetAtPath<Texture2D>(p)).ToArray();
                 Array.Sort(wew, (UnityEngine.Object one, UnityEngine.Object two) => one.name.CompareTo(two.name));
                 Selection.objects = wew;
                 Texture2DArray texture2DArray = new Texture2DArray(wew[0].width, wew[0].height, wew.Length, wew[0].format, true);
