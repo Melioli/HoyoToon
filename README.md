@@ -23,7 +23,7 @@
 ## Features
 
 - A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games.
-- The shader is based on the latest version of each game. (no beta or old code) 
+- The shader is based on the latest version of each game. (no beta or old code)
 - Supports Genshin Impact
 - Supports Honkai Impact (Part 1 and 2)
 - Supports Honkai Star Rail
@@ -33,6 +33,7 @@
 - Includes Visual Effects (VFX) Shaders like those used for Paimon, Dainlief, Asmoday, and Skirk.
 - Includes scripts for automated setup.
 - Comprehensive documentation of the shader, including its logic and features
+- Auto updater for seamless updates of the shader and accompanying scripts.
 
 ## Contact
 
