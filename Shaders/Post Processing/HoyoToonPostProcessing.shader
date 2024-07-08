@@ -173,7 +173,7 @@ Shader "Hidden/HoyoToon/Post Processing"
                 weightSum += weight;
             }
         }
-        return pixel / weightSum;
+        return saturate(pixel / weightSum);
     }
 
     // basic vertex program and structs since they will all use the same ones : 
