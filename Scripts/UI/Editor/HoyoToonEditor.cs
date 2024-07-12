@@ -18,6 +18,8 @@ namespace HoyoToon
         public const float MATERIAL_NOT_RESET = 69.12f;
 
         public const string PROPERTY_NAME_MASTER_LABEL = "shader_master_label";
+        public const string PROPERTY_NAME_MASTER_BG = "shader_master_bg";
+        public const string PROPERTY_NAME_MASTER_LOGO = "shader_master_Logo";
         public const string PROPERTY_NAME_LABEL_FILE = "shader_properties_label_file";
         public const string PROPERTY_NAME_LOCALE = "shader_locale";
         public const string PROPERTY_NAME_ON_SWAP_TO_ACTIONS = "shader_on_swap_to";
@@ -465,19 +467,35 @@ namespace HoyoToon
             GUIDevloperMode();
             GUIShaderVersioning();
 
-            // Add a logo to the top of the inspector
-            Texture2D logo = Resources.Load<Texture2D>("UI/hoyotoon");
-            GUIContent guiContent = new GUIContent(logo);
-            GUIStyle styll = new GUIStyle(); styll.fixedHeight = 145.0f;
-            styll.margin = new RectOffset(105, 0, 0, 0);
+            // Get the logo path from the shader property
+            MaterialProperty logoPathProperty = GetMaterialProperty("shader_master_logo");
+            MaterialProperty bgPathProperty = GetMaterialProperty("shader_master_bg");
 
-            if (logo != null)
+            Rect bgRect = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.ExpandWidth(true), GUILayout.Height(145.0f));
+            bgRect.x = 0;
+            bgRect.width = EditorGUIUtility.currentViewWidth;
+            Rect logoRect = new Rect(bgRect.width / 2 - 375f, bgRect.height / 2 - 65f, 750f, 130f);
+
+            if (bgPathProperty != null && !string.IsNullOrEmpty(bgPathProperty.displayName))
             {
-                GUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();  // Add flexible space before the logo
-                GUILayout.Box(logo, styll);
-                GUILayout.FlexibleSpace();  // Add flexible space after the logo
-                GUILayout.EndHorizontal();
+                // Load the background from the path
+                Texture2D bg = Resources.Load<Texture2D>(bgPathProperty.displayName);
+
+                if (bg != null)
+                {
+                    GUI.DrawTexture(bgRect, bg, ScaleMode.ScaleAndCrop);
+                }
+            }
+
+            if (logoPathProperty != null && !string.IsNullOrEmpty(logoPathProperty.displayName))
+            {
+                // Load the logo from the path
+                Texture2D logo = Resources.Load<Texture2D>(logoPathProperty.displayName);
+
+                if (logo != null)
+                {
+                    GUI.DrawTexture(logoRect, logo, ScaleMode.ScaleToFit);
+                }
             }
 
             GUITopBar();

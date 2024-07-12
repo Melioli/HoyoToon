@@ -311,6 +311,7 @@ namespace HoyoToon
 
                     if (key.StartsWith("footer_")) continue;
                     if (key == ShaderEditor.PROPERTY_NAME_MASTER_LABEL) continue;
+                    if (key == ShaderEditor.PROPERTY_NAME_MASTER_LOGO) continue;
                     if (key == ShaderEditor.PROPERTY_NAME_LABEL_FILE) continue;
                     if (key == ShaderEditor.PROPERTY_NAME_LOCALE) continue;
                     if (key == ShaderEditor.PROPERTY_NAME_ON_SWAP_TO_ACTIONS) continue;
