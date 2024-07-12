@@ -132,7 +132,7 @@ public class HoyoToonUpdaterGUI : EditorWindow
                 {
                     DrawHeaderImage(hi3p1Logo);
                 }
-                else if (line.Contains("Honkai Part 2") && hi3p2Logo != null)
+                else if (line.Contains("Honkai Impact Part 2") && hi3p2Logo != null)
                 {
                     DrawHeaderImage(hi3p2Logo);
                 }
