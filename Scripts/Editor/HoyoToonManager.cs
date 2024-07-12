@@ -13,7 +13,7 @@ public class HoyoToonManager
 {
     #region Constants
 
-    public const string version = "3.50";
+    public const string version = "4.00";
     public const string HSRShader = "HoyoToon/Star Rail/Character";
     private const string GIShader = "HoyoToon/Genshin/Character";
     private const string Hi3Shader = "HoyoToon/Honkai Impact/Character Part 1";
