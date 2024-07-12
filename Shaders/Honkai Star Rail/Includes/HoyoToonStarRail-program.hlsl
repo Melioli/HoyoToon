@@ -6,11 +6,17 @@ vs_out vs_base(vs_in v)
     UNITY_SETUP_INSTANCE_ID(v); 
     UNITY_INITIALIZE_OUTPUT(vs_out, o); 
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); 
+    // #if defined(_IS_SHDW)
+    //     float4 ws_pos = mul(unity_ObjectToWorld, v.vertex);
+    //     float3 vl = mul(_WorldSpaceLightPos0.xyz, UNITY_MATRIX_V) * (1.f / ws_pos.w);
+    //     float3 offset_pos = ((vl * .001f) * float3(0.5f, 0.5f, 1.0f)) + v.vertex.xyz;
+    //     v.vertex.xyz = offset_pos;
+    // #endif
     
     float4 pos_ws  = mul(unity_ObjectToWorld, v.vertex);
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
     o.pos = pos_wvp;
-    o.ws_pos =  mul(unity_ObjectToWorld, v.vertex);
+    o.ws_pos =  v.vertex;
     o.ss_pos = ComputeScreenPos(o.pos);
     // o.ss_pos = o.pos;
 
@@ -37,6 +43,20 @@ vs_out vs_base(vs_in v)
         if(_UseWorldPosDissolve) o.dis_pos = pos_ws; // world pos if needed
     }
 
+    if(_FaceMaterial) o.normal = 0.5f;
+
+    o.grab = ComputeGrabScreenPos(o.pos);
+    #ifdef _is_shadow
+        if(_HairMaterial)
+        {
+            float4 ws_pos = mul(unity_ObjectToWorld, v.vertex);
+            float3 vl = mul(_WorldSpaceLightPos0.xyz, UNITY_MATRIX_V) * (1.f / ws_pos.w);
+            float3 offset_pos = ((vl * .001f) * float3(7,0,5)) + v.vertex.xyz;
+            v.vertex.xyz = offset_pos;
+            o.pos = UnityObjectToClipPos(v.vertex);
+        }
+        // o.vertex = 0.f;
+    #endif
     TRANSFER_SHADOW(o)
     return o;
 }
@@ -153,6 +173,7 @@ shadow_out vs_shadow(shadow_in v)
     float3 view = _WorldSpaceCameraPos.xyz - (float3)mul(v.vertex.xyz, unity_ObjectToWorld);
     o.view = normalize(view);
     o.normal = mul((float3x3)unity_ObjectToWorld, v.normal);
+    // if(_FaceMaterial) o.normal = 0.5f;
     float4 pos_ws  = mul(unity_ObjectToWorld, v.vertex);
     o.ws_pos = pos_ws;
     float4 pos_wvp = mul(UNITY_MATRIX_VP, pos_ws);
@@ -175,15 +196,96 @@ shadow_out vs_shadow(shadow_in v)
 
 // ====================================================================
 // PIXEL SHADERS
+
+float4 ps_mask(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
+{
+    // initialize uv coord
+    float2 uv = (!vface && _backfdceuv2) ? i.uv.xy : i.uv.zw;
+    // sample diffuse texture to grab alpha channel from
+    float alpha = _MainTex.Sample(sampler_MainTex, uv);
+    // depth to test things below or above the current pixels value
+    float depth = (i.ws_pos.z / i.ws_pos.w) * 0.5 + 0.5;
+    // set up material id system to test for weird materials from
+    float material_id = 0;
+    if(_FaceMaterial) material_id = 1;
+    if(_EyeShadowMat) material_id = 2;
+    if(_HairMaterial) material_id = 3;
+    // vrchat is stupid
+    float vrchatisstupid = -100;
+    // probably redundant
+    float mask = (_FaceMaterial) ? 1.0 : 0.0;
+
+    // collect everything into their correct components
+    float4 output = float4(mask, depth, vrchatisstupid, 1.);
+
+    // do stupid alpha shit
+    // if(_EnableAlphaCutoff) clip(alpha - saturate(_AlphaTestThreshold));
+    // if(!_IsTransparent && !_EnableAlphaCutoff) output.w = 1.0f;
+
+    // clip eye shadow material
+    if(_EyeShadowMat) clip(-1);
+
+    // output.xyz = 1;
+
+    float4 facemap = _FaceMap.Sample(sampler_FaceMap, uv);
+    float4 faceexp = _FaceExpression.Sample(sampler_LightMap, uv);
+
+    float hair_alpha = 1.f;
+    #ifdef is_stencil
+        float3 view = normalize(i.view);
+        if(_FaceMaterial)
+        {
+            float side_mask = 1.0f;
+            if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
+            if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
+
+            clip(saturate(facemap.y + alpha) * side_mask - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
+            // but it looks weird if the eye shines are specifically omitted from the stencil
+        } 
+        else if(_HairMaterial)
+        {
+            // intialize direction vectors
+            float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
+            float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
+            float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
+
+            float3 view_xz = normalize(view - dot(view, up) * up);
+            float cosxz    = max(0.0f, dot(view_xz, forward));
+            float alpha_a  = saturate((1.0f - cosxz) / 0.658f);
+
+            float3 view_yz = normalize(view - dot(view, right) * right);
+            float cosyz    = max(0.0f, dot(view_yz, forward));
+            float alpha_b  = saturate((1.0f - cosyz) / 0.293f);
+            
+            hair_alpha = max(alpha_a, alpha_b);
+            // out_color.xyz = hair_alpha;
+            hair_alpha = (_UseHairSideFade) ? max(hair_alpha, _HairBlendSilhouette) : _HairBlendSilhouette;
+            
+            float side_mask = 1.0f;
+            if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
+            if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
+            hair_alpha = hair_alpha * saturate(side_mask);
+            output.w = hair_alpha;
+        }
+        else
+        {
+            discard;
+        }
+    #endif
+    // output everything for the grabpass
+    return output;
+}
+
 float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 {
+    float4 ws_pos = mul(unity_ObjectToWorld, i.ws_pos);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
     // GET LIGHT ATTENUATION FOR BOTH PASSES : 
-    UNITY_LIGHT_ATTENUATION(atten, i, i.ws_pos.xyz);
+    UNITY_LIGHT_ATTENUATION(atten, i, ws_pos.xyz);
     // FIX POTENTIAL ISSUES WITH ALPHA CLIPPING 
     if(_IsTransparent) _AlphaTestThreshold = 0.0f;
 
-    if(_DissoveONM && (_DissolveMode == 2.0)) dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.zw);
+    if(_DissoveONM && (_DissolveMode == 2.0)) dissolve_clip(ws_pos, i.dis_pos, i.dis_uv, i.uv.zw);
 
     // INITIALIZE VERTEX SHADER INPUTS : 
     float3 normal    = normalize(i.normal);
@@ -198,6 +300,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float3 specular = (float3)0.0f;
     float3 emission_color = (float3)0.0f;
     float emis_area = 0.0f;
+    float3 test_normal = normal;
 
     // MATERIAL COLOR :
     float4 color = (_HairMaterial) ? _Color0 * _Color : _Color;
@@ -237,8 +340,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         diffuse = lerp(diffuse, secondary, _SecondaryFade);
     }
 
-
-
     float diffuse_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _DiffuseMaskSource);
     float rim_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _RimMaskSource);
     float emission_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _EmissionMaskSource);
@@ -249,8 +350,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         emission_mask = 1.0f;
     }
     
-
-   
     // EXTRACT MATERIAL REGIONS 
     float material_ID = floor(8.0f * lightmap.w);
     float ramp_ID     = ((material_ID * 2.0f + 1.0f) * 0.0625f);
@@ -272,6 +371,123 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         
 
     #ifdef _IS_PASS_BASE
+
+        // ================================================================================================ //
+        // rim light : 
+        if(isVR())
+        {
+            _RimWidth = 0.5f;
+            _RimOffset = 0.0f;
+            _ES_RimLightOffset = 0.0f;
+        }
+        // populate arrays with material values 
+        float4 rim_color[8] =
+        {
+            _RimColor0,
+            _RimColor1,
+            _RimColor2,
+            _RimColor3, 
+            _RimColor4,
+            _RimColor5,
+            _RimColor6,
+            _RimColor7,   
+        };
+
+        float4 rim_values[8] = // x = width, y = softness, z = type, w = dark
+        {
+            float4(_RimWidth0, _RimEdgeSoftness0, _RimType0, _RimDark0),
+            float4(_RimWidth1, _RimEdgeSoftness1, _RimType0, _RimDark1),
+            float4(_RimWidth2, _RimEdgeSoftness2, _RimType0, _RimDark2),
+            float4(_RimWidth3, _RimEdgeSoftness3, _RimType0, _RimDark3),
+            float4(_RimWidth4, _RimEdgeSoftness4, _RimType0, _RimDark4),
+            float4(_RimWidth5, _RimEdgeSoftness5, _RimType0, _RimDark5),
+            float4(_RimWidth6, _RimEdgeSoftness6, _RimType0, _RimDark6),
+            float4(_RimWidth7, _RimEdgeSoftness7, _RimType0, _RimDark7),
+        }; // they have unused id specific rim widths but just in case they do end up using them in the future ill leave them be here
+
+        if(_UseMaterialValuesLUT) 
+        {    
+            rim_values[curr_region].yzw = lut_rimval.yxz; 
+        }
+
+        float2 screen_pos = i.ss_pos.xy / i.ss_pos.w;
+        float3 wvp_pos = mul(UNITY_MATRIX_VP, ws_pos);
+
+
+        // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
+        float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, ws_pos));
+        float fov = extract_fov();
+        fov = clamp(fov, 0, 150);
+        float range = fov_range(0, 180, fov);
+        float width_depth = camera_dist / range;
+
+        _RimWidth = _RimWidth * 0.25f;
+
+        // multiply the rim widht material values by the lightmap red channel
+        float rim_width = lerp(_RimWidth * 0.5f, _RimWidth * 0.45f, range) * width_depth * lerp(1.0f, lightmap.r, _RimLightMode);
+        if(isVR())
+        {
+            rim_width = rim_width * 0.66f;
+        }
+        // sample depth texture, this will be the base
+        float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
+
+        float rim_side = (ws_pos.z * -vs_normal.x) - (ws_pos.x * -vs_normal.z);
+        rim_side = (rim_side > 0.0f) ? 0.0f : 1.0f;
+        
+
+        // create offset screen uv using rim width value and view space normals for offset depth texture
+        float2 offset_uv = _ES_RimLightOffset.xy - _RimOffset.xy;
+        offset_uv.x = lerp(offset_uv.x, -offset_uv.x, rim_side);
+        float2 offset = ((rim_width * vs_normal) * 0.0055f);
+        offset_uv.x = screen_pos.x + ((offset_uv.x * 0.01f + offset.x));
+        offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f + offset.y);
+
+        // sample depth texture using offset uv
+        float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
+
+        float rim_depth = (offset_depth - org_depth);
+        rim_depth = pow(rim_depth, rim_values[curr_region].w); 
+        rim_depth = smoothstep(0.0f, _RimWidth, rim_depth);
+
+
+        // float rim_env_col = clamp(avg_env_col, 0.25f, 1.0f);
+        rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
+        rim_light = rim_light;
+
+        if(_EnableRimHue) rim_light.xyz = hue_shift(rim_light.xyz, curr_region, _RimHue, _RimHue2, _RimHue3, _RimHue4, _RimHue5, _RimHue6, _RimHue7, _RimHue8, _GlobalRimHue, _AutomaticRimShift, _ShiftRimSpeed, rim_mask);
+        // rim_light.xyz = rim_light * saturate(diffuse.xyz * 5.0f);
+
+        // ================================================================================================ //
+        // self shadowing 
+        float unity_shadow = SHADOW_ATTENUATION(i);
+        unity_shadow = smoothstep(0, 1., unity_shadow);
+        // if(_HairMaterial || _FaceMaterial || _EyeShadowMat) unity_shadow = 1.f;
+        // 
+        
+        float3 vl = mul(normalize(_WorldSpaceLightPos0.xyz + ws_pos), UNITY_MATRIX_V) * (1.f / ws_pos.w);
+        float depth_tweak = (org_depth* 0.5f + 0.5f) * 0.5f + 0.5f;
+        depth_tweak = pow( 4.0f * depth_tweak * (1.0f - depth_tweak), 5.f);
+        // depth_tweak = saturate(depth_tweak);
+        
+        float2 shadow_pos = (((vl * 0.02f) * ((_ScreenParams.zw)))+ screen_pos) ;
+
+        float shadow_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, shadow_pos.xy), shadow_pos) * 0.5f + 0.5f;
+
+        float shadow_offset = 0.001f + saturate((1. - depth_tweak) * 0.01f);
+
+        float cmp =  smoothstep((1. - shadow_depth) - shadow_offset, (1. - shadow_depth)  + shadow_offset, (1. - (org_depth * 0.5f + 0.5f)));
+        cmp = saturate(cmp * 2.6f);
+        cmp = saturate(smoothstep(0.95f, 1.f, cmp) + smoothstep(.87, .88, 1. - distance(uv.xy, float2(0.5f, 0.4f))));
+        
+        cmp = unity_shadow;
+        if(!_UseSelfShadow) 
+        {
+            cmp = 1.f;
+            unity_shadow = 1.f;
+        }
+
+        // ================================================================================================ //
         // get emissive area
         float4 emission = diffuse.xyzw;
         if( _EnableEmission == 2)
@@ -301,7 +517,8 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         if(!_HairMaterial)out_color = out_color * mat_color[material_ID];
         // // ================================================================================================ //
         // SHADOW AREA :
-        float shadow_area = shadow_rate(ndotl, lightmap.y, vcol.x, _ShadowRamp);
+        float shadow_area = shadow_rate((ndotl), (lightmap.y), vcol.x, _ShadowRamp);
+        if(_BaseMaterial) shadow_area = lerp(_SelfShadowDarken, shadow_area, unity_shadow);
 
         // RAMP UVS 
         float2 ramp_uv = {shadow_area, ramp_ID};
@@ -396,93 +613,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float3 stocking = -diffuse.xyz * stock_dark_area + _Stockcolor;
         stocking = stock_rim * stocking + stock_darkened;
 
-        // ================================================================================================ //
-        // rim light : 
-        if(isVR())
-        {
-            _RimWidth = 0.5f;
-            _RimOffset = 0.0f;
-            _ES_RimLightOffset = 0.0f;
-        }
-        // populate arrays with material values 
-        float4 rim_color[8] =
-        {
-            _RimColor0,
-            _RimColor1,
-            _RimColor2,
-            _RimColor3, 
-            _RimColor4,
-            _RimColor5,
-            _RimColor6,
-            _RimColor7,   
-        };
-
         
 
-        float4 rim_values[8] = // x = width, y = softness, z = type, w = dark
-        {
-            float4(_RimWidth0, _RimEdgeSoftness0, _RimType0, _RimDark0),
-            float4(_RimWidth1, _RimEdgeSoftness1, _RimType0, _RimDark1),
-            float4(_RimWidth2, _RimEdgeSoftness2, _RimType0, _RimDark2),
-            float4(_RimWidth3, _RimEdgeSoftness3, _RimType0, _RimDark3),
-            float4(_RimWidth4, _RimEdgeSoftness4, _RimType0, _RimDark4),
-            float4(_RimWidth5, _RimEdgeSoftness5, _RimType0, _RimDark5),
-            float4(_RimWidth6, _RimEdgeSoftness6, _RimType0, _RimDark6),
-            float4(_RimWidth7, _RimEdgeSoftness7, _RimType0, _RimDark7),
-        }; // they have unused id specific rim widths but just in case they do end up using them in the future ill leave them be here
 
-        if(_UseMaterialValuesLUT) 
-        {    
-            rim_values[curr_region].yzw = lut_rimval.yxz; 
-        }
-
-        float2 screen_pos = i.ss_pos.xy / i.ss_pos.w;
-        float3 wvp_pos = mul(UNITY_MATRIX_VP, i.ws_pos);
-
-
-        // in order to hide any weirdness at far distances, fade the rim by the distance from the camera
-        float camera_dist = saturate(1.0f / distance(_WorldSpaceCameraPos.xyz, i.ws_pos));
-        float fov = extract_fov();
-        fov = clamp(fov, 0, 150);
-        float range = fov_range(0, 180, fov);
-        float width_depth = camera_dist / range;
-
-        _RimWidth = _RimWidth * 0.25f;
-
-        // multiply the rim widht material values by the lightmap red channel
-        float rim_width = lerp(_RimWidth * 0.5f, _RimWidth * 0.45f, range) * width_depth * lerp(1.0f, lightmap.r, _RimLightMode);
-        if(isVR())
-        {
-            rim_width = rim_width * 0.66f;
-        }
-        // sample depth texture, this will be the base
-        float org_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos.xy), screen_pos);
-
-        float rim_side = (i.ws_pos.z * -vs_normal.x) - (i.ws_pos.x * -vs_normal.z);
-        rim_side = (rim_side > 0.0f) ? 0.0f : 1.0f;
-        
-
-        // create offset screen uv using rim width value and view space normals for offset depth texture
-        float2 offset_uv = _ES_RimLightOffset.xy - _RimOffset.xy;
-        offset_uv.x = lerp(offset_uv.x, -offset_uv.x, rim_side);
-        float2 offset = ((rim_width * vs_normal) * 0.0055f);
-        offset_uv.x = screen_pos.x + ((offset_uv.x * 0.01f + offset.x));
-        offset_uv.y = screen_pos.y + (offset_uv.y * 0.01f + offset.y);
-
-        // sample depth texture using offset uv
-        float offset_depth = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv.xy), offset_uv);
-
-        float rim_depth = (offset_depth - org_depth);
-        rim_depth = pow(rim_depth, rim_values[curr_region].w); 
-        rim_depth = smoothstep(0.0f, _RimWidth, rim_depth);
-
-
-        // float rim_env_col = clamp(avg_env_col, 0.25f, 1.0f);
-        rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
-        rim_light = rim_light;
-
-        if(_EnableRimHue) rim_light.xyz = hue_shift(rim_light.xyz, curr_region, _RimHue, _RimHue2, _RimHue3, _RimHue4, _RimHue5, _RimHue6, _RimHue7, _RimHue8, _GlobalRimHue, _AutomaticRimShift, _ShiftRimSpeed, rim_mask);
-        
         // ================================================================================================ //
         // rim shadow
         // this is distinct from the rim light, whatever it does
@@ -571,7 +704,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         // ================================================================================================ //
         if(_EnableStocking) diffuse.xyz = stocking;
         out_color = out_color * diffuse;
-        out_color.xyz = out_color.xyz * light_color;
         if(_EnableAlphaCutoff) clip(diffuse.w - saturate(_AlphaTestThreshold));
         out_color.xyz = out_color * shadow_color + (specular); 
         if(_EnableColorHue) out_color.xyz = hue_shift(out_color.xyz, curr_region, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _ColorHue6, _ColorHue7, _ColorHue8, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
@@ -579,11 +711,43 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         if(!_FaceMaterial) out_color.xyz = lerp(out_color.xyz.xyz - rim_light.xyz, out_color.xyz + rim_light.xyz, rim_values[curr_region].z);
         if(!_IsTransparent && !_EnableAlphaCutoff) out_color.w = 1.0f;
         if(_EyeShadowMat) out_color = _Color;
-        // out_color.xyz = eye_emis;
+        
+
+        // intialize direction vectors
+        float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
+        float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
+        float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
+
+        float3 view_xz = normalize(view - dot(view, up) * up);
+        float cosxz    = max(0.0f, dot(view_xz, forward));
+        float alpha_a  = saturate((1.0f - cosxz) / 0.658f);
+
+        float3 view_yz = normalize(view - dot(view, right) * right);
+        float cosyz    = max(0.0f, dot(view_yz, forward));
+        float alpha_b  = saturate((1.0f - cosyz) / 0.293f);
+
+        // if(_HairMaterial)
+        // {
+            
+        //     hair_alpha = saturate(1.0f - max(alpha_a, alpha_b));
+        //     hair_alpha = (_UseHairSideFade) ? hair_alpha * _HairBlendSilhouette : _HairBlendSilhouette;
+            
+        //     float side_mask = 1.0f;
+        //     if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
+        //     if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
+        //     hair_alpha = hair_alpha * saturate(side_mask);
+
+        //     float2 grab_uv = i.grab.xy / i.grab.w;
+        //     float3 stencil_grab = _StencilGrabTexture.Sample(sampler_StencilGrabTexture, grab_uv);                
+        //     float stencil_check = stencil_grab > 5;
+
+        //     out_color.xyz = lerp(out_color.xyz, saturate(stencil_grab - 10.f), saturate(stencil_check * hair_alpha));
+        // }
+
         if(_CausToggle)
         {
-            float2 caus_uv = i.ws_pos.xy;
-            caus_uv.x = caus_uv.x + i.ws_pos.z; 
+            float2 caus_uv = ws_pos.xy;
+            caus_uv.x = caus_uv.x + ws_pos.z; 
             if(_CausUV) caus_uv = uv;
             float2 caus_uv_a = _CausTexSTA.xy * caus_uv + _CausTexSTA.zw;
             float2 caus_uv_b = _CausTexSTB.xy * caus_uv + _CausTexSTB.zw;
@@ -612,7 +776,35 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             caus = pow(caus, _CausExp) * _CausColor * _CausInt;      
             out_color.xyz = out_color.xyz + caus;
         }
+
+        // float4 grab_pos = i.grab;
+        // float4 mask = _MaskTexture.Sample(sampler_MaskTexture, (grab_pos.xy / grab_pos.w));
+
+        out_color.xyz = out_color.xyz * light_color;
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+        
+        // out_color.xyz = step(i.vertex.z*.5+.5, 0.51);
+        // out_color.xyz = smoothstep(.9, 1., 1. - distance(uv.xy, float2(0.5f, 0.4f)));
+
+        // float shadow_mask = saturate(1.0f - max(shade_a, shade_b));
+        // float3 lf = cross(light, forward);
+        float shadow_mask = (dot(normal, light) * .5 + .5);
+        shadow_mask = smoothstep(0.5, 0.7, shadow_mask);
+        
+        #ifdef _is_shadow
+            float shadow_view = 1.0f - dot(normal, view);
+            shadow_view = smoothstep(.4,0.5,shadow_view);
+            float mask = saturate( (1. - shadow_mask));
+            float vertex_mask = (i.vertex.z * 0.5f + 0.5f);
+            vertex_mask = step((1.0f - vertex_mask), 0.54);
+            clip(vertex_mask - 0.01);
+            out_color.xyz = lerp(saturate(_ShadowColor), 1.0f, mask);
+            if(!_HairMaterial||!_UseSelfShadow) clip(-1);
+        #endif
+
+        // out_color.xyz = shadow_area;
+        
+        
         if(_DebugMode && (_DebugLights == 1)) out_color.xyz = 0.0f;
 
     #endif
@@ -635,10 +827,10 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         // float bright = lightmap.y > 0.9f && !_FaceMaterial;
 
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
-        float3 light_pass_color = ((diffuse.xyz * 3.5f) * _LightColor0.xyz) * atten * shadow_area * 0.5f;
+        float3 light_pass_color = ((diffuse.xyz * 1.0f) * _LightColor0.xyz) * atten * shadow_area * 0.5f;
         float3 light_color = lerp(light_pass_color.xyz, lerp(0.0f, min(light_pass_color, light_pass_color / light_intesnity), _WorldSpaceLightPos0.w), _FilterLight); // prevents lights from becoming too intense
         #if defined(POINT) || defined(SPOT)
-        out_color.xyz = (light_color) * 0.5f;
+        out_color.xyz = (light_color) * 0.0f;
         #elif defined(DIRECTIONAL)
         out_color.xyz = 0.0f; // dont let extra directional lights add onto the model, this will fuck a lot of shit up
         #endif
@@ -650,11 +842,11 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             float side_mask = 1.0f;
             if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
             if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
-                       
-            clip(saturate(facemap.y + diffuse.a) * side_mask - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
+            float stencil_mask = facemap.y;
+            if(_UseDifAlphaStencil == 1) stencil_mask.x = diffuse.w;
+            if(_UseDifAlphaStencil == 2) stencil_mask.x = stencil_mask.x + diffuse.w;                
+            clip(saturate(stencil_mask) * side_mask - _HairBlendSilhouette); // it is not accurate to use the diffuse alpha channel in this step
             // but it looks weird if the eye shines are specifically omitted from the stencil
-            
-            
         } 
         else if(_HairMaterial)
         {
@@ -687,6 +879,21 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         }
     #endif
     
+    // #ifdef is_stencil // for constructing the stencil texture
+    //     if(_HairMaterial || _EyeShadowMat)
+    //     {
+    //         clip(-1);
+    //     }
+    //     if(_FaceMaterial)
+    //     {
+    //         float stencil_mask = facemap.y;
+    //         if(_UseDifAlphaStencil == 1) stencil_mask.x = diffuse.w;
+    //         if(_UseDifAlphaStencil == 2) stencil_mask.x = stencil_mask.x + diffuse.w;  
+    //         out_color.xyz = lerp(out_color.xyz, out_color.xyz + 10, stencil_mask.x); 
+    //     }
+
+    // #endif
+
     if(_DebugMode)
     {
         if(_DebugDiffuse == 1) return float4(diffuse.xyz, 1.0f);  
@@ -865,9 +1072,8 @@ float4 ps_shadow(shadow_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
         out_color.xyz = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, uv, out_color);
         out_color.xyz = (float3)0.0f;
     }
-   
-
     
     if(_EnableAlphaCutoff) clip(alpha - saturate(_AlphaTestThreshold));
+
     return 0.0f;
 }

@@ -3,7 +3,9 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
     Properties 
     { 
         //Header
-        [HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Impact</color></i></b>✧", Float) = 0
+        //[HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Impact</color></i></b>✧", Float) = 0
+        [HideInInspector] shader_master_bg ("UI/background", Float) = 0
+        [HideInInspector] shader_master_logo ("UI/hi3p1logo", Float) = 0
         [HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
         [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
         [HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0

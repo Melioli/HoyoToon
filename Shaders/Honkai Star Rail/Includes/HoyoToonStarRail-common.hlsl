@@ -94,6 +94,7 @@ int material_region(float lightmap_alpha)
     return material;
 }
 
+// float shadow_rate(float ndotl, float lightmap_ao, float vertex_ao, float shadow_ramp, float shadow_map)
 float shadow_rate(float ndotl, float lightmap_ao, float vertex_ao, float shadow_ramp)
 {
     float shadow_ndotl  = ndotl * 0.5f + 0.5f;
