@@ -13,7 +13,7 @@ public class HoyoToonManager
 {
     #region Constants
 
-    public const string version = "3.50";
+    public const string version = "4.00";
     public const string HSRShader = "HoyoToon/Star Rail/Character";
     private const string GIShader = "HoyoToon/Genshin/Character";
     private const string Hi3Shader = "HoyoToon/Honkai Impact/Character Part 1";
@@ -61,6 +61,75 @@ public class HoyoToonManager
     // {
     //     DetermineBodyType();
     // }
+
+    #endregion
+
+    #region Quick Access Buttons
+
+    [MenuItem("HoyoToon/Documentation")]
+    private static void OpenDocumentation()
+    {
+        Application.OpenURL("https://docs.hoyotoon.com");
+    }
+
+    [MenuItem("GameObject/HoyoToon/Add AvatarLight")]
+    private static void AddAvatarLight()
+    {
+        GameObject selectedObject = Selection.activeGameObject;
+        if (selectedObject == null)
+        {
+            EditorUtility.DisplayDialog("Error", "No Model selected. Please select a Model to add AvatarLight.", "OK");
+            Debug.LogWarning("<color=purple>[Hoyotoon]</color> No Model selected. Please select a Model to add AvatarLight.");
+            return;
+        }
+
+        GameObject avatarLightPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Hoyoverse/Shaders/HoyoToon/Dependencies/AvatarLight.prefab");
+        GameObject avatarLight = UnityEngine.Object.Instantiate(avatarLightPrefab, selectedObject.transform);
+        avatarLight.name = "AvatarLight";
+        avatarLight.transform.localPosition = Vector3.zero;
+        avatarLight.transform.localRotation = Quaternion.identity;
+        avatarLight.transform.localScale = Vector3.one;
+        Undo.RegisterCreatedObjectUndo(avatarLight, "Add AvatarLight");
+        Selection.activeGameObject = avatarLight;
+        EditorGUIUtility.PingObject(avatarLight);
+    }
+
+    [MenuItem("GameObject/HoyoToon/Add Post Processing")]
+    private static void AddPostProcessing()
+    {
+        Camera[] cameras = UnityEngine.Object.FindObjectsOfType<Camera>();
+        if (cameras.Length > 1)
+        {
+            EditorUtility.DisplayDialog("Multiple Cameras Detected", "Multiple cameras detected in the scene. Post-processing will be added to the first camera: " + cameras[0].name, "OK");
+            AttachPostProcessing(cameras[0]);
+        }
+        else if (cameras.Length == 1)
+        {
+            AttachPostProcessing(cameras[0]);
+        }
+        else
+        {
+            EditorUtility.DisplayDialog("Error", "No cameras found in the scene. Please make sure you have at least one camera in your scene.", "OK");
+            Debug.LogWarning("<color=purple>[Hoyotoon]</color> No cameras found in the scene. Please make sure you have at least one camera in your scene.");
+        }
+    }
+
+    private static void AttachPostProcessing(Camera camera)
+    {
+        HoyoToonPostProcess postProcessing = camera.gameObject.GetComponent<HoyoToonPostProcess>();
+        if (postProcessing == null)
+        {
+            postProcessing = camera.gameObject.AddComponent<HoyoToonPostProcess>();
+            Undo.RegisterCreatedObjectUndo(postProcessing, "Add PostProcessing");
+            Selection.activeGameObject = postProcessing.gameObject;
+            EditorGUIUtility.PingObject(postProcessing);
+        }
+        else
+        {
+            EditorUtility.DisplayDialog("Error", $"HoyoToon Post Processing is already attached to the selected camera: {camera.name}", "OK");
+            Debug.LogWarning("<color=purple>[Hoyotoon]</color> HoyoToon Post Processing is already attached to the selected camera.");
+        }
+    }
 
     #endregion
 
