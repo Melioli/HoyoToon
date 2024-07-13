@@ -77,8 +77,7 @@ public class HoyoToonUpdater
         }
         else
         {
-            Debug.Log("<color=purple>[Hoyotoon]</color> You are using the latest version");
-            EditorUtility.DisplayDialog("HoyoToon Updater", "You are using the latest version. Current version: " + version + "\nLatest version: " + latestVersion, "OK");
+            Debug.Log("<color=purple>[Hoyotoon]</color> You are using the latest version. Current version: " + version + "\nLatest version: " + latestVersion);
         }
     }
 
