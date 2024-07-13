@@ -15,30 +15,26 @@ public static class HoyoToonPrerequisites
 
     private static bool initialCheckPerformed = false;
     private static ListRequest listRequest;
-    private static string manifestPath = Path.Combine(Application.dataPath, "../Packages/manifest.json");
-    private static bool pluginsFolderDeleted = false;
     private static bool prerequisitesChecked = false;
 
     static HoyoToonPrerequisites()
     {
-        EditorApplication.update += CheckAndInstallPackagesOnLoad;
-        EditorApplication.quitting += OnEditorQuitting;
-        EditorApplication.update += DeletePluginsFolder;
+        EditorApplication.update += CheckAndUninstallPackagesOnLoad;
         EditorApplication.update += PrerequisitesValidator;
+        EditorApplication.quitting += OnEditorQuitting;
     }
 
-    private static void CheckAndInstallPackagesOnLoad()
+    private static void CheckAndUninstallPackagesOnLoad()
     {
-        EditorApplication.update -= CheckAndInstallPackagesOnLoad;
+        EditorApplication.update -= CheckAndUninstallPackagesOnLoad;
         if (ShouldCheckDependencies())
         {
-            CheckAndInstallPackages();
+            CheckAndUninstallPackages();
         }
     }
 
-    private static void CheckAndInstallPackages()
+    private static void CheckAndUninstallPackages()
     {
-        UnlockPackagesIfNeeded();
         listRequest = Client.List(true);
         EditorApplication.update += ListRequestProgress;
     }
@@ -49,119 +45,60 @@ public static class HoyoToonPrerequisites
         {
             if (listRequest.Status == StatusCode.Success)
             {
-                CheckMissingPackages();
+                CheckUnnecessaryPackages();
                 initialCheckPerformed = true;
             }
-            else if (listRequest.Status >= StatusCode.Failure)
-            {
-                Debug.LogError("<color=purple>[Hoyotoon]</color> Failed to list packages: " + listRequest.Error.message);
-            }
-
             EditorApplication.update -= ListRequestProgress;
         }
     }
 
-    private static void CheckMissingPackages()
+    private static void CheckUnnecessaryPackages()
     {
-        bool packagesInstalled = true;
         foreach (var packageName in PackagesToCheck)
         {
-            bool packageFound = false;
             foreach (var package in listRequest.Result)
             {
                 if (package.name == packageName)
                 {
-                    packageFound = true;
+                    PromptUserToUninstallPackage(packageName);
                     break;
                 }
             }
-
-            if (!packageFound)
-            {
-                packagesInstalled = false;
-                PromptUserToInstallPackage(packageName);
-            }
-        }
-
-        if (packagesInstalled)
-        {
-            Debug.Log("<color=purple>[Hoyotoon]</color> All required packages are already installed.");
         }
     }
 
-    private static void PromptUserToInstallPackage(string packageName)
+    private static void PromptUserToUninstallPackage(string packageName)
     {
-        if (EditorUtility.DisplayDialog("Install Required Package",
-                                        $"The package '{packageName}' is required for HoyoToon to work properly but not installed. Do you want to install it now?",
+        if (EditorUtility.DisplayDialog("Duplicate Package Detected",
+                                        $"The package '{packageName}' is installed but detected as a duplicate and could cause issues with HoyoToon since it's already packaged with the shader. Do you want to uninstall it?",
                                         "Yes", "No"))
         {
-            InstallPackage(packageName);
+            UninstallPackage(packageName);
         }
     }
 
-    private static void InstallPackage(string packageName)
+    private static void UninstallPackage(string packageName)
     {
-        Debug.Log($"<color=purple>[Hoyotoon]</color> Installing {packageName} package...");
-        var addRequest = Client.Add(packageName);
-        EditorApplication.update += () => AddRequestProgress(addRequest, packageName);
+        Debug.Log($"<color=purple>[Hoyotoon]</color> Uninstalling {packageName} package...");
+        var removeRequest = Client.Remove(packageName);
+        EditorApplication.update += () => RemoveRequestProgress(removeRequest, packageName);
     }
 
-    private static void AddRequestProgress(AddRequest addRequest, string packageName)
+    private static void RemoveRequestProgress(RemoveRequest removeRequest, string packageName)
     {
-        if (addRequest.IsCompleted)
+        if (removeRequest.IsCompleted)
         {
-            if (addRequest.Status == StatusCode.Success)
+            if (removeRequest.Status == StatusCode.Success)
             {
-                Debug.Log($"<color=purple>[Hoyotoon]</color> Successfully installed {addRequest.Result.packageId}");
-                EditorUtility.DisplayDialog("Package Installed",
-                                            $"The package '{addRequest.Result.packageId}' has been successfully installed.",
-                                            "OK");
+                EditorUtility.DisplayDialog("Package Uninstalled", $"The package '{packageName}' has been successfully uninstalled.", "OK");
+                Debug.Log($"<color=purple>[Hoyotoon]</color> Successfully uninstalled {packageName}");
             }
-            else if (addRequest.Status >= StatusCode.Failure)
+            else
             {
-                Debug.LogError($"<color=purple>[Hoyotoon]</color> Failed to install {packageName}: {addRequest.Error.message}");
-                EditorUtility.DisplayDialog("Package Installation Failed",
-                                            $"Failed to install the package '{packageName}': {addRequest.Error.message}",
-                                            "OK");
+                EditorUtility.DisplayDialog("Error", $"Failed to uninstall {packageName}: {removeRequest.Error.message}", "OK");
+                Debug.LogError($"<color=purple>[Hoyotoon]</color> Failed to uninstall {packageName}: {removeRequest.Error.message}");
             }
-
-            EditorApplication.update -= () => AddRequestProgress(addRequest, packageName);
-        }
-    }
-
-    private static void UnlockPackagesIfNeeded()
-    {
-        if (File.Exists(manifestPath))
-        {
-            string manifestContent = File.ReadAllText(manifestPath);
-            var manifest = JsonUtility.FromJson<Manifest>(manifestContent);
-
-            bool manifestModified = false;
-            foreach (var packageName in PackagesToCheck)
-            {
-                if (manifest.lockedDependencies != null && manifest.lockedDependencies.ContainsKey(packageName))
-                {
-                    if (EditorUtility.DisplayDialog("Unlock Required Package",
-                                                    $"The package '{packageName}' is locked and required for HoyoToon to work properly. Do you want to unlock it?",
-                                                    "Yes", "No"))
-                    {
-                        manifest.lockedDependencies.Remove(packageName);
-                        manifestModified = true;
-                        Debug.Log($"<color=purple>[Hoyotoon]</color> {packageName} package was locked. It has been unlocked.");
-                    }
-                }
-            }
-
-            if (manifestModified)
-            {
-                string modifiedManifestContent = JsonUtility.ToJson(manifest, true);
-                File.WriteAllText(manifestPath, modifiedManifestContent);
-                AssetDatabase.Refresh();
-            }
-        }
-        else
-        {
-            Debug.LogError("<color=purple>[Hoyotoon]</color> Could not find manifest.json file.");
+            EditorApplication.update -= () => RemoveRequestProgress(removeRequest, packageName);
         }
     }
 
@@ -188,34 +125,9 @@ public static class HoyoToonPrerequisites
         return false;
     }
 
-    private static void DeletePluginsFolder()
-    {
-        if (!pluginsFolderDeleted)
-        {
-            string scriptFolderPath = Path.Combine(Application.dataPath, "Hoyoverse/Shaders/HoyoToon/Scripts");
-            string pluginsFolderPath = Path.Combine(scriptFolderPath, "Plugins");
-            if (Directory.Exists(pluginsFolderPath))
-            {
-                Directory.Delete(pluginsFolderPath, true);
-                string metaFilePath = pluginsFolderPath + ".meta";
-                if (File.Exists(metaFilePath))
-                {
-                    File.Delete(metaFilePath);
-                }
-                Debug.Log("<color=purple>[Hoyotoon]</color> Outdated dependencies removed and plugins folder deleted.");
-                pluginsFolderDeleted = true;
-                AssetDatabase.Refresh();
-            }
-            else
-            {
-                pluginsFolderDeleted = true;
-            }
-        }
-    }
-
     private static void OnEditorQuitting()
     {
-        EditorApplication.update -= CheckAndInstallPackagesOnLoad;
+        EditorApplication.update -= CheckAndUninstallPackages;
         EditorApplication.quitting -= OnEditorQuitting;
     }
 
@@ -229,12 +141,12 @@ public static class HoyoToonPrerequisites
             }
             else
             {
-                EditorUtility.DisplayDialog("Error", "The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear.", "OK");
-                Debug.LogError("<color=purple>[Hoyotoon]</color> The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear.");
+                EditorUtility.DisplayDialog("Error", "The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear. Unity will then initiate reloading its textures and lighting options.", "OK");
+                Debug.LogError("<color=purple>[Hoyotoon]</color> The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear. Unity will then initiate reloading its textures and lighting options.");
 
                 PlayerSettings.colorSpace = ColorSpace.Linear;
-                EditorUtility.DisplayDialog("Settings Updated", "The Color Space has been set to Linear. Unity will now initiate reloading its textures and lighting options.", "OK");
-                Debug.Log("<color=purple>[Hoyotoon]</color> The Color Space has been set to Linear. Unity will now initiate reloading its textures and lighting options.");
+                EditorUtility.DisplayDialog("Settings Updated", "The Color Space has been set to Linear.", "OK");
+                Debug.Log("<color=purple>[Hoyotoon]</color> The Color Space has been set to Linear.");
             }
 
             if (QualitySettings.shadowProjection == ShadowProjection.CloseFit)

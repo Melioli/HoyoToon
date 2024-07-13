@@ -6,7 +6,6 @@ using UnityEngine.Networking;
 using System.Collections.Generic;
 using Unity.EditorCoroutines.Editor;
 using System.Collections;
-using UnityEngine.Video;
 
 public class HoyoToonUpdaterGUI : EditorWindow
 {
@@ -15,8 +14,8 @@ public class HoyoToonUpdaterGUI : EditorWindow
     private string downloadSize;
     private string bodyContent;
     private Vector2 scrollPosition;
-    private System.Action onInstallUpdate;
-    private System.Action onIgnoreUpdate;
+    private Action onInstallUpdate;
+    private Action onIgnoreUpdate;
     private Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
     private HashSet<string> loadingTextures = new HashSet<string>();
 
