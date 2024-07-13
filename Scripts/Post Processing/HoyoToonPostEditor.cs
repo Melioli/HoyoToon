@@ -7,9 +7,12 @@ using UnityEngine;
 [CustomEditor(typeof(HoyoToonPostProcess))]
 public class HoyoToonPostProcessEditor : Editor
 {
+    private bool ShowPresets = true;
     private bool showBloomSettings = true;
     private bool showColorGrading = true;
     private bool showToneMapping = true;
+    public static string bgPathProperty = "UI/background";
+    public static string logoPathProperty = "UI/postlogo";
 
 
     public override void OnInspectorGUI()
@@ -20,14 +23,53 @@ public class HoyoToonPostProcessEditor : Editor
         Undo.RecordObject(script, "Modify HoyoToonPostProcess");
 
         // Load and draw logo;
-        Texture2D logo = Resources.Load<Texture2D>("UI/hoyotoon");
-        if (logo != null)
+        Rect bgRect = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.ExpandWidth(true), GUILayout.Height(145.0f));
+        bgRect.x = 0;
+        bgRect.width = EditorGUIUtility.currentViewWidth;
+        Rect logoRect = new Rect(bgRect.width / 2 - 375f, bgRect.height / 2 - 65f, 750f, 130f);
+
+        if (!string.IsNullOrEmpty(bgPathProperty))
         {
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.Label(logo);
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+            Texture2D bg = Resources.Load<Texture2D>(bgPathProperty);
+
+            if (bg != null)
+            {
+                GUI.DrawTexture(bgRect, bg, ScaleMode.ScaleAndCrop);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(logoPathProperty))
+        {
+            Texture2D logo = Resources.Load<Texture2D>(logoPathProperty);
+
+            if (logo != null)
+            {
+                GUI.DrawTexture(logoRect, logo, ScaleMode.ScaleToFit);
+            }
+        }
+
+        // Preset settings
+        ShowPresets = EditorGUILayout.BeginFoldoutHeaderGroup(ShowPresets, "Preset Settings");
+        if (ShowPresets)
+        {
+            EditorGUI.indentLevel++;
+
+            script.gameMode = (HoyoToonPostProcess.GameMode)EditorGUILayout.EnumPopup("Game Mode", script.gameMode);
+            if (script.gameMode == HoyoToonPostProcess.GameMode.Genshin)
+            {
+                script.bloomMode = HoyoToonPostProcess.BloomMode.Color;
+                script.bloomColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                script.toneMode = HoyoToonPostProcess.ToneMode.GenshinCustom;
+            }
+            else if (script.gameMode == HoyoToonPostProcess.GameMode.StarRail)
+            {
+                script.bloomMode = HoyoToonPostProcess.BloomMode.Brightness;
+                script.bloomColor = new Color(1.0f, 0.5801887f, 0.5801887f, 0f);
+                script.toneMode = HoyoToonPostProcess.ToneMode.StarRail;
+            }
+
+            EditorGUI.indentLevel++;
+            EditorGUILayout.EndFoldoutHeaderGroup();
         }
 
         // Bloom settings

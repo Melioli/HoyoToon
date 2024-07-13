@@ -14,20 +14,28 @@ public class HoyoToonPostProcess : MonoBehaviour
     private Material postMaterial;
 
     [SerializeField]
+    public enum GameMode
+    {
+        Genshin = 0,
+        StarRail = 1,
+    }
+    public GameMode gameMode = GameMode.Genshin;
+
+    [SerializeField]
     public enum BloomMode
     {
         Off = 0,
         Color = 1,
         Brightness = 2,
     }
-    public BloomMode bloomMode;
+    public BloomMode bloomMode = BloomMode.Color;
 
     public float bloomThreshold = 0.7f;
-    public float bloomIntensity = 1.5f;
+    public float bloomIntensity = 0.5f;
     public Vector4 bloomWeights = new(0.1f, 0.2f, 0.3f, 0.4f);
     public Color bloomColor = Color.white;
     public float blurSamples = 10;
-    public float blurWeight = 0.5f;
+    public float blurWeight = 3f;
     [Range(0.1f, 1.0f)]
     public float downsampleValue = 0.5f;
     public enum ToneMode
@@ -37,7 +45,7 @@ public class HoyoToonPostProcess : MonoBehaviour
         GenshinCustom = 2,
         StarRail = 3,
     }
-    public ToneMode toneMode;
+    public ToneMode toneMode = ToneMode.GenshinCustom;
     public float exposure = 1.05f;
     public float contrast = 1.0f;
     public float saturation = 1.0f;
