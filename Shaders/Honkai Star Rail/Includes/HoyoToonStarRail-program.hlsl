@@ -726,24 +726,6 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float cosyz    = max(0.0f, dot(view_yz, forward));
         float alpha_b  = saturate((1.0f - cosyz) / 0.293f);
 
-        // if(_HairMaterial)
-        // {
-            
-        //     hair_alpha = saturate(1.0f - max(alpha_a, alpha_b));
-        //     hair_alpha = (_UseHairSideFade) ? hair_alpha * _HairBlendSilhouette : _HairBlendSilhouette;
-            
-        //     float side_mask = 1.0f;
-        //     if(_HairSideChoose == 1) side_mask = saturate(step(0, i.vertex.x));
-        //     if(_HairSideChoose == 2) side_mask = saturate(step(i.vertex.x, 0));
-        //     hair_alpha = hair_alpha * saturate(side_mask);
-
-        //     float2 grab_uv = i.grab.xy / i.grab.w;
-        //     float3 stencil_grab = _StencilGrabTexture.Sample(sampler_StencilGrabTexture, grab_uv);                
-        //     float stencil_check = stencil_grab > 5;
-
-        //     out_color.xyz = lerp(out_color.xyz, saturate(stencil_grab - 10.f), saturate(stencil_check * hair_alpha));
-        // }
-
         if(_CausToggle)
         {
             float2 caus_uv = ws_pos.xy;
@@ -777,23 +759,15 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             out_color.xyz = out_color.xyz + caus;
         }
 
-        // float4 grab_pos = i.grab;
-        // float4 mask = _MaskTexture.Sample(sampler_MaskTexture, (grab_pos.xy / grab_pos.w));
-
         out_color.xyz = out_color.xyz * light_color;
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
-        
-        // out_color.xyz = step(i.vertex.z*.5+.5, 0.51);
-        // out_color.xyz = smoothstep(.9, 1., 1. - distance(uv.xy, float2(0.5f, 0.4f)));
 
-        // float shadow_mask = saturate(1.0f - max(shade_a, shade_b));
-        // float3 lf = cross(light, forward);
         float shadow_mask = (dot(normal, light) * .5 + .5);
         shadow_mask = smoothstep(0.5, 0.7, shadow_mask);
         
         #ifdef _is_shadow
             float shadow_view = 1.0f - dot(normal, view);
-            shadow_view = smoothstep(.4,0.5,shadow_view);
+            shadow_view = smoothstep(0.4f, 0.5f, shadow_view);
             float mask = saturate( (1. - shadow_mask));
             float vertex_mask = (i.vertex.z * 0.5f + 0.5f);
             vertex_mask = step((1.0f - vertex_mask), 0.54);
@@ -802,9 +776,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             if(!_HairMaterial||!_UseSelfShadow) clip(-1);
         #endif
 
-        // out_color.xyz = shadow_area;
-        
-        
+
         if(_DebugMode && (_DebugLights == 1)) out_color.xyz = 0.0f;
 
     #endif
@@ -821,16 +793,14 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         float3 shadow_area = (float3)1.0f;
         shadow_area = shadow_rate(ndotl, lightmap.y, i.v_col.x, 2.0f);
         // metalshadow = shadow_area_transition(lightmapao, vertexao, ndotl, material_id);
-        if(_FaceMaterial) shadow_area = shadow_rate_face(i.uv.xy, light).xxx;
+        if(_FaceMaterial) shadow_area = dot((float3)0.5f, light);
         // 
-
-        // float bright = lightmap.y > 0.9f && !_FaceMaterial;
 
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
         float3 light_pass_color = ((diffuse.xyz * 1.0f) * _LightColor0.xyz) * atten * shadow_area * 0.5f;
         float3 light_color = lerp(light_pass_color.xyz, lerp(0.0f, min(light_pass_color, light_pass_color / light_intesnity), _WorldSpaceLightPos0.w), _FilterLight); // prevents lights from becoming too intense
         #if defined(POINT) || defined(SPOT)
-        out_color.xyz = (light_color) * 0.0f;
+        out_color.xyz = (light_color) * 0.5f;
         #elif defined(DIRECTIONAL)
         out_color.xyz = 0.0f; // dont let extra directional lights add onto the model, this will fuck a lot of shit up
         #endif

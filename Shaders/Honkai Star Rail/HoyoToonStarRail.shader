@@ -540,106 +540,6 @@ Shader "HoyoToon/Star Rail/Character"
 
         ENDHLSL
 
-        // original passes 
-            // Pass
-            // {
-            //     Name "BasePass"
-            //     Tags{ "LightMode" = "ForwardBase" }
-            //     Cull [_CullMode]
-            //     Blend [_SrcBlend] [_DstBlend]
-            //     Stencil
-            //     {
-            // 		ref [_StencilRef]  
-            //         Comp [_StencilCompA]
-            // 		Pass [_StencilPassA]
-            //         Fail Keep
-            // 		ZFail Keep
-            // 	}
-
-            //     HLSLPROGRAM
-            //     // #define is_stencil
-            //     #pragma multi_compile_fwdbase
-            //     #define _IS_PASS_BASE
-            //     #pragma vertex vs_base
-            //     #pragma fragment ps_base
-
-            //     #include "Includes/HoyoToonStarRail-program.hlsl"
-            //     ENDHLSL
-            // }
-
-            // Pass
-            // {
-            //     Name "EyeStencilPass"
-            //     Tags{ "LightMode" = "ForwardBase" }
-            //     Cull [_CullMode] 
-            //     Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
-            //     Stencil
-            //     {
-            //         ref [_StencilRef]              
-            // 		Comp [_StencilCompB]
-            // 		Pass [_StencilPassB]  
-            //         Fail Keep
-            // 		ZFail Keep
-            // 	}
-
-            //     // Cull [_Cull]
-            //     // Blend [_SrcBlend] [_DstBlend]
-
-            //     HLSLPROGRAM
-            //     #define is_stencil
-            //     #define _IS_PASS_BASE
-            //     #pragma multi_compile_fwdbase            
-            //     #pragma vertex vs_base
-            //     #pragma fragment ps_base
-
-            //     #include "Includes/HoyoToonStarRail-program.hlsl"
-
-            //     ENDHLSL
-            // }
-            
-            // Pass
-            // {
-            //     Name "Light Pass"
-            //     Tags{ "LightMode" = "ForwardAdd" }
-            //     Cull [_Cull]
-            //     ZWrite Off
-            //     Blend One One
-            //     HLSLPROGRAM
-                
-            //     #pragma multi_compile_fwdadd
-            //     #define _IS_PASS_LIGHT
-
-            //     #pragma vertex vs_base
-            //     #pragma fragment ps_base 
-
-            //     #include "Includes/HoyoToonStarRail-program.hlsl"
-            //     ENDHLSL
-            // }    
-
-            
-        // Pass
-        // {
-        //     Name "StencilMasking"
-        //     Tags{ "LightMode" = "ForwardBase" }
-        //     Cull [_CullMode]
-        //     Blend [_SrcBlend] [_DstBlend]
- 
-        //     HLSLPROGRAM
-        //     // #define is_stencil
-        //     #pragma multi_compile_fwdbase
-        //     #define is_stencil
-        //     #define _IS_PASS_BASE
-        //     #pragma vertex vs_base
-        //     #pragma fragment ps_base
- 
-        //     #include "Includes/HoyoToonStarRail-program.hlsl"
-        //     ENDHLSL
-        // }
-
-        // GrabPass
-        // {
-        //     "_StencilGrabTexture"
-        // }
         
         Pass
         {
@@ -725,6 +625,24 @@ Shader "HoyoToon/Star Rail/Character"
 
             ENDHLSL
         }
+        Pass
+        {
+            Name "Light Pass"
+            Tags{ "LightMode" = "ForwardAdd" }
+            Cull [_Cull]
+            ZWrite Off
+            Blend One One
+            
+            HLSLPROGRAM
+            #pragma multi_compile_fwdadd
+            #define _IS_PASS_LIGHT
+
+            #pragma vertex vs_base
+            #pragma fragment ps_base 
+
+            #include "Includes/HoyoToonStarRail-program.hlsl"
+            ENDHLSL
+        }    
 
         Pass
         {
