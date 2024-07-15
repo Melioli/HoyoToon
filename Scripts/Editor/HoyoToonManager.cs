@@ -56,8 +56,11 @@ public class HoyoToonManager
     {
         GenerateMaterialsFromJson();
         SetupFBX();
-        AddSelectedObjectToScene();
-        GenTangents();
+        GameObject selectedObject = AddSelectedObjectToScene();
+        if (selectedObject != null)
+        {
+            GenTangents(selectedObject);
+        }
 
     }
 
@@ -142,7 +145,7 @@ public class HoyoToonManager
         }
     }
 
-    private static void AddSelectedObjectToScene()
+    private static GameObject AddSelectedObjectToScene()
     {
         GameObject selectedObject = Selection.activeObject as GameObject;
         if (selectedObject != null)
@@ -150,10 +153,13 @@ public class HoyoToonManager
             GameObject instance = GameObject.Instantiate(selectedObject);
             instance.name = selectedObject.name;
             Undo.RegisterCreatedObjectUndo(instance, "Add Selected Object to Scene");
+            return instance;
         }
         else
         {
+            EditorUtility.DisplayDialog("Error", "No valid model selected. Please select a model to add to the scene.", "OK");
             Debug.LogWarning("<color=purple>[Hoyotoon]</color> No valid model selected. Please select a model to add to the scene.");
+            return null;
         }
     }
 
@@ -1221,11 +1227,11 @@ public class HoyoToonManager
     #region Tangent Generation
 
     [MenuItem("GameObject/HoyoToon/Generate Tangents", false, 0)]
-    public static void GenTangents()
+    public static void GenTangents(GameObject selectedObject)
     {
         DetermineBodyType();
 
-        MeshFilter[] meshFilters = Selection.activeGameObject.GetComponentsInChildren<MeshFilter>();
+        MeshFilter[] meshFilters = selectedObject.GetComponentsInChildren<MeshFilter>();
         foreach (var meshFilter in meshFilters)
         {
             Mesh mesh = meshFilter.sharedMesh;
@@ -1250,7 +1256,7 @@ public class HoyoToonManager
 
         }
 
-        SkinnedMeshRenderer[] skinMeshRenders = Selection.activeGameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer[] skinMeshRenders = selectedObject.GetComponentsInChildren<SkinnedMeshRenderer>();
         foreach (var skinMeshRender in skinMeshRenders)
         {
             Mesh mesh = skinMeshRender.sharedMesh;
@@ -1273,7 +1279,7 @@ public class HoyoToonManager
             }
         }
 
-        SaveMeshAssets(Selection.activeGameObject, currentBodyType);
+        SaveMeshAssets(selectedObject, currentBodyType);
     }
 
     private static Mesh ModifyMeshTangents(Mesh mesh)
