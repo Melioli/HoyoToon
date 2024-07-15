@@ -57,6 +57,7 @@ public class HoyoToonManager
         GenerateMaterialsFromJson();
         SetupFBX();
         AddSelectedObjectToScene();
+        GenTangents();
 
     }
 
