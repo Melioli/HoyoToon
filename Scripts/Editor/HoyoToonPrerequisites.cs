@@ -148,19 +148,25 @@ public static class HoyoToonPrerequisites
                 EditorUtility.DisplayDialog("Settings Updated", "The Color Space has been set to Linear.", "OK");
                 Debug.Log("<color=purple>[Hoyotoon]</color> The Color Space has been set to Linear.");
             }
-
             if (QualitySettings.shadowProjection == ShadowProjection.CloseFit)
             {
                 Debug.Log("<color=purple>[Hoyotoon]</color> The Shadow Projection is set to Close Fit.");
             }
             else
             {
-                EditorUtility.DisplayDialog("Error", "The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.", "OK");
-                Debug.LogError("<color=purple>[Hoyotoon]</color> The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.");
+                if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.StandaloneWindows)
+                {
+                    Debug.Log("<color=purple>[Hoyotoon]</color> Different Build Target detected. Skipping Shadow Projection check.");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.", "OK");
+                    Debug.LogError("<color=purple>[Hoyotoon]</color> The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.");
 
-                QualitySettings.shadowProjection = ShadowProjection.CloseFit;
-                EditorUtility.DisplayDialog("Settings Updated", "The Shadow Projection has been set to Close Fit.", "OK");
-                Debug.Log("<color=purple>[Hoyotoon]</color> The Shadow Projection has been set to Close Fit.");
+                    QualitySettings.shadowProjection = ShadowProjection.CloseFit;
+                    EditorUtility.DisplayDialog("Settings Updated", "The Shadow Projection has been set to Close Fit.", "OK");
+                    Debug.Log("<color=purple>[Hoyotoon]</color> The Shadow Projection has been set to Close Fit.");
+                }
             }
 
             prerequisitesChecked = true;
