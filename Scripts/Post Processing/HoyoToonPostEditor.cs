@@ -59,6 +59,7 @@ public class HoyoToonPostProcessEditor : Editor
             {
                 script.bloomMode = HoyoToonPostProcess.BloomMode.Color;
                 script.bloomColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                script.exposure = 1.05f;
                 script.toneMode = HoyoToonPostProcess.ToneMode.GenshinCustom;
             }
             else if (script.gameMode == HoyoToonPostProcess.GameMode.StarRail)
@@ -66,6 +67,24 @@ public class HoyoToonPostProcessEditor : Editor
                 script.bloomMode = HoyoToonPostProcess.BloomMode.Brightness;
                 script.bloomColor = new Color(1.0f, 0.5801887f, 0.5801887f, 0f);
                 script.toneMode = HoyoToonPostProcess.ToneMode.StarRail;
+                script.exposure = 1.05f;
+                script.ACESParamA = 2.80f;
+                script.ACESParamB = 0.40f;
+                script.ACESParamC = 2.10f;
+                script.ACESParamD = 0.5f;
+                script.ACESParamE = 1.5f;
+            }
+            else if (script.gameMode == HoyoToonPostProcess.GameMode.WutheringWaves)
+            {
+                script.bloomMode = HoyoToonPostProcess.BloomMode.Color;
+                script.bloomColor = new Color(1.0f, 0.5801887f, 0.5801887f, 0f);
+                script.toneMode = HoyoToonPostProcess.ToneMode.StarRail;
+                script.exposure = 1.3f;
+                script.ACESParamA = 2.80f;
+                script.ACESParamB = 0.50f;
+                script.ACESParamC = 2.50f;
+                script.ACESParamD = 0.5f;
+                script.ACESParamE = 1.5f;
             }
 
             EditorGUI.indentLevel++;

@@ -18,6 +18,7 @@ public class HoyoToonPostProcess : MonoBehaviour
     {
         Genshin = 0,
         StarRail = 1,
+        WutheringWaves = 2,
     }
     public GameMode gameMode = GameMode.Genshin;
 
