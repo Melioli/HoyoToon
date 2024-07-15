@@ -20,7 +20,8 @@ public class HoyoToonManager
     private const string Hi3P2Shader = "HoyoToon/Honkai Impact/Character Part 2";
     private const string WuWaShader = "HoyoToon/Wuthering Waves/Character";
     private static readonly string[] clampKeyword = { "Dissolve", "ramp", "Star", "_Skin" };
-    private static readonly string[] nonSRGBKeywords = { "normalmap", "lightmap", "face_shadow", "specular_ramp", "gradient", "Grain", "Dissolve", "Repeat", "Stockings", "ExpressionMap", "FaceMap", "materialidvalueslut", "ColorMask", "_Mask", "_Normal", "_HM", "_N", "_HET", "_ID", "_SDF", "_CUBE", "_EG", "_EM", "T_Caustic" };
+    private static readonly string[] nonSRGBKeywords = { "normalmap", "lightmap", "face_shadow", "specular_ramp", "gradient", "Grain", "Dissolve", "Repeat", "Stockings", "ExpressionMap", "FaceMap", "materialidvalueslut", "ColorMask", "_Mask", "_Normal" };
+    private static readonly string[] EndsWithNonSRGBKeywords = { "_HM", "_N", "_HET", "_ID", "_SDF", "_CUBE", "_EG", "_EM", "T_Caustic" };
     private static readonly string[] NonPower2Keywords = { "materialidvalueslut" };
 
 
@@ -49,6 +50,15 @@ public class HoyoToonManager
     #endregion
 
     #region Setup
+
+    [MenuItem("Assets/HoyoToon/Full Setup")]
+    private static void FullSetup()
+    {
+        GenerateMaterialsFromJson();
+        SetupFBX();
+        AddSelectedObjectToScene();
+
+    }
 
     [MenuItem("Assets/HoyoToon/Setup FBX")]
     private static void SetupFBX()
@@ -128,6 +138,21 @@ public class HoyoToonManager
         {
             EditorUtility.DisplayDialog("Error", $"HoyoToon Post Processing is already attached to the selected camera: {camera.name}", "OK");
             Debug.LogWarning("<color=purple>[Hoyotoon]</color> HoyoToon Post Processing is already attached to the selected camera.");
+        }
+    }
+
+    private static void AddSelectedObjectToScene()
+    {
+        GameObject selectedObject = Selection.activeObject as GameObject;
+        if (selectedObject != null)
+        {
+            GameObject instance = GameObject.Instantiate(selectedObject);
+            instance.name = selectedObject.name;
+            Undo.RegisterCreatedObjectUndo(instance, "Add Selected Object to Scene");
+        }
+        else
+        {
+            Debug.LogWarning("<color=purple>[Hoyotoon]</color> No valid model selected. Please select a model to add to the scene.");
         }
     }
 
@@ -905,7 +930,6 @@ public class HoyoToonManager
         }
     }
 
-
     private static void SetTextureImportSettings(IEnumerable<string> paths)
     {
         var pathsToReimport = new List<string>();
@@ -929,7 +953,8 @@ public class HoyoToonManager
                     importer.streamingMipmaps != false ||
                     (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.wrapMode != TextureWrapMode.Clamp) ||
                     (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.sRGBTexture != false) ||
-                    (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.npotScale != TextureImporterNPOTScale.None))
+                    (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.npotScale != TextureImporterNPOTScale.None) ||
+                    (EndsWithNonSRGBKeywords.Any(k => texture.name.EndsWith(k, System.StringComparison.InvariantCultureIgnoreCase)) && importer.sRGBTexture != false))
                 {
                     importer.textureType = TextureImporterType.Default;
                     importer.textureCompression = TextureImporterCompression.Uncompressed;
@@ -944,6 +969,9 @@ public class HoyoToonManager
 
                     if (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
                         importer.npotScale = TextureImporterNPOTScale.None;
+
+                    if (EndsWithNonSRGBKeywords.Any(k => texture.name.EndsWith(k, System.StringComparison.InvariantCultureIgnoreCase)))
+                        importer.sRGBTexture = false;
 
                     settingsChanged = true;
                 }
@@ -1101,6 +1129,9 @@ public class HoyoToonManager
                 string pName = "legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes";
                 PropertyInfo prop = importer.GetType().GetProperty(pName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 prop.SetValue(importer, true);
+
+                // Save and reimport to apply changes immediately
+                importer.SaveAndReimport();
             }
         }
         finally
@@ -1204,9 +1235,16 @@ public class HoyoToonManager
             }
             else
             {
+                if (meshFilter.name.Equals("Eyes"))
+                {
+                    continue;
+                }
+                else
+                {
 
-                ModifyMeshTangents(mesh);
-                meshFilter.sharedMesh = mesh;
+                    ModifyMeshTangents(mesh);
+                    meshFilter.sharedMesh = mesh;
+                }
             }
 
         }
@@ -1222,9 +1260,15 @@ public class HoyoToonManager
             }
             else
             {
-
-                ModifyMeshTangents(mesh);
-                skinMeshRender.sharedMesh = mesh;
+                if (skinMeshRender.name.Equals("Eyes"))
+                {
+                    continue;
+                }
+                else
+                {
+                    ModifyMeshTangents(mesh);
+                    skinMeshRender.sharedMesh = mesh;
+                }
             }
         }
 
@@ -1326,7 +1370,14 @@ public class HoyoToonManager
             }
             else
             {
-                newMesh = ModifyMeshTangents(mesh);
+                if (meshFilter.name.Equals("Eyes"))
+                {
+                    continue;
+                }
+                else
+                {
+                    newMesh = ModifyMeshTangents(mesh);
+                }
             }
             newMesh.name = mesh.name; // Set the name of the new mesh to the name of the original mesh
             meshFilter.sharedMesh = newMesh;
@@ -1351,7 +1402,14 @@ public class HoyoToonManager
             }
             else
             {
-                newMesh = ModifyMeshTangents(mesh);
+                if (skinMeshRenderer.name.Equals("Eyes"))
+                {
+                    continue;
+                }
+                else
+                {
+                    newMesh = ModifyMeshTangents(mesh);
+                }
             }
             newMesh.name = mesh.name; // Set the name of the new mesh to the name of the original mesh
             skinMeshRenderer.sharedMesh = newMesh;
