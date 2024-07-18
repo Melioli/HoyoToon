@@ -20,10 +20,9 @@ public class HoyoToonManager
     private const string Hi3P2Shader = "HoyoToon/Honkai Impact/Character Part 2";
     private const string WuWaShader = "HoyoToon/Wuthering Waves/Character";
     private static readonly string[] clampKeyword = { "Dissolve", "ramp", "Star", "_Skin" };
-    private static readonly string[] nonSRGBKeywords = { "normalmap", "lightmap", "face_shadow", "specular_ramp", "gradient", "Grain", "Dissolve", "Repeat", "Stockings", "ExpressionMap", "FaceMap", "materialidvalueslut", "ColorMask", "_Mask", "_Normal" };
+    private static readonly string[] nonSRGBKeywords = { "normalmap", "lightmap", "face_shadow", "face01_shadow", "specular_ramp", "gradient", "Grain", "Dissolve", "Repeat", "Stockings", "ExpressionMap", "FaceMap", "materialidvalueslut", "ColorMask", "_Mask", "_Normal" };
     private static readonly string[] EndsWithNonSRGBKeywords = { "_HM", "_N", "_HET", "_ID", "_SDF", "_CUBE", "_EG", "_EM", "T_Caustic" };
     private static readonly string[] NonPower2Keywords = { "materialidvalueslut" };
-
 
     public enum BodyType
     {
@@ -93,7 +92,7 @@ public class HoyoToonManager
         if (selectedObject == null)
         {
             EditorUtility.DisplayDialog("Error", "No Model selected. Please select a Model to add AvatarLight.", "OK");
-            Debug.LogWarning("<color=purple>[Hoyotoon]</color> No Model selected. Please select a Model to add AvatarLight.");
+            HoyoToonLogs.WarningDebug("<color=purple>[Hoyotoon]</color> No Model selected. Please select a Model to add AvatarLight.");
             return;
         }
 
@@ -124,7 +123,7 @@ public class HoyoToonManager
         else
         {
             EditorUtility.DisplayDialog("Error", "No cameras found in the scene. Please make sure you have at least one camera in your scene.", "OK");
-            Debug.LogWarning("<color=purple>[Hoyotoon]</color> No cameras found in the scene. Please make sure you have at least one camera in your scene.");
+            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> No cameras found in the scene. Please make sure you have at least one camera in your scene.");
         }
     }
 
@@ -141,7 +140,7 @@ public class HoyoToonManager
         else
         {
             EditorUtility.DisplayDialog("Error", $"HoyoToon Post Processing is already attached to the selected camera: {camera.name}", "OK");
-            Debug.LogWarning("<color=purple>[Hoyotoon]</color> HoyoToon Post Processing is already attached to the selected camera.");
+            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> HoyoToon Post Processing is already attached to the selected camera.");
         }
     }
 
@@ -158,7 +157,7 @@ public class HoyoToonManager
         else
         {
             EditorUtility.DisplayDialog("Error", "No valid model selected. Please select a model to add to the scene.", "OK");
-            Debug.LogWarning("<color=purple>[Hoyotoon]</color> No valid model selected. Please select a model to add to the scene.");
+            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> No valid model selected. Please select a model to add to the scene.");
             return null;
         }
     }
@@ -227,7 +226,7 @@ public class HoyoToonManager
                 {
                     currentBodyType = BodyType.Hi3P2;
                     bodyTypeSet = true;
-                    Debug.Log($"<color=purple>[Hoyotoon]</color> Matched texture: {textureName} with BodyType.Hi3P2");
+                    HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Matched texture: {textureName} with BodyType.Hi3P2");
                 }
                 else if (!bodyTypeSet && textureName.ToLower().Contains("expressionmap".ToLower()))
                 {
@@ -252,23 +251,23 @@ public class HoyoToonManager
                     {
                         currentBodyType = BodyType.HI3P1;
                         bodyTypeSet = false;
-                        Debug.Log($"<color=purple>[Hoyotoon]</color> Matched texture: {textureName} with BodyType.Hi3P1");
+                        HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Matched texture: {textureName} with BodyType.Hi3P1");
                     }
                 }
             }
             if (!bodyTypeSet)
             {
                 currentBodyType = BodyType.WuWa;
-                Debug.Log($"<color=purple>[Hoyotoon]</color> No specific match found. Setting BodyType to WuWa");
+                HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> No specific match found. Setting BodyType to WuWa");
             }
         }
         else
         {
             string validFolderNames = string.Join(", ", new[] { "Textures", "Texture", "Tex" });
             EditorUtility.DisplayDialog("Error", $"Textures folder path does not exist. Ensure your textures are in a folder named {validFolderNames}.", "OK");
-            Debug.LogError("<color=purple>[Hoyotoon]</color> You need to have a Textures folder matching the valid names (e.g., 'Textures', 'Texture', 'Tex') and have all the textures inside of them.");
+            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> You need to have a Textures folder matching the valid names (e.g., 'Textures', 'Texture', 'Tex') and have all the textures inside of them.");
         }
-        Debug.Log($"<color=purple>[Hoyotoon]</color> Current Body Type: {currentBodyType}");
+        HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Current Body Type: {currentBodyType}");
     }
 
     #endregion
@@ -319,7 +318,7 @@ public class HoyoToonManager
                     {
                         string validFolderNames = string.Join(", ", new[] { "Materials", "Material", "Mat" });
                         EditorUtility.DisplayDialog("Error", $"Materials folder path does not exist. Ensure your materials are in a folder named {validFolderNames}.", "OK");
-                        Debug.LogError("<color=purple>[Hoyotoon]</color> Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
+                        HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
                     }
                 }
             }
@@ -407,6 +406,7 @@ public class HoyoToonManager
 
                 Material newMaterial = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
                 bool isNewMaterial = false;
+
                 if (newMaterial == null)
                 {
                     newMaterial = new Material(shaderToApply);
@@ -447,7 +447,11 @@ public class HoyoToonManager
 
                             string textureName = textureObject["Name"].Value<string>();
 
-                            if (!string.IsNullOrEmpty(textureName))
+                            if (string.IsNullOrEmpty(textureName))
+                            {
+                                HardsetTexture(newMaterial, propertyName, shaderToApply);
+                            }
+                            else
                             {
                                 Texture texture = null;
 
@@ -597,82 +601,24 @@ public class HoyoToonManager
                     });
                 }
 
+                SetTextureImportSettings(loadedTexturePaths);
                 ApplyCustomSettingsToMaterial(newMaterial, jsonFileName, jsonFile);
-
 
                 if (isNewMaterial)
                 {
-                    HardSetTextures(newMaterial, loadedTexturePaths);
                     AssetDatabase.CreateAsset(newMaterial, materialPath);
                 }
-
-                //ApplyAfterChanges(newMaterial, jsonFile);
+                else
+                {
+                    EditorUtility.SetDirty(newMaterial);
+                }
             }
             else
             {
                 EditorUtility.DisplayDialog("Error", $"No compatible shader found for " + jsonFileName, "OK");
-                Debug.LogError("<color=purple>[Hoyotoon]</color> No compatible shader found for " + jsonFileName);
+                HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> No compatible shader found for " + jsonFileName);
             }
         }
-    }
-
-    public static void HardSetTextures(Material newMaterial, List<string> loadedTexturePaths)
-    {
-        var textureMap = new Dictionary<string, string>
-    {
-        { "_MTMap", "Avatar_Tex_MetalMap" },
-        { "_MTSpecularRamp", "Avatar_Tex_Specular_Ramp"},
-        { "_DissolveMap", "Eff_Noise_607" },
-        { "_DissolveMask", "UI_Noise_29" },
-        { "_WeaponDissolveTex", "Eff_WeaponsTotem_Dissolve_00" },
-        { "_WeaponPatternTex", "Eff_WeaponsTotem_Grain_00" },
-        { "_ScanPatternTex", "Eff_Gradient_Repeat_01" }
-    };
-
-        if (currentBodyType.ToString().StartsWith("GI"))
-        {
-            string bodyType = currentBodyType.ToString().Substring(2);
-            textureMap["_FaceMapTex"] = $"Avatar_{bodyType}_Tex_FaceLightmap";
-        }
-
-        // Cache for loaded textures
-        var textureCache = new Dictionary<string, Texture>();
-
-        foreach (var textureProperty in textureMap)
-        {
-            string textureName = textureProperty.Value;
-            Texture texture = null;
-
-            // Check if the texture is in the cache
-            if (textureCache.ContainsKey(textureName))
-            {
-                texture = textureCache[textureName];
-            }
-            else
-            {
-                string[] textureGUIDs = AssetDatabase.FindAssets(textureName + " t:texture");
-
-                if (textureGUIDs.Length > 0)
-                {
-                    string texturePath = AssetDatabase.GUIDToAssetPath(textureGUIDs[0]);
-                    texture = AssetDatabase.LoadAssetAtPath<Texture>(texturePath);
-
-                    // Add the texture to the cache
-                    if (texture != null)
-                    {
-                        textureCache.Add(textureName, texture);
-                    }
-                }
-            }
-
-            if (texture != null)
-            {
-                newMaterial.SetTexture(textureProperty.Key, texture);
-                string texturePath = AssetDatabase.GetAssetPath(texture);
-                loadedTexturePaths.Add(texturePath);
-            }
-        }
-        SetTextureImportSettings(loadedTexturePaths);
     }
 
     private static void ProcessProperties(JToken token, Material material, Action<string, JToken> action)
@@ -937,72 +883,6 @@ public class HoyoToonManager
         }
     }
 
-    private static void SetTextureImportSettings(IEnumerable<string> paths)
-    {
-        var pathsToReimport = new List<string>();
-
-        AssetDatabase.StartAssetEditing();
-        try
-        {
-            foreach (var p in paths)
-            {
-                var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(p);
-                if (!texture) continue;
-
-                TextureImporter importer = AssetImporter.GetAtPath(p) as TextureImporter;
-                if (!importer) continue;
-
-                bool settingsChanged = false;
-
-                if (importer.textureType != TextureImporterType.Default ||
-                    importer.textureCompression != TextureImporterCompression.Uncompressed ||
-                    importer.mipmapEnabled != false ||
-                    importer.streamingMipmaps != false ||
-                    (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.wrapMode != TextureWrapMode.Clamp) ||
-                    (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.sRGBTexture != false) ||
-                    (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.npotScale != TextureImporterNPOTScale.None) ||
-                    (EndsWithNonSRGBKeywords.Any(k => texture.name.EndsWith(k, System.StringComparison.InvariantCultureIgnoreCase)) && importer.sRGBTexture != false))
-                {
-                    importer.textureType = TextureImporterType.Default;
-                    importer.textureCompression = TextureImporterCompression.Uncompressed;
-                    importer.mipmapEnabled = false;
-                    importer.streamingMipmaps = false;
-
-                    if (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
-                        importer.wrapMode = TextureWrapMode.Clamp;
-
-                    if (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
-                        importer.sRGBTexture = false;
-
-                    if (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
-                        importer.npotScale = TextureImporterNPOTScale.None;
-
-                    if (EndsWithNonSRGBKeywords.Any(k => texture.name.EndsWith(k, System.StringComparison.InvariantCultureIgnoreCase)))
-                        importer.sRGBTexture = false;
-
-                    settingsChanged = true;
-                }
-
-                if (settingsChanged)
-                {
-                    pathsToReimport.Add(p);
-                }
-            }
-        }
-        finally
-        {
-            AssetDatabase.StopAssetEditing();
-        }
-
-        foreach (var p in pathsToReimport)
-        {
-            AssetDatabase.ImportAsset(p, ImportAssetOptions.ForceUpdate);
-        }
-
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-    }
-
     [MenuItem("Assets/HoyoToon/Generate Jsons")]
     public static void GenerateJsonsFromMaterials()
     {
@@ -1097,6 +977,167 @@ public class HoyoToonManager
 
         // Write the JSON string to a file
         File.WriteAllText(outputPath, jsonContent);
+    }
+
+    #endregion
+
+    #region Textures
+
+    public class TextureCondition
+    {
+        public string CurrentBodyType { get; set; }
+        public Shader Shader { get; set; }
+        public string PropertyName { get; set; }
+        public string TextureName { get; set; }
+
+        public bool Matches(string currentBodyType, Shader shader, string propertyName)
+        {
+            return CurrentBodyType == currentBodyType && Shader == shader && PropertyName == propertyName;
+        }
+    }
+
+    private static readonly List<TextureCondition> textureConditions = new List<TextureCondition>();
+
+    static HoyoToonManager()
+    {
+        string[] GIbodyTypes = { BodyType.GIBoy.ToString(), BodyType.GIGirl.ToString(), BodyType.GILady.ToString(), BodyType.GIMale.ToString(), BodyType.GILoli.ToString() };
+        string[] GIFaceLightmap = { "Avatar_Boy_Tex_FaceLightmap", "Avatar_Girl_Tex_FaceLightmap", "Avatar_Lady_Tex_FaceLightmap", "Avatar_Male_Tex_FaceLightmap", "Avatar_Loli_Tex_FaceLightmap" };
+        string[] HSRBodyTypes = { BodyType.HSRMaid.ToString(), BodyType.HSRKid.ToString(), BodyType.HSRLad.ToString(), BodyType.HSRMale.ToString(), BodyType.HSRLady.ToString(), BodyType.HSRGirl.ToString(), BodyType.HSRBoy.ToString(), BodyType.HSRMiss.ToString() };
+        string[] HSRExpressionMap = { "W_160_Maid_Face_ExpressionMap_00", "W_120_Kid_Face_ExpressionMap_00", "M_170_Lad_Face_ExpressionMap", "M_180_Male_Face_ExpressionMap_00", "W_170_Lady_Face_ExpressionMap_00", "W_140_Girl_Face_ExpressionMap_00", "M_150_Boy_Face_ExpressionMap_00", "W_168_Miss_Face_ExpressionMap_00" };
+        string[] HSRFaceMap = { "W_160_Maid_FaceMap_00", "W_120_Kid_FaceMap_00", "M_170_Lad_FaceMap_00", "M_180_Male_FaceMap_00", "W_170_Lady_FaceMap_00", "W_140_Girl_FaceMap_00", "M_150_Boy_FaceMap_00", "W_168_Miss_FaceMap_00" };
+
+        // Genshin
+        for (int i = 0; i < GIbodyTypes.Length; i++)
+        {
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_FaceMapTex", TextureName = GIFaceLightmap[i] });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_LightMapTex", TextureName = "Avatar_Tex_Face_Shadow" });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_MTMap", TextureName = "Avatar_Tex_MetalMap" });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_MTSpecularRamp", TextureName = "Avatar_Tex_Specular_Ramp" });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_WeaponDissolveTex", TextureName = "Eff_WeaponsTotem_Dissolve_00" });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_WeaponPatternTex", TextureName = "Eff_WeaponsTotem_Grain_00" });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_ScanPatternTex", TextureName = "Eff_Gradient_Repeat_01" });
+        }
+
+        // Star Rail
+        for (int i = 0; i < HSRBodyTypes.Length; i++)
+        {
+            textureConditions.Add(new TextureCondition { CurrentBodyType = HSRBodyTypes[i], Shader = Shader.Find(HSRShader), PropertyName = "_FaceMap", TextureName = HSRFaceMap[i] });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = HSRBodyTypes[i], Shader = Shader.Find(HSRShader), PropertyName = "_ExpressionMap", TextureName = HSRExpressionMap[i] });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = HSRBodyTypes[i], Shader = Shader.Find(HSRShader), PropertyName = "_DissolveMap", TextureName = "Eff_Noise_607" });
+            textureConditions.Add(new TextureCondition { CurrentBodyType = HSRBodyTypes[i], Shader = Shader.Find(HSRShader), PropertyName = "_DissolveMask", TextureName = "UI_Noise_29" });
+        }
+    }
+
+    private static void HardsetTexture(Material newMaterial, string propertyName, Shader shader)
+    {
+        string currentBodyTypeString = currentBodyType.ToString();
+
+        if (!textureConditions.Any(condition => condition.Matches(currentBodyTypeString, shader, propertyName)))
+        {
+            HoyoToonLogs.WarningDebug($"<color=purple>[Hoyotoon]</color> No specific texture set for body type: {currentBodyTypeString}, shader: {shader.name}, property: {propertyName}, material: {newMaterial.name}");
+            return;
+        }
+
+        foreach (var condition in textureConditions)
+        {
+            if (condition.Matches(currentBodyTypeString, shader, propertyName))
+            {
+                Texture texture = Resources.Load<Texture>(condition.TextureName);
+                List<string> texturePaths = new List<string>();
+
+                if (texture == null)
+                {
+                    string[] guids = AssetDatabase.FindAssets(condition.TextureName);
+                    foreach (string guid in guids)
+                    {
+                        string path = AssetDatabase.GUIDToAssetPath(guid);
+                        texture = AssetDatabase.LoadAssetAtPath<Texture>(path);
+                        if (texture != null && texture.name == condition.TextureName)
+                        {
+                            texturePaths.Add(path);
+                            break;
+                        }
+                    }
+                }
+
+                if (texture != null)
+                {
+                    newMaterial.SetTexture(propertyName, texture);
+                    SetTextureImportSettings(texturePaths);
+                    return;
+                }
+                else
+                {
+                    HoyoToonLogs.WarningDebug($"<color=purple>[Hoyotoon]</color> Texture not found with name: {condition.TextureName}");
+                }
+            }
+        }
+    }
+
+    private static void SetTextureImportSettings(IEnumerable<string> paths)
+    {
+        var pathsToReimport = new List<string>();
+
+        AssetDatabase.StartAssetEditing();
+        try
+        {
+            foreach (var p in paths)
+            {
+                var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(p);
+                if (!texture) continue;
+
+                TextureImporter importer = AssetImporter.GetAtPath(p) as TextureImporter;
+                if (!importer) continue;
+
+                bool settingsChanged = false;
+
+                if (importer.textureType != TextureImporterType.Default ||
+                    importer.textureCompression != TextureImporterCompression.Uncompressed ||
+                    importer.mipmapEnabled != false ||
+                    importer.streamingMipmaps != false ||
+                    (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.wrapMode != TextureWrapMode.Clamp) ||
+                    (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.sRGBTexture != false) ||
+                    (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0) && importer.npotScale != TextureImporterNPOTScale.None) ||
+                    (EndsWithNonSRGBKeywords.Any(k => texture.name.EndsWith(k, System.StringComparison.InvariantCultureIgnoreCase)) && importer.sRGBTexture != false))
+                {
+                    importer.textureType = TextureImporterType.Default;
+                    importer.textureCompression = TextureImporterCompression.Uncompressed;
+                    importer.mipmapEnabled = false;
+                    importer.streamingMipmaps = false;
+
+                    if (clampKeyword.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
+                        importer.wrapMode = TextureWrapMode.Clamp;
+
+                    if (nonSRGBKeywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
+                        importer.sRGBTexture = false;
+
+                    if (NonPower2Keywords.Any(k => texture.name.IndexOf(k, System.StringComparison.InvariantCultureIgnoreCase) >= 0))
+                        importer.npotScale = TextureImporterNPOTScale.None;
+
+                    if (EndsWithNonSRGBKeywords.Any(k => texture.name.EndsWith(k, System.StringComparison.InvariantCultureIgnoreCase)))
+                        importer.sRGBTexture = false;
+
+                    settingsChanged = true;
+                }
+
+                if (settingsChanged)
+                {
+                    pathsToReimport.Add(p);
+                }
+            }
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
+        }
+
+        foreach (var p in pathsToReimport)
+        {
+            AssetDatabase.ImportAsset(p, ImportAssetOptions.ForceUpdate);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 
     #endregion
