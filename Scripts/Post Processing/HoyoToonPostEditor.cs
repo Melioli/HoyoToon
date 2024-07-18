@@ -86,6 +86,7 @@ public class HoyoToonPostProcessEditor : Editor
                 script.ACESParamD = 0.5f;
                 script.ACESParamE = 1.5f;
             }
+            else if(script.gameMode == HoyoToonPostProcess.GameMode.Custom)
 
             EditorGUI.indentLevel++;
             EditorGUILayout.EndFoldoutHeaderGroup();
