@@ -430,7 +430,7 @@ Shader "HoyoToon/Star Rail/Character"
                 [Toggle] _UseHueMask ("Enable Hue Mask", Float) = 0
                 _HueMaskTexture ("Hue Mask--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", 2D) = "white" {}
                 // Color Hue
-                [HideInInspector] m_start_colorhue ("Diffuse}", Float) = 0
+                [HideInInspector] m_start_colorhue ("Diffuse", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _DiffuseMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableColorHue ("Enable Diffuse Hue Shift", Float) = 1
                     [Toggle] _AutomaticColorShift ("Enable Auto Hue Shift", Float) = 0
@@ -446,7 +446,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _ColorHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_colorhue ("", Float) = 0
                 // Outline Hue
-                [HideInInspector] m_start_outlinehue ("Outline}", Float) = 0
+                [HideInInspector] m_start_outlinehue ("Outline", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _OutlineMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableOutlineHue ("Enable Outline Hue Shift", Float) = 1
                     [Toggle] _AutomaticOutlineShift ("Enable Auto Hue Shift", Float) = 0
@@ -462,7 +462,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _OutlineHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_outlinehue ("", Float) = 0
                 // Glow Hue
-                [HideInInspector] m_start_glowhue ("Emission}", Float) = 0
+                [HideInInspector] m_start_glowhue ("Emission", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _EmissionMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableEmissionHue ("Enable Emission Hue Shift", Float) = 1
                     [Toggle] _AutomaticEmissionShift ("Enable Auto Hue Shift", Float) = 0
@@ -478,7 +478,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _EmissionHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_glowhue ("", Float) = 0
                 // Rim Hue
-                [HideInInspector] m_start_rimhue ("Rim}", Float) = 0
+                [HideInInspector] m_start_rimhue ("Rim", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _RimMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableRimHue ("Enable Rim Hue Shift", Float) = 1
                     [Toggle] _AutomaticRimShift ("Enable Auto Hue Shift", Float) = 0
