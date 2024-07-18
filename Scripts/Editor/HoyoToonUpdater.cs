@@ -23,7 +23,7 @@ public class HoyoToonUpdater
         HoyoToonPreferences.LoadPrefs();
         if (EditorPrefs.GetBool(HoyoToonPreferences.CheckForUpdatesPref, true))
         {
-            Debug.Log("<color=purple>[Hoyotoon]</color> Checking for updates on startup...");
+            HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Checking for updates on startup...");
             CheckForUpdates();
         }
     }
@@ -37,7 +37,7 @@ public class HoyoToonUpdater
 
     private static IEnumerator CheckVersionAndUpdateCoroutine()
     {
-        Debug.Log("<color=purple>[Hoyotoon]</color> Starting version check...");
+        HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Starting version check...");
 
         UnityWebRequest versionRequest = UnityWebRequest.Get(githubApiUrl);
         versionRequest.SetRequestHeader("User-Agent", "request");
@@ -45,7 +45,7 @@ public class HoyoToonUpdater
 
         if (versionRequest.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError($"<color=purple>[Hoyotoon]</color> Failed to fetch version: {versionRequest.error}, Response Code: {versionRequest.responseCode}");
+            HoyoToonLogs.ErrorDebug($"<color=purple>[Hoyotoon]</color> Failed to fetch version: {versionRequest.error}, Response Code: {versionRequest.responseCode}");
             yield break;
         }
 
@@ -55,12 +55,12 @@ public class HoyoToonUpdater
         string downloadSize = jsonResponse.assets[0].size.ToString(); // Size in bytes
         string bodyContent = jsonResponse.body;
 
-        Debug.Log("<color=purple>[Hoyotoon]</color> Current version: " + version);
-        Debug.Log("<color=purple>[Hoyotoon]</color> Latest version: " + latestVersion);
+        HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Current version: " + version);
+        HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Latest version: " + latestVersion);
 
         if (IsNewerVersion(latestVersion, version))
         {
-            Debug.Log("<color=purple>[Hoyotoon]</color> New version available: " + latestVersion);
+            HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> New version available: " + latestVersion);
 
             HoyoToonUpdaterGUI.ShowWindow(
                 version,
@@ -68,16 +68,16 @@ public class HoyoToonUpdater
                 downloadSize,
                 bodyContent,
                 () => EditorCoroutineUtility.StartCoroutineOwnerless(DownloadAndUpdatePackage(packageUrl, latestVersion)),
-                () => Debug.Log("<color=purple>[Hoyotoon]</color> Update canceled by user.")
+                () => HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Update canceled by user.")
             );
         }
         else if (IsNewerVersion(version, latestVersion))
         {
-            Debug.Log("<color=purple>[Hoyotoon]</color> How the fuck is that even possible.... oh wait yeah developer.. ");
+            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> How the fuck is that even possible.... oh wait yeah developer.. ");
         }
         else
         {
-            Debug.Log("<color=purple>[Hoyotoon]</color> You are using the latest version. Current version: " + version + "\nLatest version: " + latestVersion);
+            HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> You are using the latest version. Current version: " + version + "\nLatest version: " + latestVersion);
         }
     }
 
@@ -104,7 +104,7 @@ public class HoyoToonUpdater
 
     private static IEnumerator DownloadAndUpdatePackage(string packageUrl, string latestVersion)
     {
-        Debug.Log("<color=purple>[Hoyotoon]</color> Starting package download...");
+        HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Starting package download...");
 
         UnityWebRequest packageRequest = UnityWebRequest.Get(packageUrl);
         string tempFilePath = Path.Combine(Application.temporaryCachePath, "Hoyotoon " + latestVersion + ".unitypackage");
@@ -113,22 +113,22 @@ public class HoyoToonUpdater
 
         if (packageRequest.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("<color=purple>[Hoyotoon]</color> Failed to download package: " + packageRequest.error);
+            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> Failed to download package: " + packageRequest.error);
             yield break;
         }
 
-        Debug.Log("<color=purple>[Hoyotoon]</color> Package download successful. Importing package...");
+        HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Package download successful. Importing package...");
 
         if (EditorPrefs.GetBool(HoyoToonPreferences.AutoImportPref, true))
         {
-            Debug.Log("<color=purple>[Hoyotoon]</color> Auto-importing package...");
+            HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Auto-importing package...");
             AssetDatabase.ImportPackage(tempFilePath, false);
-            Debug.Log("<color=purple>[Hoyotoon]</color> Package imported successfully.");
+            HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Package imported successfully.");
         }
         else
         {
             AssetDatabase.ImportPackage(tempFilePath, true);
-            Debug.Log("<color=purple>[Hoyotoon]</color> Auto-import is disabled. Please import the package manually.");
+            HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> Auto-import is disabled. Please import the package manually.");
         }
     }
 

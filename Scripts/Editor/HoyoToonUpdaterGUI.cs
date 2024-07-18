@@ -304,7 +304,7 @@ public class HoyoToonUpdaterGUI : EditorWindow
 
                 if (www.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError("Failed to load texture from URL: " + www.error);
+                    HoyoToonLogs.ErrorDebug("Failed to load texture from URL: " + www.error);
                     retries++;
                     yield return new WaitForSeconds(1); // Wait for 1 second before retrying
                 }
@@ -319,7 +319,7 @@ public class HoyoToonUpdaterGUI : EditorWindow
 
         if (!success)
         {
-            Debug.LogError("Failed to load texture after " + maxRetries + " attempts: " + url);
+            HoyoToonLogs.ErrorDebug("Failed to load texture after " + maxRetries + " attempts: " + url);
         }
     }
 
