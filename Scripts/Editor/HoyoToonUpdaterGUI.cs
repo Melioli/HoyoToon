@@ -33,7 +33,6 @@ public class HoyoToonUpdaterGUI : EditorWindow
 
     private void OnGUI()
     {
-        // Draw background and icon
         Rect bgRect = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.ExpandWidth(true), GUILayout.Height(145.0f));
         bgRect.x = 0;
         bgRect.width = EditorGUIUtility.currentViewWidth;
@@ -79,7 +78,7 @@ public class HoyoToonUpdaterGUI : EditorWindow
         GUILayout.EndVertical();
         EditorGUILayout.Space();
 
-        GUILayout.FlexibleSpace(); // Ensure the buttons stay at the bottom when resizing the window
+        GUILayout.FlexibleSpace();
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Install Update"))
@@ -94,17 +93,11 @@ public class HoyoToonUpdaterGUI : EditorWindow
         }
         GUILayout.EndHorizontal();
     }
-
-    /// <summary>
-    /// Renders the given markdown string and displays it in the editor window.
-    /// </summary>
-    /// <param name="markdown">The markdown string to render.</param>
     private void RenderMarkdown(string markdown)
     {
         string richText = ConvertMarkdownToRichText(markdown);
         string[] lines = richText.Split(new[] { "\n\n" }, StringSplitOptions.None);
 
-        // Load the image from the specified path
         Texture2D hsrLogo = Resources.Load<Texture2D>("UI/hsrlogo");
         Texture2D gilogo = Resources.Load<Texture2D>("UI/gilogo");
         Texture2D hi3p1Logo = Resources.Load<Texture2D>("UI/hi3p1logo");
@@ -158,20 +151,20 @@ public class HoyoToonUpdaterGUI : EditorWindow
                 else
                 {
                     GUIStyle h1Style = new GUIStyle(EditorStyles.boldLabel);
-                    h1Style.fontSize = 24; // Set font size for h1
+                    h1Style.fontSize = 24;
                     GUILayout.Label(line.Replace("<h1>", "").Replace("</h1>", ""), h1Style, GUILayout.Width(position.width));
                 }
             }
             else if (line.StartsWith("<h2>"))
             {
                 GUIStyle h2Style = new GUIStyle(EditorStyles.label);
-                h2Style.fontSize = 20; // Set font size for h2
+                h2Style.fontSize = 20;
                 GUILayout.Label(line.Replace("<h2>", "").Replace("</h2>", ""), h2Style, GUILayout.Width(position.width));
             }
             else if (line.StartsWith("<h3>"))
             {
                 GUIStyle h3Style = new GUIStyle(EditorStyles.miniLabel);
-                h3Style.fontSize = 16; // Set font size for h3
+                h3Style.fontSize = 16;
                 GUILayout.Label(line.Replace("<h3>", "").Replace("</h3>", ""), h3Style, GUILayout.Width(position.width));
             }
             else if (line.StartsWith("<li>"))
@@ -207,14 +200,13 @@ public class HoyoToonUpdaterGUI : EditorWindow
                 if (textureCache.ContainsKey(url))
                 {
                     Texture2D texture = textureCache[url];
-                    float maxWidth = position.width * 0.75f; // Set a maximum width for the image
-                    float maxHeight = position.height * 0.75f; // Set a maximum height for the image
+                    float maxWidth = position.width * 0.75f;
+                    float maxHeight = position.height * 0.75f;
                     float aspectRatio = (float)texture.height / texture.width;
 
                     float width = texture.width;
                     float height = texture.height;
 
-                    // Scale down the image if it exceeds the maximum dimensions
                     if (width > maxWidth)
                     {
                         width = maxWidth;
@@ -235,7 +227,7 @@ public class HoyoToonUpdaterGUI : EditorWindow
                         loadingTextures.Add(url);
                         EditorCoroutineUtility.StartCoroutine(LoadTextureCoroutine(url), this);
                     }
-                    GUILayout.Box("Loading...", GUILayout.Width(position.width * 0.5f), GUILayout.Height(50)); // Placeholder
+                    GUILayout.Box("Loading...", GUILayout.Width(position.width * 0.5f), GUILayout.Height(50));
                 }
             }
             else
@@ -246,16 +238,14 @@ public class HoyoToonUpdaterGUI : EditorWindow
 
         void DrawHeaderImage(Texture2D texture)
         {
-            float fixedWidth = texture.width; // Use the original image width
-            float fixedHeight = texture.height; // Use the original image height
+            float fixedWidth = texture.width;
+            float fixedHeight = texture.height;
 
-            // Create a custom style with no background
             GUIStyle imageStyle = new GUIStyle();
             imageStyle.normal.background = null;
 
-            // Use GUILayout to manage the layout
             GUILayout.BeginHorizontal();
-            GUILayout.Space(-200); // Add space to the left
+            GUILayout.Space(-200);
             GUILayout.Label(texture, imageStyle, GUILayout.Width(fixedWidth), GUILayout.Height(fixedHeight));
             GUILayout.EndHorizontal();
         }
@@ -263,27 +253,21 @@ public class HoyoToonUpdaterGUI : EditorWindow
 
     private string ConvertMarkdownToRichText(string markdown)
     {
-        // Convert Markdown to Unity Rich Text
         string richText = markdown;
 
-        // Bold and Italic (nested)
         richText = Regex.Replace(richText, @"\*\*\*(.+?)\*\*\*", "<b><i>$1</i></b>");
         richText = Regex.Replace(richText, @"\*\*(.+?)\*\*", "<b>$1</b>");
         richText = Regex.Replace(richText, @"\*(.+?)\*", "<i>$1</i>");
         richText = Regex.Replace(richText, @"_(.+?)_", "<i>$1</i>");
 
-        // Headers
         richText = Regex.Replace(richText, @"^# (.+)$", "<h1>$1</h1>", RegexOptions.Multiline);
         richText = Regex.Replace(richText, @"^## (.+)$", "<h2>$1</h2>", RegexOptions.Multiline);
         richText = Regex.Replace(richText, @"^### (.+)$", "<h3>$1</h3>", RegexOptions.Multiline);
 
-        // Lists
         richText = Regex.Replace(richText, @"^- (.+)$", "<li>$1</li>", RegexOptions.Multiline);
 
-        // Image links
         richText = Regex.Replace(richText, @"!\[.*?\]\((.+?)\)", "<img src=\"$1\">");
 
-        // Line breaks
         richText = richText.Replace("\n", "\n\n");
 
         return richText;
@@ -299,14 +283,14 @@ public class HoyoToonUpdaterGUI : EditorWindow
         {
             using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
             {
-                www.timeout = 10; // Set a timeout of 10 seconds
+                www.timeout = 10;
                 yield return www.SendWebRequest();
 
                 if (www.result != UnityWebRequest.Result.Success)
                 {
                     HoyoToonLogs.ErrorDebug("Failed to load texture from URL: " + www.error);
                     retries++;
-                    yield return new WaitForSeconds(1); // Wait for 1 second before retrying
+                    yield return new WaitForSeconds(1);
                 }
                 else
                 {
