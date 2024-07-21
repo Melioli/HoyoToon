@@ -79,7 +79,7 @@ public static class HoyoToonPrerequisites
 
     private static void UninstallPackage(string packageName)
     {
-        HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Uninstalling {packageName} package...");
+        HoyoToonLogs.LogDebug($"Uninstalling {packageName} package...");
         var removeRequest = Client.Remove(packageName);
         EditorApplication.update += () => RemoveRequestProgress(removeRequest, packageName);
     }
@@ -91,12 +91,12 @@ public static class HoyoToonPrerequisites
             if (removeRequest.Status == StatusCode.Success)
             {
                 EditorUtility.DisplayDialog("Package Uninstalled", $"The package '{packageName}' has been successfully uninstalled.", "OK");
-                HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Successfully uninstalled {packageName}");
+                HoyoToonLogs.LogDebug($"Successfully uninstalled {packageName}");
             }
             else
             {
                 EditorUtility.DisplayDialog("Error", $"Failed to uninstall {packageName}: {removeRequest.Error.message}", "OK");
-                HoyoToonLogs.ErrorDebug($"<color=purple>[Hoyotoon]</color> Failed to uninstall {packageName}: {removeRequest.Error.message}");
+                HoyoToonLogs.ErrorDebug($"Failed to uninstall {packageName}: {removeRequest.Error.message}");
             }
             EditorApplication.update -= () => RemoveRequestProgress(removeRequest, packageName);
         }
@@ -137,35 +137,35 @@ public static class HoyoToonPrerequisites
         {
             if (PlayerSettings.colorSpace == ColorSpace.Linear)
             {
-                HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> The Color Space is set to Linear.");
+                HoyoToonLogs.LogDebug("The Color Space is set to Linear.");
             }
             else
             {
                 EditorUtility.DisplayDialog("Error", "The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear. Unity will then initiate reloading its textures and lighting options.", "OK");
-                HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear. Unity will then initiate reloading its textures and lighting options.");
+                HoyoToonLogs.ErrorDebug("The Color Space is currently set to Gamma. To ensure proper rendering, we'll set the Color Space to Linear. Unity will then initiate reloading its textures and lighting options.");
 
                 PlayerSettings.colorSpace = ColorSpace.Linear;
                 EditorUtility.DisplayDialog("Settings Updated", "The Color Space has been set to Linear.", "OK");
-                HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> The Color Space has been set to Linear.");
+                HoyoToonLogs.LogDebug("The Color Space has been set to Linear.");
             }
             if (QualitySettings.shadowProjection == ShadowProjection.CloseFit)
             {
-                HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> The Shadow Projection is set to Close Fit.");
+                HoyoToonLogs.LogDebug("The Shadow Projection is set to Close Fit.");
             }
             else
             {
                 if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.StandaloneWindows)
                 {
-                    HoyoToonLogs.WarningDebug("<color=purple>[Hoyotoon]</color> Different Build Target detected. Skipping Shadow Projection check.");
+                    HoyoToonLogs.WarningDebug("Different Build Target detected. Skipping Shadow Projection check.");
                 }
                 else
                 {
                     EditorUtility.DisplayDialog("Error", "The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.", "OK");
-                    HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.");
+                    HoyoToonLogs.LogDebug("The Shadow Projection is currently set to Stable Fit. To ensure high quality casted shadows inside the Unity Editor, we'll set the Shadow Projection to Close Fit.");
 
                     QualitySettings.shadowProjection = ShadowProjection.CloseFit;
                     EditorUtility.DisplayDialog("Settings Updated", "The Shadow Projection has been set to Close Fit.", "OK");
-                    HoyoToonLogs.LogDebug("<color=purple>[Hoyotoon]</color> The Shadow Projection has been set to Close Fit.");
+                    HoyoToonLogs.LogDebug("The Shadow Projection has been set to Close Fit.");
                 }
             }
 
