@@ -107,6 +107,7 @@ public class HoyoToonUpdaterGUI : EditorWindow
         Texture2D uilogo = Resources.Load<Texture2D>("UI/uilogo");
         Texture2D resourceslogo = Resources.Load<Texture2D>("UI/resourceslogo");
         Texture2D PostProcessinglogo = Resources.Load<Texture2D>("UI/postlogo");
+        Texture2D editorScreenshot = Resources.Load<Texture2D>("UI/screenshotlogo");
 
         foreach (string line in lines)
         {
@@ -147,6 +148,10 @@ public class HoyoToonUpdaterGUI : EditorWindow
                 else if (line.Contains("Post Processing") && PostProcessinglogo != null)
                 {
                     DrawHeaderImage(PostProcessinglogo);
+                }
+                else if (line.Contains("Editor Screenshot") && editorScreenshot != null)
+                {
+                    DrawHeaderImage(editorScreenshot);
                 }
                 else
                 {
