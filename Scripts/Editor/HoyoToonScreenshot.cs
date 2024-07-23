@@ -159,7 +159,7 @@ public class ScreenshotEditorWindow : EditorWindow
         }
         else if (selectedView == ViewType.GameView)
         {
-            Camera gameCamera = Camera.main;
+            Camera gameCamera = UnityEngine.Object.FindObjectOfType<Camera>();
             if (gameCamera != null)
             {
                 gameCamera.targetTexture = renderTexture;
