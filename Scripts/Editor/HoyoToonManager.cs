@@ -13,7 +13,7 @@ public class HoyoToonManager
 {
     #region Constants
 
-    public const string version = "3.65";
+    public const string version = "3.75";
     public const string HSRShader = "HoyoToon/Star Rail/Character";
     private const string GIShader = "HoyoToon/Genshin/Character";
     private const string Hi3Shader = "HoyoToon/Honkai Impact/Character Part 1";
@@ -69,12 +69,6 @@ public class HoyoToonManager
         SetFBXImportSettings(GetAssetSelectionPaths());
     }
 
-    // [MenuItem("Assets/HoyoToon/Bodytype")]
-    // private static void CheckBody()
-    // {
-    //     DetermineBodyType();
-    // }
-
     #endregion
 
     #region Quick Access Buttons
@@ -92,7 +86,7 @@ public class HoyoToonManager
         if (selectedObject == null)
         {
             EditorUtility.DisplayDialog("Error", "No Model selected. Please select a Model to add AvatarLight.", "OK");
-            HoyoToonLogs.WarningDebug("<color=purple>[Hoyotoon]</color> No Model selected. Please select a Model to add AvatarLight.");
+            HoyoToonLogs.WarningDebug("No Model selected. Please select a Model to add AvatarLight.");
             return;
         }
 
@@ -123,7 +117,7 @@ public class HoyoToonManager
         else
         {
             EditorUtility.DisplayDialog("Error", "No cameras found in the scene. Please make sure you have at least one camera in your scene.", "OK");
-            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> No cameras found in the scene. Please make sure you have at least one camera in your scene.");
+            HoyoToonLogs.ErrorDebug("No cameras found in the scene. Please make sure you have at least one camera in your scene.");
         }
     }
 
@@ -140,7 +134,7 @@ public class HoyoToonManager
         else
         {
             EditorUtility.DisplayDialog("Error", $"HoyoToon Post Processing is already attached to the selected camera: {camera.name}", "OK");
-            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> HoyoToon Post Processing is already attached to the selected camera.");
+            HoyoToonLogs.ErrorDebug("HoyoToon Post Processing is already attached to the selected camera.");
         }
     }
 
@@ -157,7 +151,7 @@ public class HoyoToonManager
         else
         {
             EditorUtility.DisplayDialog("Error", "No valid model selected. Please select a model to add to the scene.", "OK");
-            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> No valid model selected. Please select a model to add to the scene.");
+            HoyoToonLogs.ErrorDebug("No valid model selected. Please select a model to add to the scene.");
             return null;
         }
     }
@@ -193,7 +187,7 @@ public class HoyoToonManager
 
             if (mesh == null)
             {
-                throw new MissingComponentException("<color=purple>[Hoyotoon]</color> The GameObject or its children must have a MeshFilter or SkinnedMeshRenderer component.");
+                throw new MissingComponentException("The GameObject or its children must have a MeshFilter or SkinnedMeshRenderer component.");
             }
 
             selectedAssetPath = AssetDatabase.GetAssetPath(mesh);
@@ -226,7 +220,7 @@ public class HoyoToonManager
                 {
                     currentBodyType = BodyType.Hi3P2;
                     bodyTypeSet = true;
-                    HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Matched texture: {textureName} with BodyType.Hi3P2");
+                    HoyoToonLogs.LogDebug($"Matched texture: {textureName} with BodyType.Hi3P2");
                 }
                 else if (!bodyTypeSet && textureName.ToLower().Contains("expressionmap".ToLower()))
                 {
@@ -251,23 +245,23 @@ public class HoyoToonManager
                     {
                         currentBodyType = BodyType.HI3P1;
                         bodyTypeSet = false;
-                        HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Matched texture: {textureName} with BodyType.Hi3P1");
+                        HoyoToonLogs.LogDebug($"Matched texture: {textureName} with BodyType.Hi3P1");
                     }
                 }
             }
             if (!bodyTypeSet)
             {
                 currentBodyType = BodyType.WuWa;
-                HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> No specific match found. Setting BodyType to WuWa");
+                HoyoToonLogs.LogDebug($"No specific match found. Setting BodyType to WuWa");
             }
         }
         else
         {
             string validFolderNames = string.Join(", ", new[] { "Textures", "Texture", "Tex" });
             EditorUtility.DisplayDialog("Error", $"Textures folder path does not exist. Ensure your textures are in a folder named {validFolderNames}.", "OK");
-            HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> You need to have a Textures folder matching the valid names (e.g., 'Textures', 'Texture', 'Tex') and have all the textures inside of them.");
+            HoyoToonLogs.ErrorDebug("You need to have a Textures folder matching the valid names (e.g., 'Textures', 'Texture', 'Tex') and have all the textures inside of them.");
         }
-        HoyoToonLogs.LogDebug($"<color=purple>[Hoyotoon]</color> Current Body Type: {currentBodyType}");
+        HoyoToonLogs.LogDebug($"Current Body Type: {currentBodyType}");
     }
 
     #endregion
@@ -277,7 +271,6 @@ public class HoyoToonManager
     [MenuItem("Assets/HoyoToon/Generate Materials")]
     public static void GenerateMaterialsFromJson()
     {
-        // Start asset editing
         AssetDatabase.StartAssetEditing();
 
         try
@@ -293,7 +286,6 @@ public class HoyoToonManager
 
                 if (Path.GetExtension(selectedPath) == ".json")
                 {
-                    // Process the selected JSON file
                     ProcessJsonFile(selectedPath, textureCache, loadedTexturePaths);
                 }
                 else
@@ -318,17 +310,14 @@ public class HoyoToonManager
                     {
                         string validFolderNames = string.Join(", ", new[] { "Materials", "Material", "Mat" });
                         EditorUtility.DisplayDialog("Error", $"Materials folder path does not exist. Ensure your materials are in a folder named {validFolderNames}.", "OK");
-                        HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
+                        HoyoToonLogs.ErrorDebug("Materials folder path does not exist. Ensure your materials are in a folder named 'Materials'.");
                     }
                 }
             }
         }
         finally
         {
-            // Stop asset editing
             AssetDatabase.StopAssetEditing();
-
-            // Save assets and refresh the asset database once
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
@@ -349,6 +338,7 @@ public class HoyoToonManager
         {
             { "_UtilityDisplay1", GIShader },
             {"_DisableCGP", GIShader},
+            {"UseGlassSpecularToggle", GIShader},
             { "_SPCubeMapIntensity", Hi3Shader },
             { "_DissolveDistortionIntensity", HSRShader },
             { "_ScreenLineInst", HSRShader},
@@ -442,7 +432,7 @@ public class HoyoToonManager
 
                             if (!textureObject.ContainsKey("Name"))
                             {
-                                throw new Exception("<color=purple>[Hoyotoon]</color> You're using outdated materials. Please download/extract using the latest AssetStudio.");
+                                throw new Exception("You're using outdated materials. Please download/extract using the latest AssetStudio.");
                             }
 
                             string textureName = textureObject["Name"].Value<string>();
@@ -455,7 +445,6 @@ public class HoyoToonManager
                             {
                                 Texture texture = null;
 
-                                // Check if the texture is in the cache
                                 if (textureCache.ContainsKey(textureName))
                                 {
                                     texture = textureCache[textureName];
@@ -469,7 +458,6 @@ public class HoyoToonManager
                                         string texturePath = AssetDatabase.GUIDToAssetPath(textureGUIDs[0]);
                                         texture = AssetDatabase.LoadAssetAtPath<Texture>(texturePath);
 
-                                        // Add the texture to the cache
                                         if (texture != null)
                                         {
                                             textureCache.Add(textureName, texture);
@@ -556,12 +544,10 @@ public class HoyoToonManager
 
                             if (!string.IsNullOrEmpty(texturePath))
                             {
-                                // Extract the texture name from the path
                                 string textureName = texturePath.Substring(texturePath.LastIndexOf('.') + 1);
 
                                 Texture texture = null;
 
-                                // Check if the texture is in the cache
                                 if (textureCache.ContainsKey(textureName))
                                 {
                                     texture = textureCache[textureName];
@@ -575,7 +561,6 @@ public class HoyoToonManager
                                         string assetPath = AssetDatabase.GUIDToAssetPath(textureGUIDs[0]);
                                         texture = AssetDatabase.LoadAssetAtPath<Texture>(assetPath);
 
-                                        // Add the texture to the cache
                                         if (texture != null)
                                         {
                                             textureCache.Add(textureName, texture);
@@ -589,8 +574,6 @@ public class HoyoToonManager
                                     string assetPath = AssetDatabase.GetAssetPath(texture);
                                     loadedTexturePaths.Add(assetPath);
 
-                                    // Assuming scale and offset are not provided in the new JSON structure
-                                    // Set default scale and offset
                                     Vector2 scale = Vector2.one;
                                     Vector2 offset = Vector2.zero;
                                     newMaterial.SetTextureScale(unityPropertyName, scale);
@@ -616,7 +599,7 @@ public class HoyoToonManager
             else
             {
                 EditorUtility.DisplayDialog("Error", $"No compatible shader found for " + jsonFileName, "OK");
-                HoyoToonLogs.ErrorDebug("<color=purple>[Hoyotoon]</color> No compatible shader found for " + jsonFileName);
+                HoyoToonLogs.ErrorDebug("No compatible shader found for " + jsonFileName);
             }
         }
     }
@@ -792,6 +775,13 @@ public class HoyoToonManager
             material.SetInt("variant_selector", 2);
             material.SetInt("_UseWeapon", 1);
         }
+        else if (material.shader.name == GIShader && jsonFileName.Contains("Glass_Eff"))
+        {
+            material.SetFloat("_SrcBlend", material.GetFloat("_SrcBlendMode"));
+            material.SetFloat("_DstBlend", material.GetFloat("_DstBlendMode"));
+            material.SetInt("variant_selector", 3);
+            material.SetInt("_UseWeapon", 1);
+        }
         else if (material.shader.name == GIShader)
         {
             material.SetInt("variant_selector", 0);
@@ -886,19 +876,14 @@ public class HoyoToonManager
     [MenuItem("Assets/HoyoToon/Generate Jsons")]
     public static void GenerateJsonsFromMaterials()
     {
-        // Get the selected materials
         Material[] selectedMaterials = Selection.GetFiltered<Material>(SelectionMode.Assets);
 
-        // Iterate over the selected materials
         foreach (Material material in selectedMaterials)
         {
-            // Generate the JSON file for each material
             string outputPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(material));
             outputPath = Path.Combine(outputPath, material.name + ".json");
             GenerateJsonFromMaterial(material, outputPath);
         }
-
-        // Refresh the folder to import the JSON files
         AssetDatabase.Refresh();
     }
 
@@ -910,7 +895,6 @@ public class HoyoToonManager
         JObject m_Floats = new JObject();
         JObject m_Colors = new JObject();
 
-        // Save shader name
         jsonObject["m_Shader"] = new JObject
         {
             { "m_FileID", material.shader.GetInstanceID() },
@@ -918,7 +902,6 @@ public class HoyoToonManager
             { "IsNull", false }
         };
 
-        // Iterate over the shader properties
         Shader shader = material.shader;
         int propertyCount = ShaderUtil.GetPropertyCount(shader);
         for (int i = 0; i < propertyCount; i++)
@@ -926,13 +909,11 @@ public class HoyoToonManager
             string propertyName = ShaderUtil.GetPropertyName(shader, i);
             ShaderUtil.ShaderPropertyType propertyType = ShaderUtil.GetPropertyType(shader, i);
 
-            // Ignore properties that start with m_start or m_end
             if (propertyName.StartsWith("m_start") || propertyName.StartsWith("m_end"))
             {
                 continue;
             }
 
-            // Depending on the property type, get the value from the material and add it to the JObject
             switch (propertyType)
             {
                 case ShaderUtil.ShaderPropertyType.TexEnv:
@@ -949,7 +930,7 @@ public class HoyoToonManager
                     }
                     break;
                 case ShaderUtil.ShaderPropertyType.Float:
-                case ShaderUtil.ShaderPropertyType.Range: // Treat Range as Float
+                case ShaderUtil.ShaderPropertyType.Range:
                     float floatValue = material.GetFloat(propertyName);
                     m_Floats[propertyName] = floatValue;
                     break;
@@ -972,10 +953,8 @@ public class HoyoToonManager
         m_SavedProperties["m_Colors"] = m_Colors;
         jsonObject["m_SavedProperties"] = m_SavedProperties;
 
-        // Serialize the JObject to a JSON string
         string jsonContent = jsonObject.ToString(Formatting.Indented);
 
-        // Write the JSON string to a file
         File.WriteAllText(outputPath, jsonContent);
     }
 
@@ -1034,7 +1013,7 @@ public class HoyoToonManager
 
         if (!textureConditions.Any(condition => condition.Matches(currentBodyTypeString, shader, propertyName)))
         {
-            HoyoToonLogs.WarningDebug($"<color=purple>[Hoyotoon]</color> No specific texture set for body type: {currentBodyTypeString}, shader: {shader.name}, property: {propertyName}, material: {newMaterial.name}");
+            HoyoToonLogs.WarningDebug($"No specific texture set for body type: {currentBodyTypeString}, shader: {shader.name}, property: {propertyName}, material: {newMaterial.name}");
             return;
         }
 
@@ -1068,7 +1047,7 @@ public class HoyoToonManager
                 }
                 else
                 {
-                    HoyoToonLogs.WarningDebug($"<color=purple>[Hoyotoon]</color> Texture not found with name: {condition.TextureName}");
+                    HoyoToonLogs.WarningDebug($"Texture not found with name: {condition.TextureName}");
                 }
             }
         }
@@ -1178,7 +1157,6 @@ public class HoyoToonManager
                 PropertyInfo prop = importer.GetType().GetProperty(pName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 prop.SetValue(importer, true);
 
-                // Save and reimport to apply changes immediately
                 importer.SaveAndReimport();
             }
         }
@@ -1267,7 +1245,6 @@ public class HoyoToonManager
 
     #region Tangent Generation
 
-    [MenuItem("GameObject/HoyoToon/Generate Tangents", false, 0)]
     public static void GenTangents(GameObject selectedObject)
     {
         DetermineBodyType();
@@ -1330,7 +1307,7 @@ public class HoyoToonManager
         var vertices = newMesh.vertices;
         var triangles = newMesh.triangles;
         var unmerged = new Vector3[newMesh.vertexCount];
-        var merged = new Dictionary<Vector3, Vector3>(); // Use a dictionary to map vertices to their merged normals
+        var merged = new Dictionary<Vector3, Vector3>();
         var tangents = new Vector4[newMesh.vertexCount];
 
         for (int i = 0; i < triangles.Length; i += 3)
@@ -1381,13 +1358,12 @@ public class HoyoToonManager
         var tangents = newMesh.tangents;
         var colors = newMesh.colors;
 
-        // Initialize colors array if it's null or doesn't have the same length as vertices array
         if (colors == null || colors.Length != vertices.Length)
         {
             colors = new Color[vertices.Length];
             for (int i = 0; i < colors.Length; i++)
             {
-                colors[i] = Color.white; // or any default color
+                colors[i] = Color.white;
             }
             newMesh.colors = colors;
         }
@@ -1427,7 +1403,7 @@ public class HoyoToonManager
                     newMesh = ModifyMeshTangents(mesh);
                 }
             }
-            newMesh.name = mesh.name; // Set the name of the new mesh to the name of the original mesh
+            newMesh.name = mesh.name;
             meshFilter.sharedMesh = newMesh;
 
             string path = AssetDatabase.GetAssetPath(mesh);
@@ -1459,7 +1435,7 @@ public class HoyoToonManager
                     newMesh = ModifyMeshTangents(mesh);
                 }
             }
-            newMesh.name = mesh.name; // Set the name of the new mesh to the name of the original mesh
+            newMesh.name = mesh.name;
             skinMeshRenderer.sharedMesh = newMesh;
 
             string path = AssetDatabase.GetAssetPath(mesh);
