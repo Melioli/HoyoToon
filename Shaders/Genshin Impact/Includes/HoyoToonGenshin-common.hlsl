@@ -133,7 +133,7 @@ float3 normal_mapping(float3 normalmap, float4 vertexws, float2 uv, float3 norma
 {
     float3 bumpmap = normalmap.xyz;
     bumpmap.xy = bumpmap.xy * 2.0f - 1.0f;
-    bumpmap.z = max(1.0f - min(_BumpScale, 0.95f), 0.001f);
+    bumpmap.z = max(1.0f - min(_BumpScale, 0.5f), 0.001f);
     bumpmap.xyz = normalize(bumpmap);   
     // world space position derivative
     float3 p_dx = ddx(vertexws);
@@ -417,18 +417,20 @@ void metalics(in float3 shadow, in float3 normal, float3 ndoth, float specularte
     metal_specular = lerp(metal_specular , metal_specular* _MTSpecularAttenInShadow, shadow_transition);
     float3 metal = metal_color + (metal_specular * (float3)0.5f);
     metal = metal * metal_shadow;  
+
+    float metal_area = saturate((speculartex > 0.89f) - _UseCharacterLeather);
+
     if(_DebugMode && (_DebugMetal == 1))
     {
-        metal = (speculartex > 0.90f) ? metal : (float3)0.0f;
+        metal = (metal_area) ? metal : (float3)0.0f;
         color.xyz = metal;
     }
     else
     {
-        metal = (speculartex > 0.90f) ? metal : color;
+        metal = (metal_area) ? metal : color;
         color.xyz = metal; 
     }
-   
-    
+
 }
 
 void specular_color(in float ndoth, in float3 shadow, in float lightmapspec, in float lightmaparea, in float material_id, inout float3 specular)
@@ -441,12 +443,84 @@ void specular_color(in float ndoth, in float3 shadow, in float lightmapspec, in 
         float2(_Shininess4, _SpecMulti4),
         float2(_Shininess5, _SpecMulti5),        
     };
+
+    float4 color_array[5] =
+    {
+        _SpecularColor, 
+        _SpecularColor2, 
+        _SpecularColor3, 
+        _SpecularColor4, 
+        _SpecularColor5, 
+    };
     
     float term = ndoth;
     term = pow(max(ndoth, 0.001f), spec_array[material_id - 1].x);
     float check = term > (-lightmaparea + 1.015);
-    specular = term * (_SpecularColor * spec_array[material_id - 1].y) * lightmapspec; 
+    specular = term * (color_array[material_id - 1] * spec_array[material_id - 1].y) * lightmapspec; 
     specular = lerp((float3)0.0f, specular * (float3)0.5f, check);
+}
+
+void leather_color(in float ndoth, in float3 normal, in float3 light, in float lightmapspec, inout float3 leather, inout float3 holographic, inout float3 color)
+{
+    float2 sphere_uv = mul(normal , (float3x3)UNITY_MATRIX_I_V).xy; 
+    float xaxis = sphere_uv.x * 0.5f + 0.5f;
+    float area =  pow( 4.0 * xaxis * (1.0 - xaxis), 1); // this is to fix any weird edge when offseting the sphere coords
+    sphere_uv.y = lerp(sphere_uv.y, sphere_uv.y + _LeatherReflectOffset, area);
+    sphere_uv.x = sphere_uv.x * _MTMapTileScale;
+    sphere_uv = sphere_uv * 0.5f + 0.5f;  
+
+    // sample the leather matcap first before calculating the specular shines, i just felt like it
+    float3 matcap = _LeatherReflect.SampleLevel(sampler_MTMap, sphere_uv, _LeatherReflectBlur) * _LeatherReflectScale;
+    // blur controls the miplevel of the matcap giving a quick way to blur/soften the shine
+
+    // main shine
+    float specular = min(pow(max(ndoth, 0.001f), _LeatherSpecularRange), 1.0f);
+    specular = smoothstep(0.5, _LeatherSpecularSharpe, specular.x) * _LeatherSpecularScale;
+
+    // detail shine
+    float3 detail = min(pow(max(ndoth, 0.001f), _LeatherSpecularDetailRange), 1.0f);
+    detail = smoothstep(0.5f, _LeatherSpecularDetailSharpe, detail.x) * _LeatherSpecularDetailScale;
+    detail = detail.xxx * _LeatherSpecularDetailColor.xyz;
+
+    // holographic
+    float holo = saturate(dot(normal, light) * 0.5f + 0.5f) * _LeatherLaserTiling + _LeatherLaserOffset;
+    float3 holo_ramp = _LeatherLaserRamp.Sample(sampler_MainTex, holo.xx).xyz * _LeatherLaserScale;
+
+    // combined
+    float3 combined = max(matcap, specular * _LeatherSpecularColor + detail);
+
+    leather = 0 + combined;
+    leather = saturate(holo_ramp * holo_ramp + leather);
+    color = (lightmapspec * leather) + color;
+    
+}
+
+void glass_color(inout float4 color, in float4 uv, in float3 view, in float3 normal)
+{   
+    float2 specular_uv = (uv.zw * _GlassSpecularTex_ST.xy) * (float2)_GlassTiling + _GlassSpecularTex_ST.zw;
+    specular_uv = (_GlassSpecularOffset + -1.0f) * view.xy + specular_uv;
+    float2 detail_uv = (float2)_GlassSpecularDetailOffset * (float2)1.0f + specular_uv;
+
+    float shine_a = _GlassSpecularTex.Sample(sampler_MainTex, specular_uv).x;
+    float shine_b = _GlassSpecularTex.Sample(sampler_MainTex, detail_uv).y;
+
+    float detail_length = (uv.w + (-_GlassSpecularDetailLength)) / max(_GlassSpecularDetailLengthRange, 0.0001f);
+    detail_length = saturate(detail_length);
+    float detail = (detail_length * shine_b) * _GlassSpecularDetailColor;
+
+    float specular_length = (uv.w + (-_GlasspecularLength)) / max(_GlasspecularLengthRange, 0.0001f);
+    specular_length = saturate(specular_length);
+    float specular = ((specular_length * shine_a) * _GlassSpecularColor) + detail;
+
+    float ndotv = pow(1.0 - dot(normal, view), _GlassThickness) * _GlassThicknessScale;
+    float3 thickness = saturate(ndotv * _GlassThickness);
+
+    specular = specular + thickness;
+
+    float4 main = _MainTex.Sample(sampler_MainTex, uv.xy);
+
+    color = (main * _MainColor) * _MainColorScaler + specular;
+    color.w = main.w;
 }
 
 float pulsate(float rate, float max_value, float min_value, float time_offset)
@@ -488,6 +562,32 @@ float3 outline_emission(in float3 color, in float material_id)
 
     float3 emission = e_color[material_id - 1].xyz * _OutlineGlowInt * color;
     return emission;
+}
+
+void nyx_state_marking(inout float3 color, in float2 uv0, in float2 uv1, in float2 uv2, in float2 uv3, in float3 normal, in float3 view, in float4 ws_pos)
+{
+
+    float2 uv[4] = 
+    {
+        uv0,
+        uv1,
+        uv2,
+        uv3
+    };
+
+    float2 screen = ((ws_pos.xy / ws_pos.w) * _ScreenParams.xy) / _ScreenParams.x;
+
+    float nyx_mask = packed_channel_picker(sampler_MainTex, _TempNyxStatePaintMaskTex, uv[_NyxBodyUVCoord], _TempNyxStatePaintMaskChannel); 
+    
+    float2 noise_uv = frac(_NyxStateOutlineColorNoiseAnim * _Time.yy);
+    noise_uv = noise_uv * _NyxStateOutlineColorNoiseScale.xy + screen;
+    float nyx_noise = _NyxStateOutlineNoise.Sample(sampler_MainTex, noise_uv).x;
+
+    float2 ramp_uv;
+    ramp_uv.x =  nyx_noise * _NyxStateOutlineColorNoiseTurbulence + noise_uv;
+    ramp_uv.y = (_DayOrNight) ? 0.25f : 0.75f;
+    float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_MainTex, ramp_uv);
+    color = lerp(color, nyx_ramp * _NyxStateOutlineColorOnBodyMultiplier.xyz, nyx_mask * _NyxStateOutlineColorOnBodyOpacity);
 }
 
 void fresnel_hit(in float ndotv, inout float3 color)

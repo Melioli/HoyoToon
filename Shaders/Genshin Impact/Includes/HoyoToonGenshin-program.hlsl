@@ -26,25 +26,28 @@ vs_out vs_model(vs_in v)
     // parallax shit
     // cringe
     float3 bitangent = cross(o.normal.xyz, o.tangent.xyz) * o.tangent.w;
-    float3 five;
-    float3 six;
-    float3 parallax;
+    if(!_UseGlassSpecularToggle)
+    {
+        float3 five;
+        float3 six;
+        float3 parallax;
 
-    float3 view = normalize(o.view);
+        float3 view = normalize(o.view);
 
-    five.x = o.tangent.z;
-    five.y = bitangent.x;
-    five.z = o.normal.x;
-    six.x = o.tangent.x;
-    six.y = bitangent.z;
-    six.z = o.normal.y;
+        five.x = o.tangent.z;
+        five.y = bitangent.x;
+        five.z = o.normal.x;
+        six.x = o.tangent.x;
+        six.y = bitangent.z;
+        six.z = o.normal.y;
 
-    parallax = view.yyy * six;
-    parallax = five * view.xxx + parallax;
-    bitangent.x = o.tangent.y;
-    bitangent.z = o.normal.z;
-    parallax = bitangent * view.zzz + parallax;
-    o.parallax = parallax;  
+        parallax = view.yyy * six;
+        parallax = five * view.xxx + parallax;
+        bitangent.x = o.tangent.y;
+        bitangent.z = o.normal.z;
+        parallax = bitangent * view.zzz + parallax;
+        o.parallax = parallax; 
+    }
 
     TRANSFER_SHADOW(o)
 
@@ -128,6 +131,74 @@ vs_out vs_edge(vs_in v)
     return o;
 }
 
+vs_out vs_nyx(vs_in v)
+{
+    vs_out o = (vs_out)0.0f; // cast all output values to zero to prevent potential errors
+    #if defined(ENABLE_NYX)
+    if(_OutlineType ==  0.0f)
+    {
+        vs_out o = (vs_out)0.0f;
+    }
+    else
+    {
+        float3 outline_normal = (_OutlineType == 1.0) ? v.normal : v.tangent.xyz;
+        float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
+        float3 view = _WorldSpaceCameraPos.xyz - (float3)mul(v.vertex.xyz, unity_ObjectToWorld);
+        o.view = normalize(view);
+        float3 ws_normal = mul(outline_normal, (float3x3)unity_ObjectToWorld);
+
+        outline_normal = mul((float3x3)UNITY_MATRIX_MV, outline_normal);
+        outline_normal.z = 0.01f;
+        outline_normal.xy = normalize(outline_normal.xyz).xy;
+
+        float outline_width = v.v_col.w;
+
+
+        float something = wv_pos.z + wv_pos.y;
+        something = something * _NyxStateOutlineVertAnimNoiseScale.x;
+        float2 screen_pos;
+        screen_pos.x = something * 0.5;
+        screen_pos.y = wv_pos.x * _NyxStateOutlineVertAnimNoiseScale.y;
+        float2 noise_uv = _Time.yy * _NyxStateOutlineVertAnimNoiseAnim;
+        noise_uv = frac(noise_uv);
+        noise_uv = noise_uv + screen_pos.xy;
+
+        float noise_a = _NyxStateOutlineNoise.SampleLevel(sampler_NyxStateOutlineNoise, noise_uv, 0).y;
+        
+        float widthScale = _NyxStateOutlineWidthScale * _NyxStateOutlineWidthScaleRange.x;
+        float nyx_outline_width = saturate((-wv_pos.y) * _NyxStateOutlineWidthScaleLerpHeightRange.z + (-_NyxStateOutlineWidthScaleLerpHeightRange.w));
+        nyx_outline_width = nyx_outline_width * (_NyxStateOutlineWidthScaleRange.y * _NyxStateOutlineWidthScale + (-widthScale)) + widthScale;
+        nyx_outline_width = (_NyxStateEnableOutlineWidthScaleHeightLerp) ? nyx_outline_width : _NyxStateOutlineWidthScale;
+
+        widthScale = _NyxStateOutlineVertAnimScale * _NyxStateOutlineVertAnimScaleRange.x;
+        float height_width = saturate((-wv_pos.y) * _NyxStateOutlineVertAnimScaleLerpHeightRange.z + (-_NyxStateOutlineVertAnimScaleLerpHeightRange.w));
+        height_width = height_width * (_NyxStateOutlineVertAnimScaleRange.y * _NyxStateOutlineVertAnimScale + (-widthScale)) + widthScale;
+        height_width = (_NyxStateEnableOutlineVertAnimScaleHeightLerp) ? height_width : _NyxStateOutlineVertAnimScale;
+
+        float outline_height = noise_a * height_width + nyx_outline_width;
+
+        float res_width = max((-_ScreenParams.y) + _NyxStateOutlineWidthVarietyWithResolution.x, 0.0f);
+        res_width = min(res_width * _NyxStateOutlineWidthVarietyWithResolution.y,  _NyxStateOutlineWidthVarietyWithResolution.z) + 1.0f;
+
+
+        outline_width = (outline_width * 0.005f) * (res_width * outline_height);
+
+        float3 normalized_pos = (normalize(wv_pos.xyz) * (float3)_MaxOutlineZOffset) * (float3)_Scale;
+
+        o.normal = (_OutlineType == 1.0) ? v.normal : v.tangent.xyz;
+        o.normal = mul((float3x3)unity_ObjectToWorld, o.normal.xyz);
+        
+        o.pos = wv_pos;
+        o.pos.xyz = normalized_pos.xyz * (v.v_col.z + -0.5f) + o.pos.xyz;
+        o.pos.xyz = outline_normal * outline_width + o.pos.xyz;
+
+        o.ss_pos = ComputeScreenPos(o.pos);
+    }
+    o.pos = mul(UNITY_MATRIX_P, o.pos);
+    #endif
+    return o;
+}
+
 shadow_out vs_shadow(shadow_in v)
 {
     shadow_out o = (shadow_out)0.0f; // initialize so no funny compile errors
@@ -142,7 +213,6 @@ shadow_out vs_shadow(shadow_in v)
     TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
     return o;
 }
-
 
 // ====================================================================
 // PIXEL SHADERS
@@ -173,7 +243,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     float2 uv_a = (!vface && _UseBackFaceUV2) ? i.uv_a.zw : i.uv_a.xy; 
     float4 uv_b = i.uv_b;
     float3 light = _WorldSpaceLightPos0.xyz;
-        
+
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv_a);
     float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv_a);
@@ -187,7 +257,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         metalspec.y = lightmap.x < 0.90f; // if metal area
 
         if(_UseBumpMap) normal = normal_mapping(normalmap, i.ws_pos, uv_a, normal);
-        if(_UseBumpMap && _TextureLineUse) detail_line(i.ss_pos.zw, normalmap.z, diffuse.xyz);
+        if(_UseBumpMap && _TextureLineUse && ((_TextureLineMultiplier.x + _TextureLineMultiplier.y + _TextureLineMultiplier.z) > 0)) detail_line(i.ss_pos.zw, normalmap.z, diffuse.xyz);
 
         // do this after the bump mapping to ensure that the normals are updated 
         // INITIALIZE INPUT floatTORS :
@@ -224,7 +294,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             rim_mask = 1.0f;
             emission_mask = 1.0f;
         }
-              
+
         if(_MainTexAlphaUse == 0) diffuse.w = 1.0f;
         if(_MainTexAlphaUse == 3) diffuse.xyz = lerp(diffuse, _FaceBlushColor, diffuse.w * _FaceBlushStrength);
         if(_MainTexAlphaUse == 1) clip(diffuse.w - _MainTexAlphaCutoff);
@@ -252,9 +322,11 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float3 shadow;
         float3 metalshadow;
         float3 s_color;
+        float3 leather = (float3)0;
         shadow_color(lightmap.y, i.v_col.x, customao, i.v_col.y, ndotl, material_id, i.uv_a.xy, shadow, metalshadow, s_color, light);
         // SPECULAR : 
         float3 specular = (float3)0.0f;
+        float3 holographic = (float3)1.0f;
         if(_SpecularHighlights) specular_color(ndoth, shadow, lightmap.x, lightmap.z, material_id, specular);
         if(lightmap.x > 0.90f) specular = 0.0f; // making sure the specular doesnt bleed into the metal area
         // METALIC :
@@ -284,7 +356,15 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 
         if(_StarCloakEnable) star_cocks(float4(out_color.xyz, diffuse.w), i.uv_a.xy, i.uv_a.zw, i.uv_b.xy, i.ss_pos, ndotv, light, i.parallax);
         
-        out_color.xyz = out_color.xyz * s_color + specular;
+        // apply specular opacity
+        float3 spec_color = out_color.xyz + (float3)-1.0f;
+        spec_color.xyz = (_SpecOpacity) * spec_color.xyz + (float3)1.0f;
+        spec_color.xyz = spec_color.xyz * specular;
+
+        // override the color with the leather if needed
+        if(_UseCharacterLeather && (material_id == 5)  && _UseMaterial5) leather_color(ndoth, normal, light, lightmap.z, leather, holographic, out_color.xyz);
+
+        out_color.xyz = out_color.xyz * s_color + (spec_color);
         
         float3 emis_color = out_color.xyz;
         float3 emis_color_eye = out_color.xyz;
@@ -300,9 +380,9 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             emis_check = 1.0f;
         }
         
+        if(_UseGlassSpecularToggle) glass_color(out_color, i.uv_a, view, normal);
+        if(_EnableNyxState && _BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
         out_color.xyz = out_color.xyz * light_color;
-
-        
         
         float3 rim_light = rimlighting(i.ss_pos, normal, i.ws_pos, light, material_id, out_color.xyz, view);
         if(_UseFaceMapNew) normal = float3(0.5f, 0.5f, 1.0f);
@@ -313,7 +393,9 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         out_color.xyz = lerp(out_color.xyz, emis_color, (mask * emis_check));
         out_color.xyz = lerp(out_color.xyz, emis_color_eye, (eye_mask * emis_check_eye));
         
-        // out_color.xyz = material_mask;
+        if(_EnableNyxState && !_BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
+
+        
         // basic ass transparency
         if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;        
         if(_DebugMode) // debuuuuuug
@@ -421,7 +503,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     return out_color; 
 }
 
-float4 ps_edge(vs_out i, bool vface: SV_ISFRONTFACE) : SV_TARGET
+float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
     float4 out_color = (float4)1.0f;
 
@@ -453,6 +535,59 @@ float4 ps_edge(vs_out i, bool vface: SV_ISFRONTFACE) : SV_TARGET
     if(_MultiLight && !_EnableOutlineGlow) out_color.xyz = out_color.xyz  * (UNITY_LIGHTMODEL_AMBIENT.xyz + _LightColor0.xyz);
     
     return out_color;
+}
+
+float4 ps_nyx(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
+{
+    #if defined(ENABLE_NYX)
+        // calculate lighting colors
+        float3 normal = normalize(i.normal);
+        float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
+        float3 light_color = max(ambient_color, _LightColor0.rgb);
+        float3 GI_color = DecodeLightProbe(normal);
+        GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
+        float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
+        GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;
+        float3 gi = (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+
+        // initialize output color
+        float4 color = (float4)1.0f;
+        // handle alpha
+        float alpha = _MainTex.Sample(sampler_MainTex, i.uv_a.xy).w;
+        if(_MainTexAlphaUse == 0) alpha = 1.0f;
+        if(_MainTexAlphaUse == 1) clip(alpha - _MainTexAlphaCutoff);
+        if(_MainTexAlphaUse == 4) color.w = alpha;
+
+        // this is basically the same code as the body nyx stuff
+        // create the screen space uv for the noise to sampled from
+        float2 screen = (((i.ss_pos.xy / i.ss_pos.w) * 0.5f) * _ScreenParams.xy) / _ScreenParams.x;
+        float2 noise_uv = frac(_NyxStateOutlineColorNoiseAnim.zw * _Time.yy);
+        noise_uv = noise_uv * _NyxStateOutlineColorNoiseScale.xy + screen;
+        // Sample noise red channel
+        float nyx_noise = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, noise_uv).x;
+        // initialize ramp uv
+        float2 ramp_uv;
+        ramp_uv.x =  nyx_noise * _NyxStateOutlineColorNoiseTurbulence + noise_uv;
+        ramp_uv.y = (_DayOrNight) ? 0.25f : 0.75f;
+        // sample ramp using the screenspace noise uvs and the noise texture itself
+        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, ramp_uv);
+
+        // increase intensity and modify color as needed
+        nyx_ramp = (nyx_ramp * (float3)_NyxStateOutlineColorScale) * _NyxStateOutlineColor;
+        // calculate brightness so it doesnt go too high
+        float nyx_brightness = max(nyx_ramp.z, nyx_ramp.y);
+        nyx_brightness = max(nyx_ramp.x, nyx_brightness);
+        float bright_check = 1.0f < nyx_brightness;
+        color.xyz = bright_check ? (nyx_ramp * (1.0f / nyx_brightness)) : nyx_ramp;
+        // depending on user choice, apply outside sources of lighting
+        if(_LineAffected) color.xyz = color.xyz * light_color + gi;
+        // if disabled, all pixels are clipped, this is to catch any weird issues with the nyx mode shader feature
+        if(!_EnableNyxOutline) clip(-1);
+        return color;
+    #else // if nyx mode is disabled, all pixels from this pass should be discarded
+        clip(-1);
+    #endif
+    return (float4)1.0f;
 }
 
 float4 ps_shadow(shadow_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
