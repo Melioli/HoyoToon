@@ -70,6 +70,20 @@ public class HoyoToonManager
         SetFBXImportSettings(GetAssetSelectionPaths());
     }
 
+    [MenuItem("GameObject/HoyoToon/Generate Tangents")]
+    private static void GenerateTangents()
+    {
+        GameObject selectedObject = Selection.activeGameObject;
+        if (selectedObject == null)
+        {
+            EditorUtility.DisplayDialog("Error", "No Model selected. Please select a Model to generate tangents.", "OK");
+            HoyoToonLogs.WarningDebug("No Model selected. Please select a Model to generate tangents.");
+            return;
+        }
+
+        GenTangents(selectedObject);
+    }
+
     #endregion
 
     #region Quick Access Buttons
