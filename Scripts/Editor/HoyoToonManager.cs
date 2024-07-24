@@ -23,6 +23,7 @@ public class HoyoToonManager
     private static readonly string[] nonSRGBKeywords = { "normalmap", "lightmap", "face_shadow", "face01_shadow", "specular_ramp", "gradient", "Grain", "Dissolve", "Repeat", "Stockings", "ExpressionMap", "FaceMap", "materialidvalueslut", "ColorMask", "_Mask", "_Normal" };
     private static readonly string[] EndsWithNonSRGBKeywords = { "_HM", "_N", "_HET", "_ID", "_SDF", "_CUBE", "_EG", "_EM", "T_Caustic" };
     private static readonly string[] NonPower2Keywords = { "materialidvalueslut" };
+    private static readonly List<string> SkipTangentMeshes = new List<string> { "Eyes" };
 
     public enum BodyType
     {
@@ -90,7 +91,7 @@ public class HoyoToonManager
             return;
         }
 
-        GameObject avatarLightPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Hoyoverse/Shaders/HoyoToon/Dependencies/AvatarLight.prefab");
+        GameObject avatarLightPrefab = Resources.Load<GameObject>("Prefabs/AvatarLight");
         GameObject avatarLight = UnityEngine.Object.Instantiate(avatarLightPrefab, selectedObject.transform);
         avatarLight.name = "AvatarLight";
         avatarLight.transform.localPosition = Vector3.zero;
@@ -1260,7 +1261,7 @@ public class HoyoToonManager
             }
             else
             {
-                if (meshFilter.name.Equals("Eyes"))
+                if (SkipTangentMeshes.Contains(meshFilter.name))
                 {
                     continue;
                 }
@@ -1285,7 +1286,7 @@ public class HoyoToonManager
             }
             else
             {
-                if (skinMeshRender.name.Equals("Eyes"))
+                if (SkipTangentMeshes.Contains(skinMeshRender.name))
                 {
                     continue;
                 }
@@ -1394,7 +1395,7 @@ public class HoyoToonManager
             }
             else
             {
-                if (meshFilter.name.Equals("Eyes"))
+                if (SkipTangentMeshes.Contains(meshFilter.name))
                 {
                     continue;
                 }
@@ -1426,7 +1427,7 @@ public class HoyoToonManager
             }
             else
             {
-                if (skinMeshRenderer.name.Equals("Eyes"))
+                if (SkipTangentMeshes.Contains(skinMeshRenderer.name))
                 {
                     continue;
                 }
