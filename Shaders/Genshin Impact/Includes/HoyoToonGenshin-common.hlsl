@@ -510,16 +510,16 @@ void glass_color(inout float4 color, in float4 uv, in float3 view, in float3 nor
 
     float specular_length = (uv.w + (-_GlasspecularLength)) / max(_GlasspecularLengthRange, 0.0001f);
     specular_length = saturate(specular_length);
-    float specular = ((specular_length * shine_a) * _GlassSpecularColor) + detail;
+    float3 specular = ((specular_length * shine_a) * _GlassSpecularColor) + detail;
 
     float ndotv = pow(1.0 - dot(normal, view), _GlassThickness) * _GlassThicknessScale;
-    float3 thickness = saturate(ndotv * _GlassThickness);
+    float3 thickness = saturate(ndotv * _GlassThickness) * _GlassThicknessColor;
 
     specular = specular + thickness;
 
     float4 main = _MainTex.Sample(sampler_MainTex, uv.xy);
 
-    color = (main * _MainColor) * _MainColorScaler + specular;
+    color.xyz = (main * _MainColor) * _MainColorScaler + specular;
     color.w = main.w;
 }
 
