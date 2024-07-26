@@ -79,7 +79,13 @@ Shader "HoyoToon/Genshin/Character"
 
         //Normal Map
         [HideInInspector] m_start_normalmap ("Normal Map", Float) = 0
+<<<<<<< Updated upstream
             [Toggle] _UseBumpMap("Normal Map", Float) = 0.0
+=======
+            [HideInInspector] [Toggle] _DummyFixedForNormal ("kms", Float) = 0
+            [Toggle] _UseBumpMap("Normal Map", Float) = 0.0
+            [HideInInspector] [Toggle] _isNativeMainNormal ("", Float) = 0
+>>>>>>> Stashed changes
             [SmallTexture]_BumpMap("Normal Map",2D)= "bump" { } 
             _BumpScale ("Normal Map Scale", Range(0.0, 1.0)) = 0.0
         [HideInInspector] m_end_normalmap ("", Float) = 0
@@ -312,6 +318,16 @@ Shader "HoyoToon/Genshin/Character"
                 [Gamma] _OutlineColor4 ("Outline Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
                 [Gamma] _OutlineColor5 ("Outline Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
             [HideInInspector] m_end_outlinescolor ("", Float) = 0
+<<<<<<< Updated upstream
+=======
+            [HideInInspector] m_start_outlineint ("Diffuse Intensity", Float) = 0
+                _OutLineIntensity ("Intensity 1", Range(0, 1)) = 0
+                _OutLineIntensity2 ("Intensity 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Range(0, 1)) = 0
+                _OutLineIntensity3 ("Intensity 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Range(0, 1)) = 0
+                _OutLineIntensity4 ("Intensity 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Range(0, 1)) = 0
+                _OutLineIntensity5 ("Intensity 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Range(0, 1)) = 0
+            [HideInInspector] m_end_outlineint ("", Float) =0
+>>>>>>> Stashed changes
             // Outline Offsets
             [HideInInspector] m_start_outlinesoffset("Outline Offset & Adjustments", Float) = 0
                 _OutlineWidthAdjustScales ("Outline Width Adjust Scales", Vector) = (0.01, 0.245, 0.6, 0.0)
@@ -672,7 +688,11 @@ Shader "HoyoToon/Genshin/Character"
             Blend [_SrcBlend] [_DstBlend]
             Stencil
             {
+<<<<<<< Updated upstream
 				Ref 200
+=======
+				Ref 10
+>>>>>>> Stashed changes
 				Comp always
 				Pass replace
 			}
@@ -697,7 +717,11 @@ Shader "HoyoToon/Genshin/Character"
             Blend One One     
             Stencil
             {
+<<<<<<< Updated upstream
 				Ref 200
+=======
+				Ref 10
+>>>>>>> Stashed changes
 				Comp always
 				Pass replace
 			}     
@@ -720,7 +744,11 @@ Shader "HoyoToon/Genshin/Character"
             Cull Front
             Stencil
             {
+<<<<<<< Updated upstream
 				Ref 200
+=======
+				Ref 10
+>>>>>>> Stashed changes
 				Comp always
 				Pass replace
                 Fail replace
@@ -760,7 +788,11 @@ Shader "HoyoToon/Genshin/Character"
             Cull Front
             Stencil
 			{
+<<<<<<< Updated upstream
 				Ref 200
+=======
+				Ref 10
+>>>>>>> Stashed changes
 				Comp notequal
 				Pass keep
 				Fail keep

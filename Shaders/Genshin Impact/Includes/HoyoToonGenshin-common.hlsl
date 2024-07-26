@@ -133,8 +133,13 @@ float3 normal_mapping(float3 normalmap, float4 vertexws, float2 uv, float3 norma
 {
     float3 bumpmap = normalmap.xyz;
     bumpmap.xy = bumpmap.xy * 2.0f - 1.0f;
+<<<<<<< Updated upstream
     bumpmap.z = max(1.0f - min(_BumpScale, 0.5f), 0.001f);
     bumpmap.xyz = normalize(bumpmap);   
+=======
+    bumpmap.z = max(-min(_BumpScale, 0.5f) + 1.0f, 0.001f);
+    bumpmap.xyz = _DummyFixedForNormal ? bumpmap : normalize(bumpmap);   // why why why
+>>>>>>> Stashed changes
     // world space position derivative
     float3 p_dx = ddx(vertexws);
     float3 p_dy = ddy(vertexws);  
@@ -154,8 +159,8 @@ float3 normal_mapping(float3 normalmap, float4 vertexws, float2 uv, float3 norma
     float3 corrected_normal = normal;   
     float2 tangent_direction = uv_det.xy * uv_dy.yz;
     float3 tangent = (tangent_direction.y * p_dy.xyz) + (p_dx * tangent_direction.x);
-    tangent = normalize(tangent);   
-    float3 bitangent = (corrected_normal.yzx * tangent.zxy) - (corrected_normal.zxy * tangent.yzx); 
+    tangent = normalize(tangent);
+    float3 bitangent = cross(corrected_normal.xyz, tangent.xyz);
     bitangent = bitangent * -uv_det;    
     float3x3 tbn = {tangent, bitangent, corrected_normal};  
     float3 mapped_normals = mul(bumpmap.xyz, tbn);
@@ -529,24 +534,33 @@ float pulsate(float rate, float max_value, float min_value, float time_offset)
     return pulse = smoothstep(min_value, max_value, pulse);
 }
 
-float3 emission_color(in float3 color, in float material_id)
+float4 emission_color(in float3 color, in float material_id)
 {
-    float4 e_color[5] =
+    float3 e_color[5] =
     {
-        _EmissionColor1_MHY * _EmissionScaler1,
-        _EmissionColor2_MHY * _EmissionScaler2,
-        _EmissionColor3_MHY * _EmissionScaler3,
-        _EmissionColor4_MHY * _EmissionScaler4,
-        _EmissionColor5_MHY * _EmissionScaler5,
+        float3((_EmissionColor1_MHY * max(_EmissionScaler1, 1.0f)).xyz),
+        float3((_EmissionColor2_MHY * max(_EmissionScaler2, 1.0f)).xyz),
+        float3((_EmissionColor3_MHY * max(_EmissionScaler3, 1.0f)).xyz),
+        float3((_EmissionColor4_MHY * max(_EmissionScaler4, 1.0f)).xyz),
+        float3((_EmissionColor5_MHY * max(_EmissionScaler5, 1.0f)).xyz),
     };
 
-    float3 emission = e_color[material_id - 1].xyz * (_EmissionColor_MHY * _EmissionScaler) * color; 
-    return emission;
+    float e_scaler[5] =
+    {
+        _EmissionScaler1,
+        _EmissionScaler2,
+        _EmissionScaler3,
+        _EmissionScaler4,
+        _EmissionScaler5,
+    };
+
+    float3 emission = e_color[material_id - 1].xyz * (_EmissionColor_MHY * max(_EmissionScaler, 1.0f)) * color; 
+    return max(float4(emission.xyz, e_scaler[material_id - 1] * _EmissionScaler), 0.0f);
 }
 
-float3 emission_color_eyes(in float3 color, in float material_id)
+float4 emission_color_eyes(in float3 color, in float material_id)
 {
-    return (_EmissionColorEye * _EmissionScaler) * _EyeGlowStrength * color;
+    return max(float4((_EmissionColorEye * max(_EmissionScaler, 1.0f)) * max(_EyeGlowStrength, 1.0f) * color, _EmissionScaler * _EyeGlowStrength), 0.0f);
 }
 
 float3 outline_emission(in float3 color, in float material_id)

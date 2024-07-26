@@ -23,6 +23,7 @@ struct vs_out
     float4 ss_pos    : TEXCOORD4; // screen space position
     float3 parallax  : TEXCOORD5;
     float4 light_pos : TEXCOORD6;
+    float3 n_view    : TEXCOORD8;
     float4 v_col     : COLOR0; // vertex color 
     UNITY_VERTEX_OUTPUT_STEREO
     SHADOW_COORDS(7)

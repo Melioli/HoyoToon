@@ -61,6 +61,10 @@ SamplerState sampler_BumpMap;
 SamplerState sampler_PackedShadowRampTex;
 SamplerState sampler_MTMap;
 SamplerState sampler_MTSpecularRamp;
+<<<<<<< Updated upstream
+=======
+SamplerState sampler_LeatherReflect;
+>>>>>>> Stashed changes
 SamplerState sampler_WeaponDissolveTex;
 SamplerState sampler_WeaponPatternTex;
 SamplerState sampler_ScanPatternTex;
@@ -145,6 +149,11 @@ float _GlassSpecularDetailLength;
 float _GlassSpecularDetailLengthRange;
 
 // normal map properties
+<<<<<<< Updated upstream
+=======
+float _DummyFixedForNormal;
+float _isNativeMainNormal;
+>>>>>>> Stashed changes
 float _UseBumpMap;
 float _BumpScale;
 
@@ -320,6 +329,14 @@ float _FallbackOutlines;
 float _OutlineWidth;
 float _OutlineCorrectionWidth;
 float _Scale;
+<<<<<<< Updated upstream
+=======
+float _OutLineIntensity;
+float _OutLineIntensity2;
+float _OutLineIntensity3;
+float _OutLineIntensity4;
+float _OutLineIntensity5;
+>>>>>>> Stashed changes
 float4 _OutlineColor;
 float4 _OutlineColor2;
 float4 _OutlineColor3;
