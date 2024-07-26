@@ -49,6 +49,8 @@ vs_out vs_model(vs_in v)
         o.parallax = parallax; 
     }
 
+
+
     TRANSFER_SHADOW(o)
 
     return o; // output to pixel shader
@@ -256,14 +258,9 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         metalspec.x = lightmap.x < 0.50f;
         metalspec.y = lightmap.x < 0.90f; // if metal area
 
-<<<<<<< Updated upstream
-        if(_UseBumpMap) normal = normal_mapping(normalmap, i.ws_pos, uv_a, normal);
-        if(_UseBumpMap && _TextureLineUse && ((_TextureLineMultiplier.x + _TextureLineMultiplier.y + _TextureLineMultiplier.z) > 0)) detail_line(i.ss_pos.zw, normalmap.z, diffuse.xyz);
-=======
         // adding support for new normal mapping boolean
         if(_UseBumpMap || _isNativeMainNormal) normal = normal_mapping(normalmap, i.ws_pos, uv_a, normal);
         if((_UseBumpMap || _isNativeMainNormal) && _TextureLineUse && ((_TextureLineMultiplier.x + _TextureLineMultiplier.y + _TextureLineMultiplier.z) > 0)) detail_line(i.ss_pos.zw, normalmap.z, diffuse.xyz);
->>>>>>> Stashed changes
 
         // do this after the bump mapping to ensure that the normals are updated 
         // INITIALIZE INPUT floatTORS :
@@ -387,13 +384,6 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             emis_check = 1.0f;
         }
         
-<<<<<<< Updated upstream
-        if(_UseGlassSpecularToggle) glass_color(out_color, i.uv_a, view, normal);
-        if(_EnableNyxState && _BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
-        out_color.xyz = out_color.xyz * light_color;
-        
-        float3 rim_light = rimlighting(i.ss_pos, normal, i.ws_pos, light, material_id, out_color.xyz, view);
-=======
 
         // New 5.0 content shit
         if(_UseGlassSpecularToggle) glass_color(out_color, i.uv_a, view, normal);
@@ -403,7 +393,6 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         out_color.xyz = out_color.xyz * light_color;
         
         // 
->>>>>>> Stashed changes
         if(_UseFaceMapNew) normal = float3(0.5f, 0.5f, 1.0f);
        
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
@@ -424,12 +413,6 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             out_color.xyz = out_color.xyz + rim_light;
         }
         
-<<<<<<< Updated upstream
-        if(_EnableNyxState && !_BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
-
-        
-=======
->>>>>>> Stashed changes
         // basic ass transparency
         if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;        
         if(_DebugMode) // debuuuuuug

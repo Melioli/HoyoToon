@@ -133,13 +133,10 @@ float3 normal_mapping(float3 normalmap, float4 vertexws, float2 uv, float3 norma
 {
     float3 bumpmap = normalmap.xyz;
     bumpmap.xy = bumpmap.xy * 2.0f - 1.0f;
-<<<<<<< Updated upstream
-    bumpmap.z = max(1.0f - min(_BumpScale, 0.5f), 0.001f);
-    bumpmap.xyz = normalize(bumpmap);   
-=======
+
     bumpmap.z = max(-min(_BumpScale, 0.5f) + 1.0f, 0.001f);
     bumpmap.xyz = _DummyFixedForNormal ? bumpmap : normalize(bumpmap);   // why why why
->>>>>>> Stashed changes
+
     // world space position derivative
     float3 p_dx = ddx(vertexws);
     float3 p_dy = ddy(vertexws);  
