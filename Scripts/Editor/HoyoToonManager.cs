@@ -603,7 +603,7 @@ public class HoyoToonManager
             }
 
             SetTextureImportSettings(loadedTexturePaths);
-            ApplyCustomSettingsToMaterial(newMaterial, jsonFileName, jsonFile);
+            ApplyCustomSettingsToMaterial(newMaterial, jsonFileName, jsonFile, jsonObject);
 
             if (isNewMaterial)
             {
@@ -656,237 +656,260 @@ public class HoyoToonManager
         return false;
     }
 
-    public static void ApplyCustomSettingsToMaterial(Material material, string jsonFileName, string jsonFile)
+    public static void ApplyCustomSettingsToMaterial(Material material, string jsonFileName, string jsonFile, JObject jsonObject)
     {
         //Hoyoverse Shaders
-        if (material.shader.name == HSRShader && jsonFileName.Contains("Face"))
+        if (material.shader.name == HSRShader)
         {
-            material.SetInt("variant_selector", 1);
-            material.SetInt("_BaseMaterial", 0);
-            material.SetInt("_HairMaterial", 0);
-            material.SetInt("_FaceMaterial", 1);
-            material.SetInt("_EyeShadowMat", 0);
-            material.SetInt("_CullMode", 2);
-            material.SetInt("_SrcBlend", 1);
-            material.SetInt("_DstBlend", 0);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 5);
-            material.SetInt("_StencilCompB", 5);
-            material.SetInt("_StencilRef", 100);
-            material.renderQueue = 2010;
-        }
-        else if (material.shader.name == HSRShader && jsonFileName.Contains("EyeShadow"))
-        {
-            material.SetInt("variant_selector", 2);
-            material.SetInt("_BaseMaterial", 0);
-            material.SetInt("_HairMaterial", 0);
-            material.SetInt("_FaceMaterial", 0);
-            material.SetInt("_EyeShadowMat", 1);
-            material.SetInt("_CullMode", 0);
-            material.SetInt("_SrcBlend", 2);
-            material.SetInt("_DstBlend", 0);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 0);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 0);
-            material.renderQueue = 2015;
-        }
-        else if (material.shader.name == HSRShader && jsonFileName.Contains("FaceMask"))
-        {
-            material.SetInt("variant_selector", 1);
-            material.SetInt("_BaseMaterial", 0);
-            material.SetInt("_HairMaterial", 0);
-            material.SetInt("_FaceMaterial", 1);
-            material.SetInt("_EyeShadowMat", 0);
-            material.SetInt("_CullMode", 0);
-            material.SetInt("_SrcBlend", 1);
-            material.SetInt("_DstBlend", 0);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 5);
-            material.SetInt("_StencilCompB", 5);
-            material.SetInt("_StencilRef", 99);
-            material.SetInt("_OutlineWidth", 0);
-            material.renderQueue = 2010;
-        }
-        else if (material.shader.name == HSRShader && jsonFileName.Contains("Trans"))
-        {
-            material.SetInt("_IsTransparent", 1);
-            material.SetInt("variant_selector", 0);
-            material.SetInt("_BaseMaterial", 1);
-            material.SetInt("_HairMaterial", 0);
-            material.SetInt("_FaceMaterial", 0);
-            material.SetInt("_EyeShadowMat", 0);
-            material.SetInt("_CullMode", 0);
-            material.SetInt("_SrcBlend", 5);
-            material.SetInt("_DstBlend", 10);
-            material.SetInt("_StencilPassA", 2);
-            material.SetInt("_StencilPassB", 0);
-            material.SetInt("_StencilCompA", 0);
-            material.SetInt("_StencilCompB", 0);
-            material.SetInt("_StencilRef", 0);
-            material.renderQueue = 2041;
-        }
-        else if (material.shader.name == HSRShader && jsonFileName.Contains("Hair"))
-        {
-            material.SetInt("variant_selector", 3);
-            material.SetInt("_BaseMaterial", 0);
-            material.SetInt("_HairMaterial", 1);
-            material.SetInt("_FaceMaterial", 0);
-            material.SetInt("_EyeShadowMat", 0);
-            material.SetInt("_CullMode", 0);
-            material.SetInt("_SrcBlend", 1);
-            material.SetInt("_DstBlend", 0);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 0);
-            material.SetInt("_StencilCompA", 5);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 100);
-            material.SetInt("_UseSelfShadow", 1);
-            material.renderQueue = 2020;
-
-            string[] faceMaterialGUIDs = AssetDatabase.FindAssets("Face t:material", new[] { Path.GetDirectoryName(jsonFile) });
-            if (faceMaterialGUIDs.Length > 0)
+            if (jsonFileName.Contains("Face"))
             {
-                string faceMaterialPath = AssetDatabase.GUIDToAssetPath(faceMaterialGUIDs[0]);
-                Material faceMaterial = AssetDatabase.LoadAssetAtPath<Material>(faceMaterialPath);
+                material.SetInt("variant_selector", 1);
+                material.SetInt("_BaseMaterial", 0);
+                material.SetInt("_HairMaterial", 0);
+                material.SetInt("_FaceMaterial", 1);
+                material.SetInt("_EyeShadowMat", 0);
+                material.SetInt("_CullMode", 2);
+                material.SetInt("_SrcBlend", 1);
+                material.SetInt("_DstBlend", 0);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 5);
+                material.SetInt("_StencilCompB", 5);
+                material.SetInt("_StencilRef", 100);
+                material.renderQueue = 2010;
+            }
+            else if (jsonFileName.Contains("EyeShadow"))
+            {
+                material.SetInt("variant_selector", 2);
+                material.SetInt("_BaseMaterial", 0);
+                material.SetInt("_HairMaterial", 0);
+                material.SetInt("_FaceMaterial", 0);
+                material.SetInt("_EyeShadowMat", 1);
+                material.SetInt("_CullMode", 0);
+                material.SetInt("_SrcBlend", 2);
+                material.SetInt("_DstBlend", 0);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 0);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 0);
+                material.renderQueue = 2015;
+            }
+            else if (jsonFileName.Contains("FaceMask"))
+            {
+                material.SetInt("variant_selector", 1);
+                material.SetInt("_BaseMaterial", 0);
+                material.SetInt("_HairMaterial", 0);
+                material.SetInt("_FaceMaterial", 1);
+                material.SetInt("_EyeShadowMat", 0);
+                material.SetInt("_CullMode", 0);
+                material.SetInt("_SrcBlend", 1);
+                material.SetInt("_DstBlend", 0);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 5);
+                material.SetInt("_StencilCompB", 5);
+                material.SetInt("_StencilRef", 99);
+                material.SetInt("_OutlineWidth", 0);
+                material.renderQueue = 2010;
+            }
+            else if (jsonFileName.Contains("Trans"))
+            {
+                material.SetInt("_IsTransparent", 1);
+                material.SetInt("variant_selector", 0);
+                material.SetInt("_BaseMaterial", 1);
+                material.SetInt("_HairMaterial", 0);
+                material.SetInt("_FaceMaterial", 0);
+                material.SetInt("_EyeShadowMat", 0);
+                material.SetInt("_CullMode", 0);
+                material.SetInt("_SrcBlend", 5);
+                material.SetInt("_DstBlend", 10);
+                material.SetInt("_StencilPassA", 2);
+                material.SetInt("_StencilPassB", 0);
+                material.SetInt("_StencilCompA", 0);
+                material.SetInt("_StencilCompB", 0);
+                material.SetInt("_StencilRef", 0);
+                material.renderQueue = 2041;
+            }
+            else if (jsonFileName.Contains("Hair"))
+            {
+                material.SetInt("variant_selector", 3);
+                material.SetInt("_BaseMaterial", 0);
+                material.SetInt("_HairMaterial", 1);
+                material.SetInt("_FaceMaterial", 0);
+                material.SetInt("_EyeShadowMat", 0);
+                material.SetInt("_CullMode", 0);
+                material.SetInt("_SrcBlend", 1);
+                material.SetInt("_DstBlend", 0);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 0);
+                material.SetInt("_StencilCompA", 5);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 100);
+                material.SetInt("_UseSelfShadow", 1);
+                material.renderQueue = 2020;
 
-                if (faceMaterial != null && faceMaterial.HasProperty("_ShadowColor"))
+                string[] faceMaterialGUIDs = AssetDatabase.FindAssets("Face t:material", new[] { Path.GetDirectoryName(jsonFile) });
+                if (faceMaterialGUIDs.Length > 0)
                 {
-                    Color shadowColor = faceMaterial.GetColor("_ShadowColor");
-                    material.SetColor("_ShadowColor", shadowColor);
+                    string faceMaterialPath = AssetDatabase.GUIDToAssetPath(faceMaterialGUIDs[0]);
+                    Material faceMaterial = AssetDatabase.LoadAssetAtPath<Material>(faceMaterialPath);
+
+                    if (faceMaterial != null && faceMaterial.HasProperty("_ShadowColor"))
+                    {
+                        Color shadowColor = faceMaterial.GetColor("_ShadowColor");
+                        material.SetColor("_ShadowColor", shadowColor);
+                    }
                 }
             }
-        }
-        else if (material.shader.name == HSRShader)
-        {
-            material.SetInt("variant_selector", 0);
-            material.SetInt("_BaseMaterial", 1);
-            material.SetInt("_HairMMaterial", 0);
-            material.SetInt("_FaceMaterial", 0);
-            material.SetInt("_EyeShadowMat", 0);
-            material.SetInt("_CullMode", 0);
-            material.SetInt("_SrcBlend", 5);
-            material.SetInt("_DstBlend", 10);
-            material.SetInt("_StencilPassA", 2);
-            material.SetInt("_StencilPassB", 0);
-            material.SetInt("_StencilCompA", 0);
-            material.SetInt("_StencilCompB", 0);
-            material.SetInt("_StencilRef", 0);
-            material.SetFloat("_OutlineScale", 0.187f);
-            material.SetFloat("_RimWidth", 1f);
-            material.SetInt("_UseSelfShadow", 1);
-            material.renderQueue = 2040;
-
-        }
-        else if (material.shader.name == GIShader && jsonFileName.Contains("Face"))
-        {
-            material.SetInt("variant_selector", 1);
-            material.SetInt("_UseFaceMapNew", 1);
-            material.SetInt("_UseSelfShadow", 0);
-        }
-        else if (material.shader.name == GIShader && jsonFileName.Contains("Equip"))
-        {
-            material.SetInt("variant_selector", 2);
-            material.SetInt("_UseWeapon", 1);
-        }
-        else if (material.shader.name == GIShader && jsonFileName.Contains("Glass_Eff"))
-        {
-            material.SetFloat("_SrcBlend", material.GetFloat("_SrcBlendMode"));
-            material.SetFloat("_DstBlend", material.GetFloat("_DstBlendMode"));
-            material.SetInt("variant_selector", 3);
-            material.SetInt("_UseWeapon", 1);
+            else
+            {
+                material.SetInt("variant_selector", 0);
+                material.SetInt("_BaseMaterial", 1);
+                material.SetInt("_HairMMaterial", 0);
+                material.SetInt("_FaceMaterial", 0);
+                material.SetInt("_EyeShadowMat", 0);
+                material.SetInt("_CullMode", 0);
+                material.SetInt("_SrcBlend", 5);
+                material.SetInt("_DstBlend", 10);
+                material.SetInt("_StencilPassA", 2);
+                material.SetInt("_StencilPassB", 0);
+                material.SetInt("_StencilCompA", 0);
+                material.SetInt("_StencilCompB", 0);
+                material.SetInt("_StencilRef", 0);
+                material.SetFloat("_OutlineScale", 0.187f);
+                material.SetFloat("_RimWidth", 1f);
+                material.SetInt("_UseSelfShadow", 1);
+                material.renderQueue = 2040;
+            }
         }
         else if (material.shader.name == GIShader)
         {
-            material.SetInt("variant_selector", 0);
+            if (jsonFileName.Contains("Face"))
+            {
+                material.SetInt("variant_selector", 1);
+                material.SetInt("_UseFaceMapNew", 1);
+                material.SetInt("_UseSelfShadow", 0);
+            }
+            else if (jsonFileName.Contains("Equip"))
+            {
+                material.SetInt("variant_selector", 2);
+                material.SetInt("_UseWeapon", 1);
+            }
+            else if (jsonFileName.Contains("Glass_Eff"))
+            {
+                material.SetFloat("_SrcBlend", material.GetFloat("_SrcBlendMode"));
+                material.SetFloat("_DstBlend", material.GetFloat("_DstBlendMode"));
+                material.SetInt("variant_selector", 3);
+                material.SetInt("_UseWeapon", 1);
+            }
+            else
+            {
+                material.SetInt("variant_selector", 0);
+
+                if (ContainsKey(jsonObject["m_SavedProperties"]?["m_Floats"], "_DummyFixedForNormal"))
+                {
+                    material.SetInt("_gameVersion", 1);
+                }
+                else
+                {
+                    material.SetInt("_gameVersion", 0);
+                }
+            }
         }
-        else if (material.shader.name == Hi3Shader && jsonFileName.Contains("Face"))
+        else if (material.shader.name == Hi3Shader)
         {
-            material.SetInt("variant_selector", 1);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 6);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 16);
-            material.renderQueue = 2000;
+            if (jsonFileName.Contains("Face"))
+            {
+                material.SetInt("variant_selector", 1);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 6);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 16);
+                material.renderQueue = 2000;
+            }
+            else if (jsonFileName.Contains("Hair"))
+            {
+                material.SetInt("variant_selector", 2);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 6);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 16);
+                material.renderQueue = 2002;
+            }
+            else if (jsonFileName.Contains("Eye"))
+            {
+                material.SetInt("variant_selector", 3);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 6);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 16);
+                material.renderQueue = 2001;
+            }
+            else if (jsonFileName.Contains("Alpha"))
+            {
+                material.SetInt("_AlphaType", 1);
+                material.SetInt("_SrcBlend", 5);
+                material.SetInt("_DstBlend", 10);
+                material.renderQueue = 2003;
+            }
         }
-        else if (material.shader.name == Hi3Shader && jsonFileName.Contains("Hair"))
+        else if (material.shader.name == Hi3P2Shader)
         {
-            material.SetInt("variant_selector", 2);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 6);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 16);
-            material.renderQueue = 2002;
-        }
-        else if (material.shader.name == Hi3Shader && jsonFileName.Contains("Eye"))
-        {
-            material.SetInt("variant_selector", 3);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 6);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 16);
-            material.renderQueue = 2001;
-        }
-        else if (material.shader.name == Hi3Shader && jsonFileName.Contains("Alpha"))
-        {
-            material.SetInt("_AlphaType", 1);
-            material.SetInt("_SrcBlend", 5);
-            material.SetInt("_DstBlend", 10);
-            material.renderQueue = 2003;
-        }
-        else if (material.shader.name == Hi3P2Shader && jsonFileName.Contains("Face"))
-        {
-            material.SetInt("variant_selector", 1);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 6);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 16);
-            material.renderQueue = 2000;
-        }
-        else if (material.shader.name == Hi3P2Shader && jsonFileName.Contains("Hair"))
-        {
-            material.SetInt("variant_selector", 2);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 6);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 16);
-            material.renderQueue = 2002;
-        }
-        else if (material.shader.name == Hi3P2Shader && jsonFileName.Contains("Eye"))
-        {
-            material.SetInt("variant_selector", 3);
-            material.SetInt("_StencilPassA", 0);
-            material.SetInt("_StencilPassB", 2);
-            material.SetInt("_StencilCompA", 6);
-            material.SetInt("_StencilCompB", 8);
-            material.SetInt("_StencilRef", 16);
-            material.renderQueue = 2001;
+            if (jsonFileName.Contains("Face"))
+            {
+                material.SetInt("variant_selector", 1);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 6);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 16);
+                material.renderQueue = 2000;
+            }
+            else if (jsonFileName.Contains("Hair"))
+            {
+                material.SetInt("variant_selector", 2);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 6);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 16);
+                material.renderQueue = 2002;
+            }
+            else if (jsonFileName.Contains("Eye"))
+            {
+                material.SetInt("variant_selector", 3);
+                material.SetInt("_StencilPassA", 0);
+                material.SetInt("_StencilPassB", 2);
+                material.SetInt("_StencilCompA", 6);
+                material.SetInt("_StencilCompB", 8);
+                material.SetInt("_StencilRef", 16);
+                material.renderQueue = 2001;
+            }
         }
 
-        // KuroGames Shaders
-        else if (material.shader.name == WuWaShader && jsonFileName.Contains("Bangs"))
+        //KuroGames Shaders
+        else if (material.shader.name == WuWaShader)
         {
-            material.SetInt("_MaterialType", 3);
-        }
-        else if (material.shader.name == WuWaShader && jsonFileName.Contains("Eye"))
-        {
-            material.SetInt("_MaterialType", 2);
-        }
-        else if (material.shader.name == WuWaShader && jsonFileName.Contains("Face"))
-        {
-            material.SetInt("_MaterialType", 1);
-        }
-        else if (material.shader.name == WuWaShader && jsonFileName.Contains("Hair"))
-        {
-            material.SetInt("_MaterialType", 4);
+            if (jsonFileName.Contains("Bangs"))
+            {
+                material.SetInt("_MaterialType", 3);
+            }
+            else if (jsonFileName.Contains("Eye"))
+            {
+                material.SetInt("_MaterialType", 2);
+            }
+            else if (jsonFileName.Contains("Face"))
+            {
+                material.SetInt("_MaterialType", 1);
+            }
+            else if (jsonFileName.Contains("Hair"))
+            {
+                material.SetInt("_MaterialType", 4);
+            }
         }
     }
 
