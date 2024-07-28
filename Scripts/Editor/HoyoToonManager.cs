@@ -1033,6 +1033,8 @@ namespace HoyoToon
                 textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_WeaponDissolveTex", TextureName = "Eff_WeaponsTotem_Dissolve_00" });
                 textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_WeaponPatternTex", TextureName = "Eff_WeaponsTotem_Grain_00" });
                 textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_ScanPatternTex", TextureName = "Eff_Gradient_Repeat_01" });
+                textureConditions.Add(new TextureCondition { CurrentBodyType = GIbodyTypes[i], Shader = Shader.Find(GIShader), PropertyName = "_NyxStateOutlineNoise", TextureName = "Eff_Avatar_NyxState" });
+
             }
 
             // Star Rail
