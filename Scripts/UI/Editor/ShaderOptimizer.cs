@@ -1879,13 +1879,13 @@ namespace HoyoToon
 
         //---GameObject + Children Locking
 
-        //[MenuItem("GameObject/HoyoToon/Materials/Unlock All", false, 0)]
+        [MenuItem("GameObject/HoyoToon/Materials/Unlock All", false, 0)]
         static void UnlockAllChildren()
         {
             SetLockForAllChildren(Selection.gameObjects, 0, true);
         }
 
-        //[MenuItem("GameObject/HoyoToon/Materials/Lock All", false, 0)]
+        [MenuItem("GameObject/HoyoToon/Materials/Lock All", false, 0)]
         static void LockAllChildren()
         {
             SetLockForAllChildren(Selection.gameObjects, 1, true);
@@ -1893,14 +1893,14 @@ namespace HoyoToon
 
         //---Asset Unlocking
 
-        //[MenuItem("Assets/HoyoToon/Materials/Unlock All", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Unlock All", false, 303)]
         static void UnlockAllMaterials()
         {
             IEnumerable<Material> mats = Selection.assetGUIDs.Select(g => AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(g)));
             SetLockedForAllMaterials(mats, 0, true);
         }
 
-        //[MenuItem("Assets/HoyoToon/Materials/Unlock All", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Unlock All", true)]
         static bool UnlockAllMaterialsValidator()
         {
             return SelectedObjectsAreLockableMaterials();
@@ -1908,14 +1908,14 @@ namespace HoyoToon
 
         //---Asset Locking
 
-        //[MenuItem("Assets/HoyoToon/Materials/Lock All", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Lock All", false, 303)]
         static void LockAllMaterials()
         {
             IEnumerable<Material> mats = Selection.assetGUIDs.Select(g => AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(g)));
             SetLockedForAllMaterials(mats, 1, true);
         }
 
-        //[MenuItem("Assets/HoyoToon/Materials/Lock All", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Lock All", true)]
         static bool LockAllMaterialsValidator()
         {
             return SelectedObjectsAreLockableMaterials();
@@ -2177,6 +2177,7 @@ namespace HoyoToon
             //first the shaders are created. compiling is suppressed with start asset editing
             AssetDatabase.StartAssetEditing();
 
+
             bool isLocking = lockState == 1;
 
             //Get cleaned materia list
@@ -2234,7 +2235,6 @@ namespace HoyoToon
                         Material reference = null;
                         if (s_shaderPropertyCombinations.ContainsKey(hash))
                         {
-
                             reference = s_shaderPropertyCombinations[hash].FirstOrDefault(m2 => m2 != m && (materialsToChangeLock.Contains(m2) || Shader.Find(applyStructsLater[m2].newShaderName) != null));
                         }
                         if (reference != null)
@@ -2373,7 +2373,7 @@ namespace HoyoToon
                     {
                         if (at.GetArrayElementAtIndex(0).stringValue == "HoyoToonShaderOptimizerLockButton")
                         {
-                            //Debug.Log(shader.name + " found to use optimizer ");
+                            Debug.Log(shader.name + " found to use optimizer ");
                             isShaderUsingHoyoToonOptimizer[shader] = true;
                             shaderHoyoToonOptimizerPropertyName[shader] = p.displayName;
                             return true;
