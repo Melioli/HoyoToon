@@ -772,6 +772,9 @@ Shader "HoyoToon/Genshin/Character"
         //endex
         //ifex _EnableNyxState == 0
             #define can_nyx
+        //endex 
+        //ifex _EnableNyxOutline == 0
+            #define nyx_outline
         //endex
         //ifex _DebugMode == 0
             #define can_debug
@@ -882,7 +885,7 @@ Shader "HoyoToon/Genshin/Character"
             ENDHLSL
         }   
         //endex
-        //ifex _EnableNyxOutline==0
+        
         Pass // Nyx Outline Pass, Rendered after everything so it appears behind everything thanks to the stencil settings
         {
             Name "Nyx Outline Pass"
@@ -904,7 +907,7 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }
-        //endex
+        
     }
     CustomEditor "HoyoToon.ShaderEditor"
 }

@@ -381,8 +381,8 @@ namespace HoyoToon
                         }
                         catch (System.Exception e)
                         {
-                            Debug.LogError("[HoyoToon] Couldn't open Editor Window of type" + data);
-                            Debug.LogException(e);
+                            Debug.LogError("Couldn't open Editor Window of type" + data);
+                            //Debug.LogException(e);
                         }
                     }
                     break;

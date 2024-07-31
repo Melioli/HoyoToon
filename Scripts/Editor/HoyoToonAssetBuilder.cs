@@ -13,7 +13,7 @@ namespace HoyoToon
             Object selectedObject = Selection.activeObject;
             if (selectedObject == null || !(selectedObject is GameObject))
             {
-                Debug.LogError("Please select a prefab to build an AssetBundle.");
+                HoyoToonLogs.ErrorDebug("Please select a prefab to build an AssetBundle.");
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace HoyoToon
             // Check if the build was successful
             if (manifest == null)
             {
-                Debug.LogError("AssetBundle build failed.");
+                HoyoToonLogs.ErrorDebug("AssetBundle build failed.");
                 return;
             }
 
@@ -57,7 +57,7 @@ namespace HoyoToon
             // Refresh the AssetDatabase to ensure the AssetBundle is updated in Unity
             AssetDatabase.Refresh();
 
-            Debug.Log("AssetBundle built successfully at: " + outputPath);
+            HoyoToonLogs.LogDebug("AssetBundle built successfully at: " + outputPath);
         }
     }
 }

@@ -140,7 +140,7 @@ vs_out vs_edge(vs_in v)
 vs_out vs_nyx(vs_in v)
 {
     vs_out o = (vs_out)0.0f; // cast all output values to zero to prevent potential errors
-    #if defined(ENABLE_NYX)
+    #if defined(nyx_outline) && defined(can_nyx)
     if(_OutlineType ==  0.0f)
     {
         vs_out o = (vs_out)0.0f;
@@ -620,7 +620,7 @@ float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 
 float4 ps_nyx(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
-    #if defined(ENABLE_NYX)
+    #if defined(can_nyx) && defined(nyx_outline)
         // calculate lighting colors
         float3 normal = normalize(i.normal);
         float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));

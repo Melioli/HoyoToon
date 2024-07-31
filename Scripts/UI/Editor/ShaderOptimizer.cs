@@ -1924,7 +1924,7 @@ namespace HoyoToon
         //----Folder Lock
 
         //This does not work for folders on the left side of the project explorer, because they are not exposed to Selection
-        //[MenuItem("Assets/HoyoToon/Materials/Lock Folder", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Lock Folder", false, 303)]
         static void LockFolder()
         {
             IEnumerable<string> folderPaths = Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p));
@@ -1933,7 +1933,7 @@ namespace HoyoToon
             SetLockedForAllMaterials(materials, 1, true);
         }
 
-        //[MenuItem("Assets/HoyoToon/Materials/Lock Folder", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Lock Folder", true)]
         static bool LockFolderValidator()
         {
             return Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p)).Count() == Selection.objects.Length;
@@ -1941,7 +1941,7 @@ namespace HoyoToon
 
         //-----Folder Unlock
 
-        //[MenuItem("Assets/HoyoToon/Materials/Unlock Folder", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Unlock Folder", false, 303)]
         static void UnLockFolder()
         {
             IEnumerable<string> folderPaths = Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p));
@@ -1950,7 +1950,7 @@ namespace HoyoToon
             SetLockedForAllMaterials(materials, 0, true);
         }
 
-        //[MenuItem("Assets/HoyoToon/Materials/Unlock Folder", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Unlock Folder", true)]
         static bool UnLockFolderValidator()
         {
             return Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p)).Count() == Selection.objects.Length;
@@ -2373,7 +2373,7 @@ namespace HoyoToon
                     {
                         if (at.GetArrayElementAtIndex(0).stringValue == "HoyoToonShaderOptimizerLockButton")
                         {
-                            Debug.Log(shader.name + " found to use optimizer ");
+                            //Debug.Log(shader.name + " found to use optimizer ");
                             isShaderUsingHoyoToonOptimizer[shader] = true;
                             shaderHoyoToonOptimizerPropertyName[shader] = p.displayName;
                             return true;
