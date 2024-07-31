@@ -353,11 +353,11 @@ namespace HoyoToon
             { "_UtilityDisplay1", GIShader },
             { "_DisableCGP", GIShader},
             { "UseGlassSpecularToggle", GIShader},
+            { "_RampTexV", Hi3P2Shader},
+            { "_MiscGrp", Hi3P2Shader},
             { "_SPCubeMapIntensity", Hi3Shader },
             { "_DissolveDistortionIntensity", HSRShader },
             { "_ScreenLineInst", HSRShader},
-            { "_RampTexV", Hi3P2Shader},
-            { "_MiscGrp", Hi3P2Shader},
             { "ShadingModel", WuWaShader}
         };
 
