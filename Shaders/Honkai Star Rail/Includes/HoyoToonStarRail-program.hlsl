@@ -423,8 +423,10 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             #endif
                 if(_FaceMaterial)
             {
-                float eye_emis = (facemap.x > 0.45f) && (facemap.x < 0.55f);
-                emis_area = emis_area + eye_emis;
+                #if defined(faceishadow)
+                    float eye_emis = (facemap.x > 0.45f) && (facemap.x < 0.55f);
+                    emis_area = emis_area + eye_emis;
+                #endif
             }
         #endif
             
