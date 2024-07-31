@@ -3,23 +3,37 @@
 // -------------------------------------------
 // TEXTURES AND SAMPLERS
 Texture2D _MainTex; 
+#if defined(second_diffuse)
 Texture2D _SecondaryDiff; 
+#endif
 Texture2D _LightMap;
+#if defined(use_shadow)
 Texture2D _DiffuseRampMultiTex;
 Texture2D _DiffuseCoolRampMultiTex;
+#endif
+#if defined(use_stocking)
 Texture2D _StockRangeTex;
+#endif
+#if defined(faceishadow)
 Texture2D _FaceMap;
 Texture2D _FaceExpression;
+#endif
 Texture2D _MaterialValuesPackLUT;
+#if defined(use_emission)
 Texture2D _EmissionTex; 
+#endif
+#if defined(use_caustic)
 Texture2D _CausTexture;
-Texture2D _MaskTex;
+#endif
+#if defined(can_dissolve)
 Texture2D _DissolveMap;
 Texture2D _DissolveMask;
 Texture2D _DissolveGradientMask;
 Texture2D _DissolveAnimTex;
+#endif
+#if defined(can_shift)
 Texture2D _HueMaskTexture;
-Texture2D _StencilGrabTexture;
+#endif
 
 float4 _CausTexture_ST;
 SamplerState sampler_DissolveMap;
@@ -29,18 +43,19 @@ SamplerState sampler_MainTex;
 SamplerState sampler_LightMap;
 SamplerState sampler_DiffuseRampMultiTex;
 SamplerState sampler_FaceMap;
-SamplerState sampler_StencilGrabTexture;
 
+#if defined(use_rimlight)
 UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+#endif
 
 float _testA;
 
 // MATERIAL STATES
-bool _BaseMaterial;
-bool _FaceMaterial;
-bool _EyeShadowMat;
-bool _HairMaterial;
-bool _IsTransparent;
+float _BaseMaterial;
+float _FaceMaterial;
+float _EyeShadowMat;
+float _HairMaterial;
+float _IsTransparent;
 
 float _FilterLight;
 
@@ -73,9 +88,10 @@ float3 _headUpVector;
 float3 _headForwardVector;
 float3 _headRightVector;
 float _HairBlendSilhouette;
-bool _UseHairSideFade;
+float _UseHairSideFade;
 int _HairSideChoose;
 float _UseDifAlphaStencil;
+float _EnableStencil;
 float3 _ShadowColor;
 float3 _NoseLineColor;
 float _NoseLinePower;
@@ -90,7 +106,7 @@ float4 _ExEyeColor;
 float _ExShadowIntensity;
 
 // stocking proprties
-bool _EnableStocking;
+float _EnableStocking;
 float4 _StockRangeTex_ST;
 float4 _Stockcolor;
 float4 _StockDarkcolor;
@@ -113,7 +129,7 @@ float _ShadowBoostVal;
 
 float _EnvironmentLightingStrength;
 
-bool _UseMaterialValuesLUT;
+float _UseMaterialValuesLUT;
 
 // specular properties 
 float4 _ES_SPColor;

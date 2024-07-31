@@ -11,6 +11,8 @@ Shader "HoyoToon/Star Rail/Character"
 		[HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
         //Header End
 
+        [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
+
         //Material Type
         [HoyoToonWideEnum(Base, 0, Face, 1, EyeShadow, 2, Hair, 3)]variant_selector("Material Type--{on_value_actions:[
 		{value:0,actions:[{type:SET_PROPERTY,data:_BaseMaterial=1.0}, {type:SET_PROPERTY,data:_FaceMaterial=0.0}, {type:SET_PROPERTY,data:_EyeShadowMat=0.0}, {type:SET_PROPERTY,data:_HairMaterial=0.0}]},
@@ -48,14 +50,17 @@ Shader "HoyoToon/Star Rail/Character"
             [SmallTexture]_LightMap ("Light Map Texture", 2D) = "grey" {}
             [Toggle]_UseMaterialValuesLUT ("Enable Material LUT", Float) = 0
             [SmallTexture]_MaterialValuesPackLUT ("Mat Pack LUT--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialValuesLUT==1.0}}", 2D) = "white" {}
+            [Toggle] _MultiLight ("Enable Lighting from Multiple Sources", Float) = 1
             [Toggle] _FilterLight ("Limit Spot/Point Light Intensity", Float) = 1 // because VRC world creators are fucking awful at lighting you need to do shit like this to not blow your models the fuck up
             // on by default >:(
             [Toggle] _backfdceuv2 ("Back Face Use UV2", float) = 1
+            //ifex _UseSecondaryTex == 0
             [HideInInspector] m_start_secondarymain("Secondary Texture", Float) = 0
                 [Toggle] _UseSecondaryTex ("Enable Secondary Diffuse", float) = 0
                 _SecondaryDiff ("Secondary Diffuse Texture", 2D) = "white" {}
                 _SecondaryFade ("Fade to Secondary", Range(0,1)) = 0
             [HideInInspector] m_end_secondarymain("", Float) = 0
+            //endex
             [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
                 [Toggle]_IsTransparent ("Enable Transparency", float) = 0
                 [Toggle] _EnableAlphaCutoff ("Enable Alpha Cutoff", Float) = 0
@@ -85,6 +90,7 @@ Shader "HoyoToon/Star Rail/Character"
         // -------------------------------------------
 
         // face specific settings 
+        //ifex _FaceMaterial == 0
         [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_FaceMaterial==1.0}}", Float) = 0
             [SmallTexture] _FaceMap ("Face Map Texture", 2D) = "white" {}
             [SmallTexture] _FaceExpression ("Face Expression map", 2D) = "black" {}
@@ -103,23 +109,15 @@ Shader "HoyoToon/Star Rail/Character"
                 
             [HideInInspector] m_end_faceexpression("", Float) = 0
         [HideInInspector] m_end_faceshading("", Float) = 0 
+        //endex
 
-        // // Hair Settings
-        // [HideInInspector] m_start_hair("Hair--{condition_show:{type:PROPERTY_BOOL,data:_HairMaterial==1.0}}", Float) = 0
-        // [Enum(Off, 0, Right, 1, Left, 2)] _HairSideChoose ("Side Picker", Int) = 0
-        // [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 0
-        // _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
-        // [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
-        // [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
-        // [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
-        // [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
-        // [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
-        // [HideInInspector] m_end_hair("", Float) = 0
 
         // Lighting Options
         // -------------------------------------------
         [HideInInspector] m_start_lighting("Lighting Options", Float) = 0
-            [HideInInspector] m_start_lightandshadow("Shadow", Float) = 0
+            //ifex _EnableShadow == 0
+            [HideInInspector] m_start_lightandshadow("Shadow--{reference_property:_EnableShadow}", Float) = 0
+                [HideInInspector] [Toggle] _EnableShadow ("", Float) = 1
                 [SmallTexture]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
                 [SmallTexture]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
                 //[Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
@@ -134,14 +132,19 @@ Shader "HoyoToon/Star Rail/Character"
                 //_ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
                 //_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
                 //_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
+                //ifex _UseSelfShadow == 0
                 [HideInInspector] m_start_selfshadow ("Self Shadow", Float) = 0
                     [Toggle] _UseSelfShadow ("Use Self Shadow", Float) = 0
                     _SelfShadowDarken ("Self Shadow Darken", Float) = 0
                     _SelfShadowDepthOffset ("Shadow Depth Offset", Float) = 0
                     _SelfShadowSampleOffset ("Shadow Sample Offset", Float) = 0
                 [HideInInspector] m_end_selfshadow ("", Float) = 0
+                //endex
             [HideInInspector] m_end_lightandshadow("", Float) = 0
-            [HideInInspector] m_start_lightingrim("Rim Light", Float) = 0
+            //endex
+            //ifex _EnableRimLight == 0
+            [HideInInspector] m_start_lightingrim("Rim Light--{reference_property:_EnableRimLight}", Float) = 0
+                [HideInInspector] [Toggle] _EnableRimLight ("Enable Rim Light", Float) = 1
                 _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
                 //_RimCt ("Rim CT", Float) = 5
                 _Rimintensity ("Rim Intensity", Float) = 1
@@ -238,11 +241,14 @@ Shader "HoyoToon/Star Rail/Character"
                 // // --- Offset 
                 // _RimShadowOffset ("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
             [HideInInspector] m_end_lightingrim("", Float) = 0
+            //endex
         [HideInInspector] m_end_lighting("", Int) = 0
         // -------------------------------------------
 
+        //ifex _EnableSpecular == 0
         // specular 
-        [HideInInspector] m_start_specular("Specular", Float) = 0
+        [HideInInspector] m_start_specular("Specular--{reference_property:_EnableSpecular}", Float) = 0
+            [HideInInspector] [Toggle] _EnableSpecular ("Enable Specular", Float) = 1
             _ES_SPColor ("Global Specular Color", Color) = (1, 1, 1, 1)
             _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
             [HideInInspector] m_start_specularcolor("Specular Color", Float) = 0
@@ -255,7 +261,7 @@ Shader "HoyoToon/Star Rail/Character"
                 _SpecularColor6 ("Specular Color 6 | (RGB ID = 192)", Color) = (1, 1, 1, 1)
                 _SpecularColor7 ("Specular Color 7 | (RGB ID = 223)", Color) = (1, 1, 1, 1)
             [HideInInspector] m_end_specularcolor("", Float) = 0
-
+           
             [HideInInspector] m_start_specularshininess("Specular Shininess", Float) = 0
                 _SpecularShininess0 ("Specular Shininess 0 (Power) | (RGB ID = 0)", Range(0.1, 500))   = 10
                 _SpecularShininess1 ("Specular Shininess 1 (Power) | (RGB ID = 31)", Range(0.1, 500))  = 10
@@ -289,9 +295,10 @@ Shader "HoyoToon/Star Rail/Character"
                 _SpecularIntensity7 ("Specular Intensity 7 | (RGB ID = 223)", Range(0, 50)) = 1
             [HideInInspector] m_end_specularintensity("", Float) = 0
         [HideInInspector] m_end_specular("", Float) = 0
+        //endex
 
-
-        [HideInInspector] m_start_stockings("Stockings", Float) = 0
+        //ifex _EnableStocking == 0
+        [HideInInspector] m_start_stockings("Stockings--{reference_property:_EnableStocking}", Float) = 0
             [Toggle] _EnableStocking ("Enable Stockings", Float) = 0
             _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
             _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
@@ -304,8 +311,9 @@ Shader "HoyoToon/Star Rail/Character"
             _Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
             // _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
         [HideInInspector] m_end_stockings("", Float) = 0
-
-        [HideInInspector] m_start_outlines("Outlines", Float) = 0
+        //endex
+        //ifex _EnableOutline == 0
+        [HideInInspector] m_start_outlines("Outlines--{reference_property:_EnableOutline}", Float) = 0
             [Toggle] _EnableOutline ("Enable Outlines", Float) = 1 // on by default
             _AlphaCutoff ("Outline Alpha Cutoff", Range(0,1)) = 0.0
             [Toggle]_EnableFOVWidth ("Enable FOV Scaling", Float) = 1
@@ -332,17 +340,21 @@ Shader "HoyoToon/Star Rail/Character"
                 _FixLipOutline ("TurnOn Temp Lip Outline", Range(0, 1)) = 0
             [HideInInspector] m_end_outlinelip("", Float) = 0
         [HideInInspector] m_end_outlines("", Float) = 0        
-
+        //endex
         [HideInInspector] m_start_specialeffects("Special Effects", Float) = 0
-            [HideInInspector] m_start_specialeffectsemission("Emission", Float) = 0
-                [Enum(Off, 0, Ingame, 1, Custom, 2)] _EnableEmission ("Enable Emission", Float) = 0
+            //ifex _EnableEmission == 0
+            [HideInInspector] m_start_specialeffectsemission("Emission--{reference_property:_EmissionToggle}", Float) = 0
+                [HideInInspector] [Toggle] _EmissionToggle ("", Float) = 0
+                [Enum(Off, 0, Ingame, 1, Custom, 2)] _EnableEmission ("Enable Emission--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_EmissionToggle=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_EmissionToggle=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_EmissionToggle=1}]}]}", Float) = 0
                 _EmissionTex ("Emission Texture--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission==2}}", 2D) = "white" {}
                 _EmissionTintColor ("Emission Color Tint--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Color) = (1, 1, 1, 1)
                 _EmissionThreshold ("Emission Threshold--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Range(0,1)) = 0.5
                 _EmissionIntensity ("Emission Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableEmission>0}}", Float) = 1
             [HideInInspector] m_end_specialeffectsemission("", Float) = 0
-
-            [HideInInspector] m_start_stencilfade("Stencils", Float) = 0
+            //endex
+            //ifex _EnableStencil == 0
+            [HideInInspector] m_start_stencilfade("Stencils--{reference_property:_EnableStencil}", Float) = 0
+                [Toggle] _EnableStencil ("Use Stencils", Float) = 0
                 [HideInInspector] m_start_stencilalpha ("Fade Controls", Float) = 0
                     _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
                     [Toggle]_UseHairSideFade ("Solid At Sides", Float) = 0
@@ -355,9 +367,10 @@ Shader "HoyoToon/Star Rail/Character"
                 [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
                 [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
             [HideInInspector] m_end_stencilfade("", Float) = 0
-
+            //endex
+            //ifex _CausToggle == 0
             // CAUSTICS
-            [HideInInspector] m_start_caustic("Caustics", Float) = 0
+            [HideInInspector] m_start_caustic("Caustics--{reference_property:_CausToggle}", Float) = 0
                 [Toggle] _CausToggle ("Enable Caustics", Float) = 0.0
                 _CausTexture ("Caustic Texture--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", 2D) = "black" {} 
                 _CausTexSTA ("First Caustic Texture Scale & Bias--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Vector) = (1.0, 1.0, 0.0, 0.0)
@@ -371,8 +384,9 @@ Shader "HoyoToon/Star Rail/Character"
                 [Toggle] _EnableSplit ("Enable Caustic RGB Split--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
                 _CausSplit ("Caustic RGB Split--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_CausToggle==1},condition2:{type:PROPERTY_BOOL,data:_EnableSplit==1}}}", Range(0.0, 1.0)) = 0.0
             [HideInInspector] m_end_caustic ("", Float) = 0 
-
-            [HideInInspector] m_start_dissolve("Dissolve", Float) = 0
+            //endex
+            //ifex _DissoveONM == 0
+            [HideInInspector] m_start_dissolve("Dissolve--{reference_property:_DissoveONM}", Float) = 0
                 [Toggle] _DissoveONM ("Enable Dissolve", Float) = 0.0
                 [Enum(Off, 0, Simple, 1, Advanced, 2)] _DissolveMode ("Dissolve Mode--{condition_show:{type:PROPERTY_BOOL,data:_DissoveONM==1.0}}", Float) = 0
                 [Toggle] _DissolveClip ("Enable Dissolve Clip--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==2.0}}", Float) = 0.0
@@ -425,12 +439,16 @@ Shader "HoyoToon/Star Rail/Character"
                 _DissovlePosFadeSmoothstep ("Dissolve Position Fade Smoothstep | X = min | Y = max--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 1.0, 0.0, 0.0)		
 
             [HideInInspector] m_end_dissolve("", Float) = 0
+            //endex
+
+            //ifex _EnableHueShift == 0
             // Hue Controls
-            [HideInInspector] m_start_hueshift("Hue Shifting", Float) = 0
+            [HideInInspector] m_start_hueshift("Hue Shifting--{reference_property:_EnableHueShift}", Float) = 0
+                [Toggle] _EnableHueShift ("Enable Hue Shifting", Float) = 0
                 [Toggle] _UseHueMask ("Enable Hue Mask", Float) = 0
                 _HueMaskTexture ("Hue Mask--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", 2D) = "white" {}
                 // Color Hue
-                [HideInInspector] m_start_colorhue ("Diffuse", Float) = 0
+                [HideInInspector] m_start_colorhue ("Diffuse--{reference_property:_EnableColorHue}", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _DiffuseMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableColorHue ("Enable Diffuse Hue Shift", Float) = 1
                     [Toggle] _AutomaticColorShift ("Enable Auto Hue Shift", Float) = 0
@@ -446,7 +464,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _ColorHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_colorhue ("", Float) = 0
                 // Outline Hue
-                [HideInInspector] m_start_outlinehue ("Outline", Float) = 0
+                [HideInInspector] m_start_outlinehue ("Outline--{reference_property:_EnableOutlineHue}", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _OutlineMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableOutlineHue ("Enable Outline Hue Shift", Float) = 1
                     [Toggle] _AutomaticOutlineShift ("Enable Auto Hue Shift", Float) = 0
@@ -462,7 +480,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _OutlineHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_outlinehue ("", Float) = 0
                 // Glow Hue
-                [HideInInspector] m_start_glowhue ("Emission", Float) = 0
+                [HideInInspector] m_start_glowhue ("Emission--{reference_property:_EnableEmissionHue}", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _EmissionMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableEmissionHue ("Enable Emission Hue Shift", Float) = 1
                     [Toggle] _AutomaticEmissionShift ("Enable Auto Hue Shift", Float) = 0
@@ -478,7 +496,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _EmissionHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_glowhue ("", Float) = 0
                 // Rim Hue
-                [HideInInspector] m_start_rimhue ("Rim", Float) = 0
+                [HideInInspector] m_start_rimhue ("Rim--{reference_property:_EnableRimHue}", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _RimMaskSource ("Hue Mask Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", Float) = 0
                     [Toggle] _EnableRimHue ("Enable Rim Hue Shift", Float) = 1
                     [Toggle] _AutomaticRimShift ("Enable Auto Hue Shift", Float) = 0
@@ -494,6 +512,7 @@ Shader "HoyoToon/Star Rail/Character"
                     _RimHue8 ("Hue Shift 8", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_rimhue ("", Float) = 0
             [HideInInspector] m_end_hueshift ("", float) = 0        
+            //endex
         [HideInInspector] m_end_specialeffects("", Float) = 0
 
         //Rendering Options
@@ -501,7 +520,8 @@ Shader "HoyoToon/Star Rail/Character"
             [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2
             [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
             [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
-            [HideInInspector] m_start_debugOptions("Debug", Float) = 0
+            //ifex _DebugMode == 0
+            [HideInInspector] m_start_debugOptions("Debug--{reference_property:_DebugMode}", Float) = 0
                 [Toggle] _DebugMode ("Enable Debug Mode", float) = 0
                 [Enum(Off, 0, RGB, 1, A, 2)] _DebugDiffuse("Diffuse Debug Mode", Float) = 0
                 [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugLightMap ("Light Map Debug Mode", Float) = 0
@@ -520,6 +540,7 @@ Shader "HoyoToon/Star Rail/Character"
                 [Enum(Off, 0, On, 1)] _DebugLights ("Lights Debug Mode", Float) = 0
                 [Enum(Off, 0, On, 1)] _DebugHairFade ("Hair Fade Debug Mode", Float) = 0
             [HideInInspector] m_end_debugOptions("Debug", Float) = 0
+            //endex
         [HideInInspector] m_end_renderingOptions("Rendering Options", Float) = 0
         //Rendering Options End
     }
@@ -527,6 +548,43 @@ Shader "HoyoToon/Star Rail/Character"
     {
         Tags{ "RenderType"="Opaque" "Queue"="Geometry" }
         HLSLINCLUDE
+
+        //ifex _UseSecondaryTex == 0
+        #define second_diffuse
+        //endex
+        //ifex _UseSelfShadow == 0
+        #define self_shading
+        //endex
+        //ifex _EnableShadow == 0
+        #define use_shadow
+        //endex
+        //ifex _FaceMaterial == 0
+        #define faceishadow
+        //endex
+        //ifex _EnableSpecular == 0
+        #define use_specular
+        //endex 
+        //ifex _EnableStocking == 0
+        #define use_stocking
+        //endex
+        //ifex _EnableRimLight == 0
+        #define use_rimlight
+        //endex
+        //ifex _EnableEmission == 0
+        #define use_emission
+        //endex
+        //ifex _CausToggle == 0
+        #define use_caustic
+        //endex
+        //ifex _EnableHueShift == 0
+        #define can_shift
+        //endex
+        //ifex _DissoveONM == 0
+        #define can_dissolve
+        //endex
+        //ifex _DebugMode == 0
+        #define debug_mode
+        //endex
 
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
@@ -540,7 +598,7 @@ Shader "HoyoToon/Star Rail/Character"
 
         ENDHLSL
 
-        
+        //ifex _EnableShadow == 0 || _UseSelfShadow == 0
         Pass
         {
             Name "Hair Shadow"
@@ -569,6 +627,7 @@ Shader "HoyoToon/Star Rail/Character"
             #include "Includes/HoyoToonStarRail-program.hlsl"
             ENDHLSL
         }
+        //endex
 
         Pass
         {
@@ -596,6 +655,7 @@ Shader "HoyoToon/Star Rail/Character"
             ENDHLSL
         }
 
+        //ifex _EnableStencil == 0
         Pass
         {
             Name "EyeStencilPass"
@@ -625,6 +685,8 @@ Shader "HoyoToon/Star Rail/Character"
 
             ENDHLSL
         }
+        //endex
+        //ifex _MultiLight == 0
         Pass
         {
             Name "Light Pass"
@@ -642,8 +704,9 @@ Shader "HoyoToon/Star Rail/Character"
 
             #include "Includes/HoyoToonStarRail-program.hlsl"
             ENDHLSL
-        }    
-
+        }  
+        //endex  
+        //ifex _EnableOutline == 0
         Pass
         {
             Name "Outline"
@@ -659,6 +722,7 @@ Shader "HoyoToon/Star Rail/Character"
             #include "Includes/HoyoToonStarRail-program.hlsl"
             ENDHLSL
         }
+        //endex
         
         Pass
         {
@@ -676,6 +740,7 @@ Shader "HoyoToon/Star Rail/Character"
             #include "Includes/HoyoToonStarRail-program.hlsl"
             ENDHLSL
         } 
+        
         // UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
     CustomEditor "HoyoToon.ShaderEditor"
