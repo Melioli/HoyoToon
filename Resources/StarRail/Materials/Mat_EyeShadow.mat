@@ -8,29 +8,20 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Mat_EyeShadow
-  m_Shader: {fileID: 4800000, guid: b196fee0fbabd494c81494f39a8192f4, type: 3}
+  m_Shader: {fileID: 4800000, guid: 9902eb11c589c1e4a9e061822132200f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _BACKFDCEUV2_ON
-  - _DISSOLVEPOSMASKGLOBALONM_ON
-  - _DISSOLVEPOSMASKONM_ON
-  - _DISSOLVEPOSMASKWORLDONM_ON
-  - _ENABLECOLORHUE_ON
-  - _ENABLEEMISSIONHUE_ON
-  - _ENABLEFOVWIDTH_ON
-  - _ENABLEOUTLINEHUE_ON
-  - _ENABLEOUTLINE_ON
-  - _ENABLERIMHUE_ON
-  - _EYESHADOWMAT_ON
-  - _FILTERLIGHT_ON
-  - _USEHAIRSIDEFADE_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2015
-  stringTagMap: {}
+  stringTagMap:
+    AllLockedGUIDS: beab67085595b4749a6c0b6be5d20418
+    OriginalShader: HoyoToon/Star Rail/Character
+    OriginalShaderGUID: b196fee0fbabd494c81494f39a8192f4
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -200,16 +191,22 @@ Material:
     - _EmissionIntensity: 1
     - _EmissionMaskSource: 0
     - _EmissionThreshold: 0.5
+    - _EmissionToggle: 0
     - _EnableAlphaCutoff: 0
     - _EnableBackRimLight: 1
     - _EnableColorHue: 1
     - _EnableEmission: 0
     - _EnableEmissionHue: 1
     - _EnableFOVWidth: 1
-    - _EnableOutline: 1
+    - _EnableHueShift: 0
+    - _EnableOutline: 0
     - _EnableOutlineHue: 1
     - _EnableRimHue: 1
+    - _EnableRimLight: 0
+    - _EnableShadow: 0
+    - _EnableSpecular: 0
     - _EnableSplit: 0
+    - _EnableStencil: 1
     - _EnableStocking: 0
     - _EnvironmentLightingStrength: 1
     - _ExCheekIntensity: 0
@@ -236,6 +233,7 @@ Material:
     - _InvertGradient: 0
     - _IsTransparent: 0
     - _LiquidOpaqueness: 1
+    - _MultiLight: 1
     - _NoseLinePower: 1
     - _Opaqueness: 0.1
     - _OutlineFixFront: 0.05
@@ -314,6 +312,10 @@ Material:
     - _RimWidth: 1
     - _Rimintensity: 1
     - _SecondaryFade: 0
+    - _SelfShadowDarken: 0
+    - _SelfShadowDepthOffset: 0
+    - _SelfShadowSampleOffset: 0
+    - _ShaderOptimizerEnabled: 1
     - _ShadowRamp: 1
     - _ShiftColorSpeed: 0
     - _ShiftEmissionSpeed: 0
@@ -360,11 +362,13 @@ Material:
     - _Stockpower1: 1
     - _Stockthickness: 0
     - _SurfaceLighted: 3
+    - _UseDifAlphaStencil: 2
     - _UseGlass: 0
     - _UseHairSideFade: 1
     - _UseHueMask: 0
     - _UseMaterialValuesLUT: 0
     - _UseSecondaryTex: 0
+    - _UseSelfShadow: 0
     - _UseWorldPosDissolve: 0
     - _WobbleX: 0
     - _WobbleZ: 0
@@ -402,6 +406,7 @@ Material:
     - m_end_renderingOptions: 0
     - m_end_rimhue: 0
     - m_end_secondarymain: 0
+    - m_end_selfshadow: 0
     - m_end_specialeffects: 0
     - m_end_specialeffectsemission: 0
     - m_end_specular: 0
@@ -409,10 +414,11 @@ Material:
     - m_end_specularintensity: 0
     - m_end_specularroughness: 0
     - m_end_specularshininess: 0
+    - m_end_stencilalpha: 0
     - m_end_stencilfade: 0
     - m_end_stockings: 0
     - m_end_weapondissolve: 0
-    - m_start_caustic: 0
+    - m_start_caustic: 1
     - m_start_colorhue: 0
     - m_start_debugOptions: 0
     - m_start_disoutline: 0
@@ -425,9 +431,9 @@ Material:
     - m_start_glowhue: 0
     - m_start_hair: 0
     - m_start_hueshift: 0
-    - m_start_lightandshadow: 1
+    - m_start_lightandshadow: 0
     - m_start_lighting: 1
-    - m_start_lightingrim: 1
+    - m_start_lightingrim: 0
     - m_start_lightingrimcolor: 0
     - m_start_lightingrimdark: 0
     - m_start_lightingrimsoftness: 0
@@ -439,23 +445,27 @@ Material:
     - m_start_outlinecolor: 0
     - m_start_outlinehue: 0
     - m_start_outlinelip: 0
-    - m_start_outlines: 1
+    - m_start_outlines: 0
     - m_start_renderingOptions: 0
     - m_start_rimhue: 0
     - m_start_secondarymain: 1
-    - m_start_specialeffects: 0
+    - m_start_selfshadow: 0
+    - m_start_specialeffects: 1
     - m_start_specialeffectsemission: 0
     - m_start_specular: 0
     - m_start_specularcolor: 1
     - m_start_specularintensity: 0
     - m_start_specularroughness: 1
     - m_start_specularshininess: 1
-    - m_start_stencilfade: 0
+    - m_start_stencilalpha: 1
+    - m_start_stencilfade: 1
     - m_start_stockings: 0
     - m_start_weapondissolve: 0
     - shader_is_using_HoyoToon_editor: 69
     - shader_is_using_hoyeditor: 0
+    - shader_master_bg: 0
     - shader_master_label: 0
+    - shader_master_logo: 0
     - variant_selector: 2
     m_Colors:
     - _BackColor: {r: 1, g: 1, b: 1, a: 1}
