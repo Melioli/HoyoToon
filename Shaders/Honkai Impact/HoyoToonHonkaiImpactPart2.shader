@@ -26,6 +26,9 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             //Material Type End
             // face and eyes should use Base Stencil, Hair includes the stencil by default
 
+        
+        [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
+
         [HideInInspector] m_start_main ("Main", Float) = 0
             _MainTex ("Diffuse Texture", 2D) = "white" {}
             _LightMapTex ("Light Map Tex", 2D) = "gray" { } // (R X-ray Mask, G Shadow Threshold, B Specular Shininess, A NoUsed)
@@ -37,17 +40,26 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 _VertexAlphaFactor ("Alpha From Vertex Factor", Range(0,1)) = 0 // (0: off)
                 _CutOff ("Alpha Test Factor", Range(0,1)) = 0.5
             [HideInInspector] m_end_alpha ("", Float) = 0
+            [HideInInspector] m_start_directions("Facing Directions", Float) = 0
+                _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
+                _headRightVector ("Right Vector | XYZ", Vector) = (-1, 0, 0, 0)
+                _headUpVector ("Up Vector || XYZ", Vector) = (0, 1, 0, 0)
+            [HideInInspector] m_end_directions ("", Float) = 0
         [HideInInspector] m_end_main ("", Float) = 0
         
-        [HideInInspector] m_start_bump("Normal Map", Float) = 0
+        //ifex _UseBump ==  0
+        [HideInInspector] m_start_bump("Normal Map--{reference_property:_UseBump}", Float) = 0
+            [Toggle] _UseBump ("Enable Normal Mapping", Float) = 0
             _BumpMap ("Normal Map", 2D) = "bump" { } // (RGB - Normal)
             _BumpScale ("Normal Scale", Range(0, 5)) = 1
         [HideInInspector] m_end_bump("Normal Map", Float) = 0
+        //endex
 
+        //ifex variant_selector!=1
         [HideInInspector] m_start_faceshading("Face Shading--{condition_show:{type:PROPERTY_BOOL,data:variant_selector==1.0}}", Float) = 0.0
-            [HideInInspector] m_start_faceshadow ("Face Shadow", Float) = 0
+            [HideInInspector] m_start_faceshadow ("Face Shadow--{reference_property:_EnableFaceMap}", Float) = 0
+                [Toggle] _EnableFaceMap ("Use Face Map", Float) = 0
                 _FaceMapTex ("Face Map Texture", 2D) = "gray" { } // (A)
-            [HideInInspector] [Toggle]_EnableFaceMap ("Use Face Map", Float) = 0
             [HideInInspector] m_end_faceshadow("", Float) = 0
             [HideInInspector] m_start_faceexp("Face Expression", Float) = 0
                 _FaceExpTex ("Face Expression Texture", 2D) = "white" { }
@@ -66,16 +78,16 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                     _ExpShadowIntensityA ("Expression Shadow Intensity(A)", Range(0, 1)) = 0
                 [HideInInspector] m_end_expint("", Float) = 0
             [HideInInspector] m_end_faceexp("", Float) = 0 
-            [HideInInspector] m_start_directions("Facing Directions", Float) = 0
-                _headForwardVector ("Forward Vector | XYZ", Vector) = (0, 0, 1, 0)
-                _headRightVector ("Right Vector | XYZ", Vector) = (-1, 0, 0, 0)
-                _headUpVector ("Up Vector || XYZ", Vector) = (0, 1, 0, 0)
-            [HideInInspector] m_end_directions ("", Float) = 0
+            
         [HideInInspector] m_end_faceshading(" ", Float) = 0
+        //endex
 
         [HideInInspector] m_start_lighting("Lighting Options", Float) = 0
+            [Toggle] _MultiLight ("Enable Multiple Lights Support", Float) =0
             [Toggle] _FilterLight ("Limit Spot/Point Light Intensity", Float) = 1    
-            [HideInInspector] m_start_shadow ("Shadow", Float) = 0.0   
+            //ifex _EnableShadow == 0
+            [HideInInspector] m_start_shadow ("Shadow--{reference_property:_EnableShadow}", Float) = 0.0   
+                [Toggle] _EnableShadow ("Enable Shadow", Float) = 1
                 _RampTex ("Diffuse Ramp Texture", 2D) = "white" { }
                 _RampTexV ("Diffuse Ramp Y Coordinate", Range(0, 1)) = 1
                 _DiffuseOffset ("Shadow Offset", Range(-1, 1)) = 0
@@ -102,10 +114,12 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 [HideInInspector] m_end_hair_shadow("", Float) = 0
                 [HideInInspector] _SecondShadow ("Second Shadow Threshold", Range(0, 1)) = 0.51
             [HideInInspector] m_end_shadow ("Shadow", Float) = 0.0  
+            //endex
         [HideInInspector] m_end_lighting("", Float) = 0
 
         [HideInInspector] m_start_reflections("Reflections", Float) = 0
-            [HideInInspector] m_start_metallics("Metallics", Int) = 0
+            //ifex _MTMapRampTexUsed == 0
+            [HideInInspector] m_start_metallics("Metallics--{reference_property:_MTMapRampTexUsed}", Int) = 0
                 [Toggle]_MTMapRampTexUsed ("Enable", Float) = 0
                 _MTMap ("Metal Map Texture--{condition_show:{type:PROPERTY_BOOL,data:_MTMapRampTexUsed==1.0}}", 2D) = "white" { }
                 _MTMapTileScale ("Metal Map Tile Scale--{condition_show:{type:PROPERTY_BOOL,data:_MTMapRampTexUsed==1.0}}", Float) = 1
@@ -120,8 +134,10 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                     _MTSpecularColor ("Metal Specular Color", Color) = (1,1,1,1)
                 [HideInInspector] m_end_metallicscolor ("", Int) = 0
             [HideInInspector] m_end_metallics("", Int) = 0
-
-            [HideInInspector] m_start_specular("Specular Reflections", Int) = 0
+            //endex
+            //ifex _EnableSpecular == 0
+            [HideInInspector] m_start_specular("Specular Reflections--{reference_property:_EnableSpecular}", Int) = 0
+                [Toggle] _EnableSpecular ("Enable Specular", Float) = 0
                 [Toggle] _UseSoftSpecular ("Use Soft Specular--{condition_show:{type:PROPERTY_BOOL,data:variant_selector<2.0}}", Float) = 0
                 _Shininess ("Specular Shininess--{condition_show:{type:PROPERTY_BOOL,data:variant_selector<2.0}}", Range(0.1, 100)) = 10
                 _SpecSoftRange ("Specular Soft--{condition_show:{type:PROPERTY_BOOL,data:variant_selector<2.0}}", Range(0, 0.5)) = 0
@@ -133,7 +149,8 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                     _LightSpecColor3 ("Light Specular Color 3--{condition_show:{type:PROPERTY_BOOL,data:_SpecularRampTexUsed==1.0}}", Color) = (1,1,1,1)
                     _LightSpecColor4 ("Light Specular Color 4--{condition_show:{type:PROPERTY_BOOL,data:_SpecularRampTexUsed==1.0}}", Color) = (1,1,1,1)
                     _LightSpecColor5 ("Light Specular Color 5--{condition_show:{type:PROPERTY_BOOL,data:_SpecularRampTexUsed==1.0}}", Color) = (1,1,1,1)
-                [HideInInspector] m_end_specularcolor ("", Float) = 0         
+                [HideInInspector] m_end_specularcolor ("", Float) = 0       
+                //ifex variant_selector !=2.0
                 _SpecularOffset ("Specular Offset--{condition_show:{type:PROPERTY_BOOL,data:variant_selector==2.0}}", Vector) = (0,0,0,1)
                 _SpecularShiftRange ("Specular Shift Range--{condition_show:{type:PROPERTY_BOOL,data:variant_selector==2.0}}", Range(-5, 5)) = 0.1
                 _RampMap ("Hair Ramp Map Texture--{condition_show:{type:PROPERTY_BOOL,data:variant_selector==2.0}}", 2D) = "white" { } // |RG (2D diffuse ramp) BA (2D specular ramp)
@@ -161,9 +178,11 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                     _SpecularHighShininessRangeMin ("Specular High Shininess Range Min", Range(0, 2500)) = 0.1
                     _SpecularHighShininessRangeMax ("Specular High Shininess Range Max", Range(0, 2500)) = 0.1
                 [HideInInspector] m_end_HighGrp ("High", Float) = 0
+                //endex
             [HideInInspector] m_end_specular("", Int) = 0
-
-            [HideInInspector] m_start_rimglow("Rim Glow", Float) = 0
+            //endex
+            //ifex _EnableRimGlow == 0
+            [HideInInspector] m_start_rimglow("Rim Glow--{reference_property:_EnableRimGlow}", Float) = 0
                 [Toggle] _EnableRimGlow ("Enable Rim Glow", Float) = 0
                 _RGPower ("Rim Glow Power--{condition_show:{type:PROPERTY_BOOL,data:_EnableRimGlow==1.0}}", Range(0.001, 100)) = 1
                 _RGSoftRange ("Rim Glow Soft Range--{condition_show:{type:PROPERTY_BOOL,data:_EnableRimGlow==1.0}}", Range(0, 1)) = 0.1
@@ -176,11 +195,13 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                         _RGColor4 ("Rim Glow Color 4--{condition_show:{type:PROPERTY_BOOL,data:_RGRampTexUsed==1.0}}", Color) = (1,1,1,1)
                         _RGColor5 ("Rim Glow Color 5--{condition_show:{type:PROPERTY_BOOL,data:_EnableRimGlow==1.0}}", Color) = (1,1,1,1)
                     [HideInInspector] m_end_rimcolor("", Float) = 0
-                [HideInInspector] m_end_rimglow("", Float) = 0
-
+            [HideInInspector] m_end_rimglow("", Float) = 0
+            //endex
         [HideInInspector] m_end_reflections ("", Float) = 0
 
-        [HideInInspector] m_start_outlines("Outlines", Float) = 0
+        //ifex _EnableOutline == 0
+        [HideInInspector] m_start_outlines("Outlines--{reference_property:_EnableOutline}", Float) = 0
+            [Toggle] _EnableOutline ("Enable Outlines", Float) = 1
             _OutlineWidth ("Outline Width", Range(0, 100)) = 0.04
             _Scale ("Outline Scale", Range(0, 100)) = 0.04
             _GlobalOutlineScale("Global Outline Scale", Vector) = (1,1,1,0)
@@ -196,10 +217,11 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 _OutlineColor5 ("Outline Color 5--{condition_show:{type:PROPERTY_BOOL,data:_More_Outline_Color==1.0}}", Color) = (0,0,0,1)
             [HideInInspector] m_end_outline_color("", Float) = 0 
         [HideInInspector] m_end_outlinescolor ("", Float) = 0
-
+        //endex
         [HideInInspector] m_start_specialeffects("Special Effects", Float) = 0
-
-            [HideInInspector] m_start_xray("Stencil/X-Ray", Float) = 0
+            //ifex _EnableStencil == 0.0
+            [HideInInspector] m_start_xray("Stencil--{reference_property:_EnableStencil}", Float) = 0
+                [Toggle] _EnableStencil ("Enable Stencil", float)  = 0
                 _HairBlendSilhouette ("Hair Blend Silhouette", Range(0, 1)) = 0.5
                 [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
                 [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
@@ -207,9 +229,15 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
                 [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
             [HideInInspector] m_end_xray("", Float) = 0
-            
-            [HideInInspector] m_start_emissionglow("Emission", Float) = 0
-                [Enum(Off, 0, On, 1)]_Emission_Type ("Emission", Float) = 0
+            //endex
+            //ifex _Emission_Type == 0
+            [HideInInspector] m_start_emissionglow("Emission--{reference_property:_hiddenemission}", Float) = 0
+                [HideInInspector] [Toggle] _hiddenemission ("stop looking at this--{on_value_actions:[
+                {value:0,actions:[{type:SET_PROPERTY,data:_Emission_Type=0}]},
+                {value:1,actions:[{type:SET_PROPERTY,data:_Emission_Type=1}]}]}", Float) = 0 //this is so stupid
+                [Enum(Off, 0, On, 1)] _Emission_Type ("Emission--{on_value_actions:[
+                {value:0,actions:[{type:SET_PROPERTY,data:_hiddenemission=0}]},
+                {value:1,actions:[{type:SET_PROPERTY,data:_hiddenemission=1}]}]}", Float) = 0
                 _EmissionStrength ("Emission Strength", Range(0, 100)) = 1
                 [Toggle]_MulAlbedo ("Multiply Emission by Diffuse", Float) = 0
                 [Toggle]_UseMainTexAsEmission ("Use Diffuse Alpha as Emission Mask", Float) = 0
@@ -222,134 +250,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                     _EmissionColor5 ("Emission Color 5--{condition_show:{type:PROPERTY_BOOL,data:_EmissionRampTexUsed==1.0}}", Color) = (0,0,0,1)
                 [HideInInspector] m_end_emission_color("", Float) = 0 
             [HideInInspector] m_end_emissionglow ("", Float) = 0
-
-            // [HideInInspector] m_start_vfxgeneral("VFX General", Float) = 0
-            //     [Toggle] _IsVFX ("Enable VFX Settings", Float) = 0
-            //     _EmissionScaler ("Emission Scaler", Range(0, 50)) = 0
-            //     [PowerSlider(3.0)] _Saturation ("Saturation", Range(0, 10)) = 1
-            //     [PowerSlider(3.0)] _Contrast ("Contrast", Range(0, 10)) = 1
-            //     [Toggle] _UseCustomData ("Use Custom Data", Float) = 1
-            //     _DiffuseTex1 ("Diffuse Tex1", 2D) = "white" { }
-            //     _DiffAngle1 ("Diffuse Angle", Range(0, 360)) = 0
-            //     _DiffAngleSpeed1 ("Diffuse Angle Speed", Float) = 0
-            //     _USpeed1 ("Diffuse Tex1 U Speed(Custom1.x)", Float) = 0
-            //     _VSpeed1 ("Diffuse Tex1 V Speed(Custom1.y)", Float) = 0
-            //     [Toggle] _UseScreenUV ("Use ScreenUV", Float) = 0
-            //     [HideInInspector] m_start_parallaxgrp("Parallax", Float) = 0
-            //         [Toggle]_Parallax_ON ("Parallax", Float) = 0
-            //         _HeightFactor ("Height Factor", Float) = 0
-            //     [HideInInspector] m_end_parallaxgrp("", Float) = 0
-            //     [HideInInspector] m_start_diffusetwo("Secondary Diffuse", Float) = 0
-            //         [Toggle]_DifTex2_ON ("Diffuse 2", Float) = 0
-            //         _DiffuseTex2 ("Diffuse Tex2", 2D) = "white" { }
-            //         _DiffAngle2 ("Diffuse2 Angle", Range(0, 360)) = 0
-            //         _DiffAngleSpeed2 ("Diffuse2 Angle Speed", Float) = 0
-            //         _USpeed2 ("Diffuse Tex2 U Speed", Float) = 0
-            //         _VSpeed2 ("Diffuse Tex2 V Speed", Float) = 0
-            //         [Toggle] _UseRGBTint ("Use RGB Tint", Float) = 0
-            //         _Diffuse2TintColorR ("Diff2 TintColor R", Color) = (1,1,1,1)
-            //         _Diffuse2TintColorG ("Diff2 TintColor G", Color) = (1,1,1,1)
-            //         _Diffuse2TintColorB ("Diff2 TintColor B", Color) = (1,1,1,1)
-            //     [HideInInspector] m_end_diffusetwo("", Float) = 0
-            //     [HideInInspector] m_start_dissolve ("Dissolve", Float) = 0
-            //         [Toggle]_Dissolve_ON ("Dissolve", Float) = 0
-            //         _DissolveTex ("Dissolve Tex", 2D) = "white" { }
-            //         _DissolveMask ("Dissolve Mask", 2D) = "white" { }
-            //         _DissolveMaskAngle ("Dissolve Mask Angle", Range(0, 360)) = 0
-            //         _DissolveMaskAngleSpeed ("Dissolve Mask Angle Speed", Float) = 0
-            //         _DissMaskIntensity ("Dissolve Mask Intensity", Range(0, 1)) = 0
-            //         [Toggle] _UseUV2 ("Use UV2", Float) = 0
-            //         _DissAngle ("Dissolve Angle", Range(0, 360)) = 0
-            //         _DissAngleSpeed ("Dissolve Angle Speed", Float) = 0
-            //         _DissUSpeed ("_Diss U Speed", Float) = 0
-            //         _DissVSpeed ("_Diss V Speed", Float) = 0
-            //         _DissolveRange ("Dissolve Range(Custom2.x)", Float) = 0
-            //         _Smooth ("Smooth Intensity(Custom2.y)", Range(0, 1)) = 0
-            //         _DissEdge ("Dissolve Edge Range", Range(-1, 1)) = 0
-            //         _DissEdgeIntensity ("Dissolve Edge Intensity", Float) = 3
-            //         _DissEdgeColor ("Dissolve Edge Color", Color) = (1,1,1,1)
-            //         [Enum(Add, 0, AlphaBlend, 1, Tint, 2)] _DissBlendType ("Dissolve Blend Type", Float) = 0
-            //     [HideInInspector] m_end_dissolve ("", Float) = 0
-            //     [HideInInspector] m_start_masking ("Masking", Float) = 0
-            //         [Toggle]_MaskTex_ON ("Mask Texture", Float) = 0
-            //         _MaskTex ("Mask Tex", 2D) = "black" { }
-            //         _MaskAngle ("Mask Angle", Range(0, 360)) = 0
-            //         _MaskAngleSpeed ("Mask Angle Speed", Float) = 0
-            //         [Toggle] _UseAChannel ("Use A Channel", Float) = 0
-            //         _MaskIntensity ("Mask Intensity", Range(0, 1)) = 0
-            //         _MaskUSpeed ("Mask U Speed(Custom1.z)", Float) = 0
-            //         _MaskVSpeed ("Mask V Speed(Custom1.w)", Float) = 0
-            //     [HideInInspector] m_end_masking ("", Float) = 0
-            //     [HideInInspector] m_start_noisegroup("Noise Group", Float) = 0
-            //         [Toggle] _NoiseTex_ON ("Noise Texture", Float) = 0
-            //         _NoiseEffectDiffuse1 ("Effect Diffuse1", Float) = 1
-            //         _NoiseEffectDiffuse2 ("Effect Diffuse2", Float) = 1
-            //         _NoiseEffectDissolve ("Effect Dissolve", Float) = 1
-            //         _NoiseTex ("Noise Tex", 2D) = "white" { }
-            //         _NoiseUSpeed ("Noise U Speed", Float) = 0
-            //         _NoiseVSpeed ("Noise V Speed", Float) = 0
-            //         _NoiseIntensity ("Noise Intensity(Custom2.z)", Float) = 0
-            //         _NoiseAffectChannle ("Noise Affect Channle(XY)", Vector) = (1,1,0,0)
-            //         [Toggle] _UseUVMask ("Use UV Mask", Float) = 0
-            //         _MaskLevel ("Mask Level", Float) = 1
-            //         _NoiseMaskRotation ("Noise Mask Rotation", Range(0, 360)) = 0
-            //         _NoiseOffset ("Noise Offset", Float) = 0
-            //     [HideInInspector] m_end_noisegroup("", Float) = 0
-            //     [HideInInspector] m_start_vtxoffset("Vertex Offset", Float) = 0
-            //         [Toggle]_VertexOffset_ON ("Vertex Offset", Float) = 0
-            //         _VertexOffsetTex ("VertexOffset Tex", 2D) = "white" { }
-            //         _OffsetUSpeed ("Offset U Speed", Float) = 0
-            //         _OffsetVSpeed ("Offset V Speed", Float) = 0
-            //         [Toggle] _UseOffsetMask ("Use OffsetMask", Float) = 0
-            //         _OffsetMaskTex ("VertexOffset MaskTex", 2D) = "white" { }
-            //         [Toggle] _UseMaxOffset ("Limit Max Offset", Float) = 0
-            //         _OffsetDir ("Offset Direction(XYZ), Max Offset(W)", Vector) = (0,0,1,1)
-            //         _OffsetIntensity ("VertexOffset Intensity(Custom2.w)", Float) = 0
-            //     [HideInInspector] m_end_vtxoffset("", Float) = 0
-            //     [HideInInspector] m_start_depthbias ("Depth Bias", Float) = 0
-            //         [Toggle] _EnableDepthBias ("EnableDepthBias", Float) = 0
-            //         _ZDepthBias ("ZDepthBias--{condition_show:{type:PROPERTY_BOOL,data:_EnableDepthBias==1.0}}", Float) = 0
-            //     [HideInInspector] m_end_depthbias ("", Float) = 0
-            //     [HideInInspector] m_start_clip("Clipping", Float) = 0
-            //         [Toggle] _Clip ("Clip Alpha", Float) = 0
-            //         _ClipA ("Clip--{condition_show:{type:PROPERTY_BOOL,data:_Clip==1.0}}", Range(0, 1)) = 0
-            //     [HideInInspector] m_end_clip("", float) = 0
-            //     [HideInInspector] m_start_screen_effect("Screen Effect", Float) = 0
-            //         [Toggle] _UseScreenVertex ("Use Screen Vertex", Float) = 0
-            //         _ScreenScale ("Screen Scale--{condition_show:{type:PROPERTY_BOOL,data:_UseScreenVertex==1.0}}", Vector) = (1,1,1,1)
-            //     [HideInInspector] m_end_screen_effect("", float) = 0
-            //     [HideInInspector] m_start_fresnel("Fresnel", Float) = 0
-            //         [Toggle] _UseFresnel ("Fresnel On", Float) = 0
-            //         _FresnelParams ("Fresnel Parameters--{condition_show:{type:PROPERTY_BOOL,data:_UseFresnel==1.0}}", Vector) = (1,1,0,1)
-            //         _FresnelColor ("Fresnel Color--{condition_show:{type:PROPERTY_BOOL,data:_UseFresnel==1.0}}", Color) = (1,1,1,1)
-            //         _Inverse ("Inverse--{condition_show:{type:PROPERTY_BOOL,data:_UseFresnel==1.0}}", Float) = 0
-            //         _UseFresnelAbs ("Use Fresnel Abs--{condition_show:{type:PROPERTY_BOOL,data:_UseFresnel==1.0}}", Float) = 0
-            //         [Enum(RGB, 0, A, 1)] _FresnelChannel ("Fresnel Channel--{condition_show:{type:PROPERTY_BOOL,data:_UseFresnel==1.0}}", Float) = 0
-            //     [HideInInspector] m_end_fresnel("", float) = 0
-            //     [HideInInspector] m_start_depth("Depth", Float) = 0
-            //         [Toggle] _UseDepth ("Depth On", Float) = 0
-            //         [Enum(Transparent, 0, AlphaBlend, 1)] _DepthBlendType ("Depth Blend Type--{condition_show:{type:PROPERTY_BOOL,data:_UseDepth==1.0}}", Float) = 0
-            //         _DepthCt ("DepthCt--{condition_show:{type:PROPERTY_BOOL,data:_UseDepth==1.0}}", Range(0, 5)) = 0.5
-            //         _EdgeLight ("EdgeLight Color--{condition_show:{type:PROPERTY_BOOL,data:_UseDepth==1.0}}", Color) = (1,1,1,1)
-            //         _EdgeBrightness ("EdgeLight Brightness--{condition_show:{type:PROPERTY_BOOL,data:_UseDepth==1.0}}", Float) = 1
-            //         _EdgeContrast ("EdgeLight Contrast--{condition_show:{type:PROPERTY_BOOL,data:_UseDepth==1.0}}", Float) = 1
-            //         [Toggle] _EdgeEffectCol ("EdgeLight Effect Color--{condition_show:{type:PROPERTY_BOOL,data:_UseDepth==1.0}}", Float) = 0
-            //     [HideInInspector] m_end_depth("", float) = 0
-            //     [HideInInspector] m_start_vfxnormal("Normal Map", Float) = 0
-            //         [Toggle] _EnableNormalTex ("Enable Normal Tex", Float) = 0
-            //         _Normalmap ("Normal map--{condition_show:{type:PROPERTY_BOOL,data:_EnableNormalTex==1.0}}", 2D) = "bump" { }
-            //         _NormalIntensity ("Normal Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableNormalTex==1.0}}", Float) = 1
-            //     [HideInInspector] m_end_vfxnormal("", float) = 0
-            //     [HideInInspector] m_start_locallight ("LocalLight", Float) = 0
-            //         _EnableLocalLight ("Enable LocalLight", Float) = 0
-            //         _MainIntensity ("Main Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableLocalLight==1.0}}", Float) = 1
-            //         _MainSmoothness ("Main Smoothness--{condition_show:{type:PROPERTY_BOOL,data:_EnableLocalLight==1.0}}", Float) = 0.5
-            //         [Toggle] _UseLocalLightTint ("Use Tint Color--{condition_show:{type:PROPERTY_BOOL,data:_EnableLocalLight==1.0}}", Float) = 0
-            //         _LocalLightTint ("LocalLight TintColor--{condition_show:{type:PROPERTY_BOOL,data:_EnableLocalLight==1.0}}", Color) = (1,1,1,1)
-            //         _RampIntensity ("Ramp Intensity--{condition_show:{type:PROPERTY_BOOL,data:_EnableLocalLight==1.0}}", Float) = 1
-            //         _RampSmoothness ("Ramp Smoothness--{condition_show:{type:PROPERTY_BOOL,data:_EnableLocalLight==1.0}}", Float) = 1
-            //     [HideInInspector] m_end_locallight ("", Float) = 0
-            // [HideInInspector] m_end_vfxgeneral("", Float) = 0
+            //endex
 
         [HideInInspector] m_end_specialeffects ("", Float) = 0
 
@@ -362,8 +263,9 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             _OffsetRate ("Offset Rate", Range(-1,1)) = 0
             _OffsetUnits ("Offset Units", Range(-1,1)) = 0
 
+            //ifex _DebugMode == 0
             // Debug Options
-            [HideInInspector] m_start_debugOptions("Debug", Float) = 0
+            [HideInInspector] m_start_debugOptions("Debug--{reference_property:_DebugMode}", Float) = 0
                 [Toggle] _DebugMode ("Enable Debug Mode", float) = 0
                 [Enum(Off, 0, RGB, 1, A, 2)] _DebugDiffuse("Diffuse Debug Mode", Float) = 0
                 [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugLightMap ("Light Map Debug Mode", Float) = 0
@@ -381,6 +283,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
                 [Enum(Off, 0, On, 1)] _DebugLights ("Lights Debug Mode", Float) = 0
                 [HoyoToonWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, All(Color Coded), 6)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0
             [HideInInspector] m_end_debugOptions("Debug", Float) = 0
+            //endex
         
         [HideInInspector] m_end_renderingOptions("Rendering Options", Float) = 0
     }
@@ -388,6 +291,30 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
     {
         Tags{ "RenderType"="Opaque" "Queue"="Geometry" }
         HLSLINCLUDE
+
+        // material macros
+        //ifex _EnableShadow == 0
+        #define use_shadow
+        //endex
+        //ifex _EnableSpecular == 0
+        #define use_specular
+        //endex
+        //ifex variant_selector!=1
+        #define faceishadow
+        //endex
+        //ifex variant_selector!=2
+        #define is_hair
+        //endex
+        //ifex _MTMapRampTexUsed == 0
+        #define use_metal
+        //endex
+        //ifex _EnableRimGlow == 0
+        #define use_rimglow
+        //endex
+        //ifex _Emission_Type == 0
+        #define use_emission
+        //endex
+
         #include "UnityCG.cginc"
         #include "UnityPBSLighting.cginc"
         #include "UnityShaderVariables.cginc"
@@ -395,270 +322,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
         #include "UnityLightingCommon.cginc"
         #include "Lighting.cginc"
         // ==================================================== //
-        float variant_selector;
-        float _FilterLight;
-        // === textures === //
-        Texture2D _MainTex;
-        SamplerState sampler_MainTex;
-        float4 _MainTex_ST;
-        Texture2D _BumpMap;
-        Texture2D _NormalMap;
-        SamplerState sampler_BumpMap;
-        Texture2D _LightMapTex;
-        SamplerState sampler_LightMapTex;
-        Texture2D _FaceMapTex;
-        SamplerState sampler_FaceMapTex;
-        Texture2D _RampTex;
-        SamplerState sampler_RampTex;
-        Texture2D _MTMap;
-        SamplerState sampler_MTMap;
-        Texture2D _SpecularMaskMap;
-        SamplerState sampler_SpecularMaskMap;
-        Texture2D _RampMap;
-        // SamplerState sampler_RampMap;
-        Texture2D _JitterMap;
-        float4 _JitterMap_ST;
-        Texture2D _HairStripPatternsTex;
-        float4 _HairStripPatternsTex_ST;
-        SamplerState sampler_JitterMap;
-        // Texture2D _DiffuseTex1;
-        // SamplerState sampler_DiffuseTex1;
-        // Texture2D _DiffuseTex2;
-        // Texture2D _DissolveTex;
-        // Texture2D _DissolveMask;
-        // Texture2D _MaskTex;
-        // Texture2D _NoiseTex;
-        // Texture2D _VertexOffsetTex;
-        Texture2D _FaceExpTex;
-        SamplerState sampler_FaceExpTex;
-        float4 _FaceExpTex_ST;
-        
-        // === diffuse === //
-        float4 _Color;
-        float4 _BackFaceColor;
-        float _UseVFaceSwitch2UV;
-        float _CutOff;
-        float _Opaqueness;
-        // === normal map === //
-        float _BumpScale;
-        // === shadow === //
-        float _EnableFaceMap;
-        float _HairShadowWidthX;
-        float _HairShadowWidthY;
-        float _ShadowRampTexUsed;
-        float4 _ShadowMultColor;
-        float4 _ShadowMultColor2;
-        float4 _ShadowMultColor3;
-        float4 _ShadowMultColor4;
-        float4 _ShadowMultColor5;
-        float4 _FirstShadowMultColor;
-        float4 _SecondShadowMultColor;
-        float _EnableBlack;
-        float _ShadowContrast;
-        float _SecondShadow;
-        float _DiffuseOffset;
-        float _ToneSoft;
-        float _SceneShadowSoft;
-        float _NormalBias;
-        float _DepthBias;
-        float _PowOfNormalBias;
-        float _RampTexV;
-        float _AmbientLerpValue;
-        float _LightArea;
-        float4 _headForwardVector;
-        float4 _headRightVector;
-        float4 _headUpVector;
-        // === specular (non-hair) === //
-        float _UseSoftSpecular;
-        float _SpecularRampTexUsed;
-        float4 _LightSpecColor;
-        float4 _LightSpecColor2;
-        float4 _LightSpecColor3;
-        float4 _LightSpecColor4;
-        float4 _LightSpecColor5;
-        float _Shininess;
-        float _SpecSoftRange;
-        float _SpecMulti;
-        // === specular (hair) === //
-        float _SpecularMaskLerp;
-        float4 _SpecularOffset;
-        float _SpecularLowJitterRangeMin;
-        float _SpecularLowJitterRangeMax;
-        float _SpecularLowShininessRangeMin;
-        float _SpecularLowShininessRangeMax;
-        float _SpecularLowShift;
-        float4 _SpecularLowColor;
-        float _SpecularLowIntensity;
-        float _SpecularHighJitterRangeMin;
-        float _SpecularHighJitterRangeMax;
-        float _SpecularHighShininessRangeMin;
-        float _SpecularHighShininessRangeMax;
-        float _SpecularHighShift;
-        float4 _SpecularHighColor;
-        float _SpecularHighIntensity;
-        float _SpecularFresnelIntensity;
-        float _SpecularShiftRange;
-        // === metalic === //
-        float _MTMapRampTexUsed;
-        float _MTMapThreshold;
-        float _MTMapBrightness;
-        float _MTMapTileScale;
-        float4 _MTMapLightColor;
-        float4 _MTMapDarkColor;
-        float4 _MTShadowMultiColor;
-        float _MTShininess;
-        float _MTSpecularAttenInShadow;
-        float4 _MTSpecularColor;
-        // === emission === //
-        float _Emission_Type;
-        float _EmissionRampTexUsed;
-        float4 _EmissionColor;
-        float4 _EmissionColor2;
-        float4 _EmissionColor3;
-        float4 _EmissionColor4;
-        float4 _EmissionColor5;
-        float _EmissionStrength;
-        float _MulAlbedo;
-        float _UseMainTexAsEmission;
-        // === rim glow === //
-        float _EnableRimGlow;
-        float4 _RGColor;
-        float _RGRampTexUsed;
-        float4 _RGColor2;
-        float4 _RGColor3;
-        float4 _RGColor4;
-        float4 _RGColor5;
-        float _RGPower;
-        float _RGSoftRange;
-        float _RimGlowStrength;
-        // === outline === //
-        float _OutlinebyTangent; 
-        float _OutlineWidth;
-        float _Scale;
-        float4 _GlobalOutlineScale;
-        float _More_Outline_Color;
-        float4 _OutlineColor;
-        float4 _OutlineColor2;
-        float4 _OutlineColor3;
-        float4 _OutlineColor4;
-        float4 _OutlineColor5;
-        // === stencil === //
-        float _HairBlendSilhouette;
-        // ===  face expression === //
-        float4 _ExpBlushColorR;
-        float4 _ExpShadowColorG;
-        float4 _ExpShadowColorB;
-        float4 _ExpShadowColorA;
-        float _ExpBlushIntensityR;
-        float _ExpShadowIntensityG;
-        float _ExpShadowIntensityB;
-        float _ExpShadowIntensityA;
-        float _ExpOutlineToggle;
-        float _ExpOutlineFix;
-        // === vfx shit === //
-        float _IsVFX;
-        // float _EmissionScaler;
-        // float _Saturation;
-        // float _Contrast;
-        // float _UseCustomData;
-        // float _DiffAngle1;
-        // float _DiffAngleSpeed1;
-        // float _USpeed1;
-        // float _VSpeed1;
-        // float _UseScreenUV;
-        // float _Parallax_ON;
-        // float _HeightFactor;
-        // float _DifTex2_ON;
-        // float _DiffAngle2;
-        // float _DiffAngleSpeed2;
-        // float _USpeed2;
-        // float _VSpeed2;
-        // float _UseRGBTint;
-        // float4 _Diffuse2TintColorR;
-        // float4 _Diffuse2TintColorG;
-        // float4 _Diffuse2TintColorB;
-        // float _Dissolve_ON;
-        // float _DissolveMaskAngle;
-        // float _DissolveMaskAngleSpeed;
-        // float _DissMaskIntensity;
-        // float _UseUV2;
-        // float _DissAngle;
-        // float _DissAngleSpeed;
-        // float _DissUSpeed;
-        // float _DissVSpeed;
-        // float _DissolveRange;
-        // float _Smooth;
-        // float _DissEdge;
-        // float _DissEdgeIntensity;
-        // float4 _DissEdgeColor;
-        // float _DissBlendType;
-        // float _MaskTex_ON;
-        // float _MaskAngle;
-        // float _MaskAngleSpeed;
-        // float _UseAChannel;
-        // float _MaskIntensity;
-        // float _MaskUSpeed;
-        // float _MaskVSpeed;
-        // float _NoiseTex_ON;
-        // float _NoiseEffectDiffuse1;
-        // float _NoiseEffectDiffuse2;
-        // float _NoiseEffectDissolve;
-        // float _NoiseUSpeed;
-        // float _NoiseVSpeed;
-        // float _NoiseIntensity;
-        // float4 _NoiseAffectChannle;
-        // float _UseUVMask;
-        // float _MaskLevel;
-        // float _NoiseMaskRotation;
-        // float _NoiseOffset;
-        // float _VertexOffset_ON;
-        // float _OffsetUSpeed;
-        // float _OffsetVSpeed;
-        // float _UseOffsetMask;
-        // float _OffsetMaskTex;
-        // float _UseMaxOffset;
-        // float4 _OffsetDir;
-        // float _OffsetIntensity;
-        // float _EnableDepthBias;
-        // float _ZDepthBias;
-        // float _Clip;
-        // float _ClipA;
-        // float _UseScreenVertex;
-        // float _ScreenScale;
-        // float _UseFresnel;
-        // float4 _FresnelParams;
-        // float4 _FresnelColor;
-        // float _Inverse;
-        // float _UseFresnelAbs;
-        // float _FresnelChannel;
-        // float _UseDepth;
-        // float _DepthBlendType;
-        // float _DepthCt;
-        // float4 _EdgeLight;
-        // float _EdgeBrightness;
-        // float _EdgeContrast;
-        // float _EdgeEffectCol;
-        // === debug === //
-        float _DebugMode;
-        float _DebugDiffuse;
-        float _DebugLightMap;
-        float _DebugFaceMap;
-        float _DebugExpMap;
-        float _DebugNormalMap;
-        float _DebugVertexColor;
-        float _DebugRimLight;
-        float _DebugNormalVector;
-        float _DebugTangent;
-        float _DebugMetal;
-        float _DebugSpecular;
-        float _DebugEmission;
-        float _DebugFaceVector;
-        float _DebugLights;
-        float _DebugMaterialIDs;
-        // ===  unity globals === //
-        uniform float _GI_Intensity;
-        uniform float4x4 _LightMatrix0;
-        // ==================================================== //
+        #include "Includes/Part2-declarations.hlsl"
         #include "Includes/Part2-inputs.hlsl"
         #include "Includes/Part2-common.hlsl"
         ENDHLSL
@@ -689,6 +353,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             ENDHLSL
         }
 
+        // ifex _MultiLight == 0
         Pass // main pass
         {
             Name "Character Pass"
@@ -714,7 +379,8 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             #include "Includes/Part2-program.hlsl"
             ENDHLSL
         }
-
+        //endex
+        //ifex _EnableStencil == 0
         Pass // stencil xray
         {
             Name "Character Pass X-RAY"
@@ -744,9 +410,10 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             #include "Includes/Part2-program.hlsl"
             ENDHLSL
         }
+        //endex
 
         
-
+        //ifex _EnableStencil == 0 || _MultiLight == 0
         Pass // stencil xray
         {
             Name "Character Pass Light"
@@ -776,8 +443,9 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             #include "Includes/Part2-program.hlsl"
             ENDHLSL
         }
-        
+        //endex
 
+        //ifex _EnableOutline == 0
         Pass // edge pass
         {
             Name "Edge Pass"
@@ -809,6 +477,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             #include "Includes/Part2-program.hlsl"
             ENDHLSL
         }
+        //endex
 
         Pass // depth shadow pass
         {

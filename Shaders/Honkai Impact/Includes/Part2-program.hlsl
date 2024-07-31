@@ -25,8 +25,6 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
 
     UNITY_LIGHT_ATTENUATION(atten, i, i.ws_pos.xyz);
-    
-
     // initialize output color : 
     float4 color = (float4)1.0f;
 
@@ -72,21 +70,23 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     float2 shaded_area = 1.0f; // initialize as 1 since the each variant has its own shadow area calculation
     float3 shadow_color = 1.0f;
 
-    if(variant_selector == 0)
-    {
-        shaded_area = shadow_area_body(lightmap.y, ndotl);
-        shadow_color = shadow_base(shaded_area.x, lightmap.w, lightmap.y);
-    }
-    else if(variant_selector == 1 && _EnableFaceMap)
-    {
-        shaded_area = shadow_area_face(uv, light);
-        shadow_color = shadow_base(shaded_area.x, lightmap.w, lightmap.y);
-    }
-    else if(variant_selector == 2)
-    {
-        shaded_area = shadow_area_hair(lightmap.y, ndotl);
-        shadow_color = shadow_hair(shaded_area, lightmap.y);
-    }
+    #if defined(use_shadow)
+        if(variant_selector == 0)
+        {
+            shaded_area = shadow_area_body(lightmap.y, ndotl);
+            shadow_color = shadow_base(shaded_area.x, lightmap.w, lightmap.y);
+        }
+        else if(variant_selector == 1 && _EnableFaceMap)
+        {
+            shaded_area = shadow_area_face(uv, light);
+            shadow_color = shadow_base(shaded_area.x, lightmap.w, lightmap.y);
+        }
+        else if(variant_selector == 2)
+        {
+            shaded_area = shadow_area_hair(lightmap.y, ndotl);
+            shadow_color = shadow_hair(shaded_area, lightmap.y);
+        }
+    #endif
     #ifdef _IS_PASS_BASE
         // color + alpha bullshit
         color.xyz = color.xyz * diffuse.xyz;
@@ -110,33 +110,49 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         
         if(_MTMapRampTexUsed && metal_area)
         {
-            metal(normal, shaded_area.x, shadow_color, ndoth, lightmap.x, float2(low_range, soft_range.y), color, lightmap.w, specular, shadow);
+            #if defined(use_metal)
+                metal(normal, shaded_area.x, shadow_color, ndoth, lightmap.x, float2(low_range, soft_range.y), color, lightmap.w, specular, shadow);
+            #endif
         }
         else
         {
             if(variant_selector == 2)
             {
-                specular = hair_specular(normal, bitangent, light, view, uv, shaded_area.x);
+                #if defined(use_specular) && defined(is_hair)
+                    specular = hair_specular(normal, bitangent, light, view, uv, shaded_area.x);
+                #endif
             }
             else
             {
+                #if defined(use_specular)
                 specular =  specular_regular(lightmap.w, shaded_area.xy, shadow_color, ndoth, lightmap.xz);
+                #endif
             }
         }
-        shaded_area = shaded_area * -0.2f + 1.2f;
-        shadow = shadow * shaded_area.x;
-        color.xyz = color.xyz * shadow;
+        
+        #if defined(use_shadow)
+            shaded_area = shaded_area * -0.2f + 1.2f;
+            shadow = shadow * shaded_area.x;
+            color.xyz = color.xyz * shadow;
+        #endif
+
         color.xyz = color.xyz * float3(0.891f, 0.919f, 0.942f) + specular;
 
-        if(variant_selector == 1)
-        {
-            color.xyz = face_exp(uv, color);
-        }
+        #if defined(faceishadow)
+            if(variant_selector == 1)
+            {
+                color.xyz = face_exp(uv, color);
+            }
+        #endif
 
         float emission_tex = _UseMainTexAsEmission ? diffuse.w : 1.0f;
-        float3 emissive = emission(lightmap.w, emission_tex, color.xyz);
-
-        emissive = _EnableRimGlow ? rim + emissive : emissive;
+        float3 emissive = (float3)0.0f;
+        #if defined(use_emission)
+            emissive = emission(lightmap.w, emission_tex, color.xyz);
+        #endif
+        #if defined(use_rimglow)
+            if(_EnableRimGlow) emissive = rim + emissive;
+        #endif
         color.xyz = color.xyz + emissive;
 
         float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
@@ -158,6 +174,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             if(_DebugLightMap == 2) return float4(lightmap.yyy, 1.0f);
             if(_DebugLightMap == 3) return float4(lightmap.zzz, 1.0f);
             if(_DebugLightMap == 4) return float4(lightmap.www, 1.0f);
+            #if defined(faceishadow)
             if(_DebugFaceMap == 1) return float4(facemap.xxx, 1.0f);
             if(_DebugFaceMap == 2) return float4(facemap.yyy, 1.0f);
             if(_DebugFaceMap == 3) return float4(facemap.zzz, 1.0f);
@@ -166,6 +183,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             if(_DebugExpMap == 2) return float4(expmap.yyy, 1.0f);
             if(_DebugExpMap == 3) return float4(expmap.zzz, 1.0f);
             if(_DebugExpMap == 4) return float4(expmap.www, 1.0f);
+            #endif
             if(_DebugNormalMap == 1) return float4(bump.xyz, 1.0f);
             if(_DebugVertexColor == 1) return float4(i.color.xxx, 1.0f);
             if(_DebugVertexColor == 2) return float4(i.color.yyy, 1.0f);
@@ -240,30 +258,37 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     #endif
 
     #ifdef is_xray
-        if(variant_selector == 2)
+        if(_EnableStencil)
         {
-            float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
-            float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
-            float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
+            if(variant_selector == 2)
+            {
+                float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
+                float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
+                float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
 
-            float3 view_xz = normalize(view - dot(view, up) * up);
-            float cosxz    = max(0.0f, dot(view_xz, forward));
-            float alpha_a  = saturate((1.0f - cosxz) / 0.858f);
+                float3 view_xz = normalize(view - dot(view, up) * up);
+                float cosxz    = max(0.0f, dot(view_xz, forward));
+                float alpha_a  = saturate((1.0f - cosxz) / 0.858f);
 
-            float3 view_yz = normalize(view - dot(view, right) * right);
-            float cosyz    = max(0.0f, dot(view_yz, forward));
-            float alpha_b  = saturate((1.0f - cosyz) / 0.593f);
+                float3 view_yz = normalize(view - dot(view, right) * right);
+                float cosyz    = max(0.0f, dot(view_yz, forward));
+                float alpha_b  = saturate((1.0f - cosyz) / 0.593f);
 
-            float hair_alpha = max(alpha_a, alpha_b);
+                float hair_alpha = max(alpha_a, alpha_b);
 
 
-            color.w = max(hair_alpha, _HairBlendSilhouette);
+                color.w = max(hair_alpha, _HairBlendSilhouette);
+            }
+            else if(variant_selector == 1)
+            {
+                clip(lightmap.x - 0.45f);
+            }
+            else if(variant_selector != 3)
+            {
+                discard;
+            }
         }
-        else if(variant_selector == 1)
-        {
-            clip(lightmap.x - 0.45f);
-        }
-        else if(variant_selector != 3)
+        else
         {
             discard;
         }
@@ -275,14 +300,16 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 edge_out vs_edge(edge_in v)
 {
     edge_out o;
+    if(!_EnableOutline) return (edge_out)0.0f;
     float exp_fix = 1.0;
-    if(variant_selector == 1 && _ExpOutlineToggle)
-    {
-        float exp_map =_FaceExpTex.SampleLevel(sampler_FaceExpTex, v.uv_0.xy, 0).w;
-
-        exp_fix = saturate((1.0f - exp_map) * _ExpOutlineFix);
-        exp_fix = exp_map + exp_fix;
-    } 
+    #if defined(faceishadow)
+        if(variant_selector == 1 && _ExpOutlineToggle)
+        {
+            float exp_map =_FaceExpTex.SampleLevel(sampler_FaceExpTex, v.uv_0.xy, 0).w;
+            exp_fix = saturate((1.0f - exp_map) * _ExpOutlineFix);
+            exp_fix = exp_map + exp_fix;
+        } 
+    #endif
     float3 outline_normal = v.tangent;
     outline_normal = mul((float3x3)UNITY_MATRIX_MV, outline_normal);
     outline_normal.z = 0.01f;
