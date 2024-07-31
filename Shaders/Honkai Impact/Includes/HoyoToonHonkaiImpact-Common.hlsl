@@ -1,5 +1,3 @@
-#include "Includes/HoyoToonHonkaiImpact-Colors.hlsl"
-
 float shadow_rate_face(float facemap, float facemap_mirror, float ao, float4 ws_pos)
 {
     // head directions
@@ -107,91 +105,95 @@ float3 hi3_rim(float ndotv, float lightmap, float ndotl, float3 diffuse)
 
 void dissolve_a(in float2 uv2, in float4 mask_uv, in float2 dis_angle, inout float3 color, out float blend_alpha, out float add_alpha, out float out_noise, out float2 out_mask)
 {
-    float noise = _NoiseTex.Sample(sampler_NoiseTex, mask_uv.zw).x * _NoiseIntensity;
-    float2 mUV = noise * (float2)0.0099f + mask_uv.xy;
-    float2 mask = _MaskDisTex.Sample(sampler_MaskDisTex, mUV).xy * (float2)_MaskDisTexScale;
-    // since the second dissolve function needs the masks and noise, output them like this
-    out_mask = mask;
-    out_noise = noise; 
-    if(_LengthWaysDisBlend) // if(_LengthWaysDisBlend != 0)
-    {
-        float alpha = _AlphaPosition + _Edge;
-        alpha = saturate((alpha - 0.5f) * mask.x - 1.0f);
-        alpha = ceil(alpha);
+    #if defined(can_dissolve)
+        float noise = _NoiseTex.Sample(sampler_NoiseTex, mask_uv.zw).x * _NoiseIntensity;
+        float2 mUV = noise * (float2)0.0099f + mask_uv.xy;
+        float2 mask = _MaskDisTex.Sample(sampler_MaskDisTex, mUV).xy * (float2)_MaskDisTexScale;
+        // since the second dissolve function needs the masks and noise, output them like this
+        out_mask = mask;
+        out_noise = noise; 
+        if(_LengthWaysDisBlend) // if(_LengthWaysDisBlend != 0)
+        {
+            float alpha = _AlphaPosition + _Edge;
+            alpha = saturate((alpha - 0.5f) * mask.x - 1.0f);
+            alpha = ceil(alpha);
 
-        float4 main2 = _MainTex2.Sample(sampler_MainTex, uv2);
-        add_alpha = main2.w * _AddLightColor.w;
-        float idk_alpha = saturate(main2.w * _AddLightColor.w + -alpha);
-        float3 idk = main2.xyz * _AddLightColor.xyz  + -color;
-        color = idk_alpha.xxx * idk + color;
-        blend_alpha = alpha;
-    }
-    else 
-    {
-        add_alpha = 1.0f;
-        blend_alpha = 0.0f;
-    }
+            float4 main2 = _MainTex2.Sample(sampler_MainTex, uv2);
+            add_alpha = main2.w * _AddLightColor.w;
+            float idk_alpha = saturate(main2.w * _AddLightColor.w + -alpha);
+            float3 idk = main2.xyz * _AddLightColor.xyz  + -color;
+            color = idk_alpha.xxx * idk + color;
+            blend_alpha = alpha;
+        }
+        else 
+        {
+            add_alpha = 1.0f;
+            blend_alpha = 0.0f;
+        }
+    #endif
 }
 
 void dissolve_b(float2 uv2, float4 mask_uv, float2 dis_angle, float in_noise, float2 in_mask, inout float4 in_color, float add_alpha, float blend_alpha)
 {
-    if(_BackFaceUseUV2)
-    {
-        float noise_tint = min(pow(in_noise, _TintColorPower), 1.0f);
-        float noise_check = (in_noise * in_noise) < 0.001f;
-        float3 dissolve_color = (float3)_DisColorScale * _DisColor.xyz;
-        float dis_noise = noise_check ? -1.0f : noise_tint + -1.0f;
-        dis_noise = _TintColorEdge * dis_noise + 1.0f;
-
-        if(_LengthWaysDisBlend)
+    #if defined(can_dissolve)
+        if(_BackFaceUseUV2)
         {
-            noise_tint = _AlphaPosition + _Edge;
-            float2 noise_mask = (-noise_tint) * in_mask.xy + (float2)1.0f;
+            float noise_tint = min(pow(in_noise, _TintColorPower), 1.0f);
+            float noise_check = (in_noise * in_noise) < 0.001f;
+            float3 dissolve_color = (float3)_DisColorScale * _DisColor.xyz;
+            float dis_noise = noise_check ? -1.0f : noise_tint + -1.0f;
+            dis_noise = _TintColorEdge * dis_noise + 1.0f;
 
-            // smoothstep
-            float soft = 1.0f / _Soft;
-            noise_mask = saturate(noise_mask * soft);
-            float2 mask_something = noise_mask * (float2)-2.0f + (float2)3.0f;
-            noise_mask = -mask_something * (noise_mask * noise_mask) + (float2)1.0f;
+            if(_LengthWaysDisBlend)
+            {
+                noise_tint = _AlphaPosition + _Edge;
+                float2 noise_mask = (-noise_tint) * in_mask.xy + (float2)1.0f;
 
-            float edge = -blend_alpha + noise_mask;
-            add_alpha = saturate(add_alpha * edge); 
+                // smoothstep
+                float soft = 1.0f / _Soft;
+                noise_mask = saturate(noise_mask * soft);
+                float2 mask_something = noise_mask * (float2)-2.0f + (float2)3.0f;
+                noise_mask = -mask_something * (noise_mask * noise_mask) + (float2)1.0f;
 
-            float3 color = dissolve_color * dis_noise + in_color.xyz;
+                float edge = -blend_alpha + noise_mask;
+                add_alpha = saturate(add_alpha * edge); 
 
-            in_color.xyz  = add_alpha * color + in_color.xyz;
+                float3 color = dissolve_color * dis_noise + in_color.xyz;
 
-            float alpha = -(noise_mask.y) * blend_alpha + 1.5f;       
-            alpha = floor(alpha);
-            int(alpha);
-            if(int(alpha)==0)clip(-1.0f);
-            // clip(alpha);
+                in_color.xyz  = add_alpha * color + in_color.xyz;
+
+                float alpha = -(noise_mask.y) * blend_alpha + 1.5f;       
+                alpha = floor(alpha);
+                int(alpha);
+                if(int(alpha)==0)clip(-1.0f);
+                // clip(alpha);
+            }
+            else
+            {
+                float uv_dis = dis_angle.y + (-mask_uv.y);
+                uv_dis = _DissolveUseUV2 * uv_dis + mask_uv.y;
+                uv_dis = (_OnlyUseMaskDis) ? 1.0f : uv_dis;
+
+                float alpha = _AlphaPosition + -0.5f;
+
+                float idk = alpha + _Edge;
+                idk = (-idk) * in_mask.x + uv_dis;
+
+                float soft = 1.f / _Soft;
+                idk = saturate(idk * soft);
+                soft = idk * -2.0f + 3.0f;
+                soft = -idk * soft + 1.0f;
+
+                float3 color = dissolve_color * dis_noise + in_color.xyz;
+
+                in_color.xyz  = soft * color + in_color.xyz;
+
+                float clip_alpha = -alpha * in_mask.x + uv_dis;
+                clip_alpha = max(floor(clip_alpha + 1.0f), 0.0f);
+                if(int(clip_alpha)==0) clip(-1.f);
+            }
         }
-        else
-        {
-            float uv_dis = dis_angle.y + (-mask_uv.y);
-            uv_dis = _DissolveUseUV2 * uv_dis + mask_uv.y;
-            uv_dis = (_OnlyUseMaskDis) ? 1.0f : uv_dis;
-
-            float alpha = _AlphaPosition + -0.5f;
-
-            float idk = alpha + _Edge;
-            idk = (-idk) * in_mask.x + uv_dis;
-
-            float soft = 1.f / _Soft;
-            idk = saturate(idk * soft);
-            soft = idk * -2.0f + 3.0f;
-            soft = -idk * soft + 1.0f;
-
-            float3 color = dissolve_color * dis_noise + in_color.xyz;
-
-            in_color.xyz  = soft * color + in_color.xyz;
-
-            float clip_alpha = -alpha * in_mask.x + uv_dis;
-            clip_alpha = max(floor(clip_alpha + 1.0f), 0.0f);
-            if(int(clip_alpha)==0) clip(-1.f);
-        }
-    }
+    #endif 
     // return in_color;
 }
 
