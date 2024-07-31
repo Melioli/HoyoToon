@@ -18,6 +18,8 @@ vs_out vs_model(vs_in v)
     o.tangent.xyz = mul((float3x3)unity_ObjectToWorld, v.tangent);
     o.tangent.w = v.tangent.w * unity_WorldTransformParams.w;
     o.view = camera_position() - mul(unity_ObjectToWorld, v.vertex).xyz;
+    o.n_view.xyz = -mul(unity_ObjectToWorld, v.vertex).xyz + unity_ObjectToWorld[3].xyz;
+    o.n_view = float4(_DummyFixedForNormal ? o.n_view : o.view, 1.0f);
     o.ws_pos =  mul(unity_ObjectToWorld, v.vertex);
     o.ss_pos = ComputeScreenPos(o.pos);
     o.v_col = v.v_col;
@@ -100,7 +102,9 @@ vs_out vs_edge(vs_in v)
             outline_scale = outline_scale * _Scale;
             outline_scale = outline_scale * 0.414f;
             outline_scale = outline_scale * v.v_col.w;
-            if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_FaceMapTex, v.uv_0.xy, 0.0f).z;
+            #if defined(faceisshadow)
+                if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_FaceMapTex, v.uv_0.xy, 0.0f).z;
+            #endif
 
             float offset_depth = saturate(1.0f - depth);
             float max_offset = lerp(_MaxOutlineZOffset * 0.1, _MaxOutlineZOffset, offset_depth);
@@ -183,7 +187,7 @@ vs_out vs_nyx(vs_in v)
         res_width = min(res_width * _NyxStateOutlineWidthVarietyWithResolution.y,  _NyxStateOutlineWidthVarietyWithResolution.z) + 1.0f;
 
 
-        outline_width = (outline_width * 0.005f) * (res_width * outline_height);
+        outline_width = (outline_width * 0.005f) * (res_width * outline_height) * 0.5f;
 
         float3 normalized_pos = (normalize(wv_pos.xyz) * (float3)_MaxOutlineZOffset) * (float3)_Scale;
 
@@ -222,9 +226,11 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
     // FUTURE PROOFING :
-    if(!_StarCloakEnable) 
+    float cockType = _StarCockType;
+    float cockEnabled = _StarCloakEnable;
+    if(!cockEnabled) 
     {
-        _StarCockType = 10;
+        cockType = 10;
     }
     
     // stupid legacy specular support, please mihoyo dont change value names again
@@ -249,25 +255,38 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv_a);
     float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv_a);
-    float customao  = _CustomAO.Sample(sampler_LightMapTex, uv_a);
-    float4 normalmap = _BumpMap.Sample(sampler_BumpMap, uv_a);
-    float4 facemap = _FaceMapTex.Sample(sampler_FaceMapTex, uv_a);
+    #if defined(use_shadow)
+        float customao  = _CustomAO.Sample(sampler_LightMapTex, uv_a);
+    #endif
+    #if defined(use_bump)
+        float4 normalmap = _BumpMap.Sample(sampler_BumpMap, uv_a);
+    #endif
+    #if defined(faceishadow)
+        float4 facemap = _FaceMapTex.Sample(sampler_FaceMapTex, uv_a);
+    #endif
 
     #ifdef _IS_PASS_BASE // Basic character shading pass, should only include the basic enviro light stuff + debug rendering shit
         float2 metalspec;
         metalspec.x = lightmap.x < 0.50f;
         metalspec.y = lightmap.x < 0.90f; // if metal area
 
-        // adding support for new normal mapping boolean
-        if(_UseBumpMap || _isNativeMainNormal) normal = normal_mapping(normalmap, i.ws_pos, uv_a, normal);
-        if((_UseBumpMap || _isNativeMainNormal) && _TextureLineUse && ((_TextureLineMultiplier.x + _TextureLineMultiplier.y + _TextureLineMultiplier.z) > 0)) detail_line(i.ss_pos.zw, normalmap.z, diffuse.xyz);
+        half bump_enable = _UseBumpMap;
+        half isMainNormal = _isNativeMainNormal;
+        half isLine = _TextureLineUse;
 
+        // adding support for new normal mapping boolean
+        #if defined(use_bump)
+            if(bump_enable || isMainNormal) normal = normal_mapping(normalmap, _gameVersion == 1 ? i.n_view : i.ws_pos, uv_a, normal);
+        #if defined(sdf_line)
+            if((bump_enable || isMainNormal) && _TextureLineUse && ((_TextureLineMultiplier.x + _TextureLineMultiplier.y + _TextureLineMultiplier.z) > 0)) detail_line(i.ss_pos.zw, normalmap.z, diffuse.xyz);
+        #endif
+        #endif
         // do this after the bump mapping to ensure that the normals are updated 
-        // INITIALIZE INPUT floatTORS :
-        float3 halffloattor = normalize(light + view);
+        // INITIALIZE INPUT VECTORS :
+        float3 half_vector = normalize(light + view);
         float ndotl = dot(normal, light);
         float ndotv = dot(normal, view);
-        float ndoth = dot(normal, halffloattor);
+        float ndoth = dot(normal, half_vector);
 
         // lighting
         float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
@@ -282,21 +301,26 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float material_id = materialID(lightmap.w);
 
         // COLOR SHIT 
+        #if defined(use_texTint)
         if(_MainTexColoring) diffuse = maintint(diffuse);
+        #endif
         // sample mask texture
+        #if defined (has_mask)
         float4 material_mask = _MaterialMasksTex.Sample(sampler_LightMapTex, uv_a);
-        
-        // HUE MASKS: 
-        float diffuse_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _DiffuseMaskSource);
-        float rim_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _RimMaskSource);
-        float emission_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _EmissionMaskSource);
+        #endif
+        #if defined(can_shift)
+            // HUE MASKS: 
+            float diffuse_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _DiffuseMaskSource);
+            float rim_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _RimMaskSource);
+            float emission_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _EmissionMaskSource);
 
-        if(!_UseHueMask)
-        {
-            diffuse_mask = 1.0f;
-            rim_mask = 1.0f;
-            emission_mask = 1.0f;
-        }
+            if(!_UseHueMask)
+            {
+                diffuse_mask = 1.0f;
+                rim_mask = 1.0f;
+                emission_mask = 1.0f;
+            }
+        #endif
 
         if(_MainTexAlphaUse == 0) diffuse.w = 1.0f;
         if(_MainTexAlphaUse == 3) diffuse.xyz = lerp(diffuse, _FaceBlushColor, diffuse.w * _FaceBlushStrength);
@@ -322,50 +346,72 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         }
 
         // SHADOW
-        float3 shadow;
+        float3 shadow = 1.0f;
         float3 metalshadow;
-        float3 s_color;
+        float3 s_color = (float3)1.0f;
         float3 leather = (float3)0;
-        shadow_color(lightmap.y, i.v_col.x, customao, i.v_col.y, ndotl, material_id, i.uv_a.xy, shadow, metalshadow, s_color, light);
-        // SPECULAR : 
+        #if defined(use_shadow)
+            if(_EnableShadow) shadow_color(lightmap.y, i.v_col.x, customao, i.v_col.y, ndotl, material_id, i.uv_a.xy, shadow, metalshadow, s_color, light);
+        #endif
+           // SPECULAR : 
         float3 specular = (float3)0.0f;
         float3 holographic = (float3)1.0f;
-        if(_SpecularHighlights) specular_color(ndoth, shadow, lightmap.x, lightmap.z, material_id, specular);
-        if(lightmap.x > 0.90f) specular = 0.0f; // making sure the specular doesnt bleed into the metal area
+        #if defined(use_specular)
+            if(_SpecularHighlights) specular_color(ndoth, shadow, lightmap.x, lightmap.z, material_id, specular);
+            if(lightmap.x > 0.90f) specular = 0.0f; // making sure the specular doesnt bleed into the metal area
+        #endif
         // METALIC :
-        if(_MetalMaterial) metalics(metalshadow, normal, ndoth, lightmap.x, vface, diffuse.xyz);
-        if(_DebugMode && (_DebugMetal == 1)) return float4(diffuse.xyz, 1.0f);
-        // moving these after the metal so the metal can also be recolored
-        if(!_DisableColors) diffuse = diffuse * coloring(material_id, material_mask);
-        if(_UseMaterialMasksTex && !_DisableColors) diffuse = diffuse * material_mask_coloring(material_mask);
-        if(_EnableColorHue) diffuse.xyz = hue_shift(diffuse.xyz, material_id, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
+        #if defined(use_metal)
+            if(_MetalMaterial) metalics(metalshadow, normal, ndoth, lightmap.x, vface, diffuse.xyz);
+            if(_DebugMode && (_DebugMetal == 1)) return float4(diffuse.xyz, 1.0f);
+            // moving these after the metal so the metal can also be recolored
+        #endif
+        #if !defined(disable_color)
+        if(!_DisableColors) diffuse = diffuse * coloring(material_id);
+            #if defined(has_mask)
+                if(_UseMaterialMasksTex && !_DisableColors) diffuse = diffuse * material_mask_coloring(material_mask);
+            #endif
+        #endif
+        #if defined(can_shift)
+            if(_EnableColorHue) diffuse.xyz = hue_shift(diffuse.xyz, material_id, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
+        #endif
         out_color = diffuse;
         out_color.w = 1.0f;
 
-        if(_HandEffectEnable)
-        {
-            arm_effect(out_color, i.uv_a.xy, i.uv_a.zw, i.uv_b.xy, view, normal, ndotl);\
-            if(_EnableColorHue) out_color.xyz = hue_shift(out_color.xyz, material_id, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
-
-            out_color.xyz = out_color.xyz * light_color;
-            out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
-            return out_color;
-        }
-
+        #if defined(asmogay_arm)
+            if(_HandEffectEnable)
+            {
+                arm_effect(out_color, i.uv_a.xy, i.uv_a.zw, i.uv_b.xy, view, normal, ndotl);
+                #if defined(can_shift)
+                    if(_EnableColorHue) out_color.xyz = hue_shift(out_color.xyz, material_id, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
+                #endif
+                out_color.xyz = out_color.xyz * light_color;
+                out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+                return out_color;
+            }
+        #endif
         // FRESNEL : 
         // this is used for skill effects or certain idle animations
         // think like that one idle animation raiden has
-        fresnel_hit(ndotv, out_color.xyz);
+        #if defined(has_fresnel)
+            if(_EnableFresnel)fresnel_hit(ndotv, out_color.xyz);
+        #endif
 
-        if(_StarCloakEnable) star_cocks(float4(out_color.xyz, diffuse.w), i.uv_a.xy, i.uv_a.zw, i.uv_b.xy, i.ss_pos, ndotv, light, i.parallax);
-        
+        #if defined(is_cock)
+            if(_StarCloakEnable) star_cocks(float4(out_color.xyz, diffuse.w), i.uv_a.xy, i.uv_a.zw, i.uv_b.xy, i.ss_pos, ndotv, light, i.parallax);
+        #endif
         // apply specular opacity
-        float3 spec_color = out_color.xyz + (float3)-1.0f;
-        spec_color.xyz = (_SpecOpacity) * spec_color.xyz + (float3)1.0f;
-        spec_color.xyz = spec_color.xyz * specular;
+        float3 spec_color = 0.0f;
+        #if defined(use_specular)
+            spec_color = out_color.xyz + (float3)-1.0f;
+            spec_color.xyz = (_SpecOpacity) * spec_color.xyz + (float3)1.0f;
+            spec_color.xyz = spec_color.xyz * specular;
+        #endif
 
-        // override the color with the leather if needed
-        if(_UseCharacterLeather && (material_id == 5)  && _UseMaterial5) leather_color(ndoth, normal, light, lightmap.z, leather, holographic, out_color.xyz);
+        #if defined(use_leather)
+            // override the color with the leather if needed
+            if(_UseCharacterLeather && (material_id == 5)  && _UseMaterial5) leather_color(ndoth, normal, light, lightmap.z, leather, holographic, out_color.xyz);
+        #endif
 
         out_color.xyz = out_color.xyz * s_color + (spec_color);
         
@@ -373,22 +419,28 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float4 emis_color_eye = out_color.xyzz;
         emis_color = emission_color(emis_color, material_id);
         emis_color_eye = emission_color_eyes(emis_color, material_id);
-        if(_EnableEmissionHue) emis_color.xyz = hue_shift(emis_color.xyz, material_id, _EmissionHue, _EmissionHue2, _EmissionHue3, _EmissionHue4, _EmissionHue5, _GlobalEmissionHue, _AutomaticEmissionShift, _ShiftEmissionSpeed, emission_mask);
-        if(_EnableEmissionHue) emis_color_eye.xyz = hue_shift(emis_color_eye.xyz, material_id, _EmissionHue, _EmissionHue2, _EmissionHue3, _EmissionHue4, _EmissionHue5, _GlobalEmissionHue, _AutomaticEmissionShift, _ShiftEmissionSpeed, emission_mask);
-
-        if(_StarCloakEnable && _StarCockEmis)
-        {
-            emis_color.xyz = emis_color.xyz;
-            emis_color.w = _EmissionScaler;
-            mask = _StarCockType == 2 ? diffuse.w : 1.0f;
-            emis_check = 1.0f;
-        }
+        #if defined(can_shift)
+            if(_EnableEmissionHue) emis_color.xyz = hue_shift(emis_color.xyz, material_id, _EmissionHue, _EmissionHue2, _EmissionHue3, _EmissionHue4, _EmissionHue5, _GlobalEmissionHue, _AutomaticEmissionShift, _ShiftEmissionSpeed, emission_mask);
+            if(_EnableEmissionHue) emis_color_eye.xyz = hue_shift(emis_color_eye.xyz, material_id, _EmissionHue, _EmissionHue2, _EmissionHue3, _EmissionHue4, _EmissionHue5, _GlobalEmissionHue, _AutomaticEmissionShift, _ShiftEmissionSpeed, emission_mask);
+        #endif
+        #if defined(is_cock)
+            if(_StarCloakEnable && _StarCockEmis)
+            {
+                emis_color.xyz = emis_color.xyz;
+                emis_color.w = _EmissionScaler;
+                mask = _StarCockType == 2 ? diffuse.w : 1.0f;
+                emis_check = 1.0f;
+            }
+        #endif
         
 
         // New 5.0 content shit
-        if(_UseGlassSpecularToggle) glass_color(out_color, i.uv_a, view, normal);
-        if(_EnableNyxState && _BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
-
+        #if defined(parallax_glass)
+            if(_UseGlassSpecularToggle) glass_color(out_color, i.uv_a, view, normal);
+        #endif
+        #if defined(can_nyx)
+            if(_EnableNyxState && _BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
+        #endif
         // Apply scene light color, only taking the main directional light color * ambient color settings
         out_color.xyz = out_color.xyz * light_color;
         
@@ -400,89 +452,96 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         out_color.xyz = lerp(out_color.xyz, emis_color, ((mask * emis_color.w) * emis_check));
         out_color.xyz = lerp(out_color.xyz, emis_color_eye, (eye_mask * emis_check_eye) * emis_color_eye.w);
         
-        if(_EnableNyxState && !_BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
-        
+        #if defined(can_nyx)
+            if(_EnableNyxState && !_BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
+        #endif
         // Rim light moved to last thing done to the model so to ensure that all parts get it
         // previous versions it was added to the color before certain things and they didnt recieve any rim lights as a result
         // most notably was the star cock shit when set to be emissive
         float3 rim_light = (float3)0.0f;
-        if(_UseRimLight) 
-        {
-            rim_light = rimlighting(i.ss_pos, normal, i.ws_pos, light, material_id, out_color.xyz, view);
-            if(_EnableRimHue) rim_light.xyz = hue_shift(rim_light.xyz, material_id, _RimHue, _RimHue2, _RimHue3, _RimHue4, _RimHue5, _GlobalRimHue, _AutomaticRimShift, _ShiftRimSpeed, rim_mask);
-            out_color.xyz = out_color.xyz + rim_light;
-        }
+        #if defined(use_rimlight)
+            if(_UseRimLight) 
+            {
+                rim_light = rimlighting(i.ss_pos, normal, i.ws_pos, light, material_id, out_color.xyz, view);
+                #if defined(can_shift)
+                    if(_EnableRimHue) rim_light.xyz = hue_shift(rim_light.xyz, material_id, _RimHue, _RimHue2, _RimHue3, _RimHue4, _RimHue5, _GlobalRimHue, _AutomaticRimShift, _ShiftRimSpeed, rim_mask);
+                #endif
+                out_color.xyz = out_color.xyz + rim_light;
+            }
+        #endif
         
         // basic ass transparency
-        if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;        
-        if(_DebugMode) // debuuuuuug
-        {
-            if(_DebugDiffuse == 1) return float4(diffuse.xyz, 1.0f);
-            if(_DebugDiffuse == 2) return float4(diffuse.www, 1.0f);
-            if(_DebugLightMap == 1) return float4(lightmap.xxx, 1.0f);
-            if(_DebugLightMap == 2) return float4(lightmap.yyy, 1.0f);
-            if(_DebugLightMap == 3) return float4(lightmap.zzz, 1.0f);
-            if(_DebugLightMap == 4) return float4(lightmap.www, 1.0f);
-            if(_DebugFaceMap == 1) return float4(facemap.xxx, 1.0f);
-            if(_DebugFaceMap == 2) return float4(facemap.yyy, 1.0f);
-            if(_DebugFaceMap == 3) return float4(facemap.zzz, 1.0f);
-            if(_DebugFaceMap == 4) return float4(facemap.www, 1.0f);
-            if(_DebugNormalMap == 1) return float4(normalmap.xy, 1.0f, 1.0f);
-            if(_DebugNormalMap == 2) return float4(normalmap.zzz, 1.0f);
-            if(_DebugVertexColor == 1) return float4(i.v_col.xxx, 1.0f);
-            if(_DebugVertexColor == 2) return float4(i.v_col.yyy, 1.0f);
-            if(_DebugVertexColor == 3) return float4(i.v_col.zzz, 1.0f);
-            if(_DebugVertexColor == 4) return float4(i.v_col.www, 1.0f);
-            if(_DebugRimLight == 1) return float4(rim_light.xyz, 1.0f);
-            if(_DebugNormalVector == 1) return float4(i.normal.xyz * 0.5f + 0.5f, 1.0f);
-            if(_DebugNormalVector == 2) return float4(i.normal.xyz, 1.0f);
-            if(_DebugNormalVector == 3) return float4(normal.xyz * 0.5f + 0.5f, 1.0f);
-            if(_DebugNormalVector == 4) return float4(normal.xyz, 1.0f);
-            if(_DebugTangent == 1) return float4(i.tangent.xyz, 1.0f);
-            if(_DebugSpecular == 1) return float4(specular.xyz, 1.0f);
-            if(_DebugEmission == 1) return float4((mask * emis_check).xxx, 1.0f);
-            if(_DebugEmission == 2) return float4(emis_color.xyz, 1.0f);
-            if(_DebugEmission == 3) return float4(emis_color.xyz * (mask * emis_check).xxx, 1.0f);
-            if(_DebugFaceVector == 1) return float4(normalize(UnityObjectToWorldDir(_headForwardVector.xyz)).xyz, 1.0f);
-            if(_DebugFaceVector == 2) return float4(normalize(UnityObjectToWorldDir(_headRightVector.xyz)).xyz, 1.0f);
-            if((_DebugMaterialIDs > 0) && (_DebugMaterialIDs != 6))
+        if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;      
+        #if defined(can_debug)  
+            if(_DebugMode) // debuuuuuug
             {
-                if(_DebugMaterialIDs == material_id)
+                if(_DebugDiffuse == 1) return float4(diffuse.xyz, 1.0f);
+                if(_DebugDiffuse == 2) return float4(diffuse.www, 1.0f);
+                if(_DebugLightMap == 1) return float4(lightmap.xxx, 1.0f);
+                if(_DebugLightMap == 2) return float4(lightmap.yyy, 1.0f);
+                if(_DebugLightMap == 3) return float4(lightmap.zzz, 1.0f);
+                if(_DebugLightMap == 4) return float4(lightmap.www, 1.0f);
+                if(_DebugFaceMap == 1) return float4(facemap.xxx, 1.0f);
+                if(_DebugFaceMap == 2) return float4(facemap.yyy, 1.0f);
+                if(_DebugFaceMap == 3) return float4(facemap.zzz, 1.0f);
+                if(_DebugFaceMap == 4) return float4(facemap.www, 1.0f);
+                if(_DebugNormalMap == 1) return float4(normalmap.xy, 1.0f, 1.0f);
+                if(_DebugNormalMap == 2) return float4(normalmap.zzz, 1.0f);
+                if(_DebugVertexColor == 1) return float4(i.v_col.xxx, 1.0f);
+                if(_DebugVertexColor == 2) return float4(i.v_col.yyy, 1.0f);
+                if(_DebugVertexColor == 3) return float4(i.v_col.zzz, 1.0f);
+                if(_DebugVertexColor == 4) return float4(i.v_col.www, 1.0f);
+                if(_DebugRimLight == 1) return float4(rim_light.xyz, 1.0f);
+                if(_DebugNormalVector == 1) return float4(i.normal.xyz * 0.5f + 0.5f, 1.0f);
+                if(_DebugNormalVector == 2) return float4(i.normal.xyz, 1.0f);
+                if(_DebugNormalVector == 3) return float4(normal.xyz * 0.5f + 0.5f, 1.0f);
+                if(_DebugNormalVector == 4) return float4(normal.xyz, 1.0f);
+                if(_DebugTangent == 1) return float4(i.tangent.xyz, 1.0f);
+                if(_DebugSpecular == 1) return float4(specular.xyz, 1.0f);
+                if(_DebugEmission == 1) return float4((mask * emis_check).xxx, 1.0f);
+                if(_DebugEmission == 2) return float4(emis_color.xyz, 1.0f);
+                if(_DebugEmission == 3) return float4(emis_color.xyz * (mask * emis_check).xxx, 1.0f);
+                if(_DebugFaceVector == 1) return float4(normalize(UnityObjectToWorldDir(_headForwardVector.xyz)).xyz, 1.0f);
+                if(_DebugFaceVector == 2) return float4(normalize(UnityObjectToWorldDir(_headRightVector.xyz)).xyz, 1.0f);
+                if((_DebugMaterialIDs > 0) && (_DebugMaterialIDs != 6))
                 {
-                    return (float4)1.0f;
+                    if(_DebugMaterialIDs == material_id)
+                    {
+                        return (float4)1.0f;
+                    }
+                    else 
+                    {
+                        return float4((float3)0.0f, 1.0f);
+                    }
                 }
-                else 
+                if(_DebugMaterialIDs == 6)
                 {
-                    return float4((float3)0.0f, 1.0f);
+                    float4 debug_color = float4(0.0f, 0.0f, 0.0f, 1.0f);
+                    if(material_id == 1)
+                    {
+                        debug_color.xyz = float3(1.0f, 0.0f, 0.0f);
+                    }
+                    else if(material_id == 2)
+                    {
+                        debug_color.xyz = float3(0.0f, 1.0f, 0.0f);
+                    }
+                    else if(material_id == 3)
+                    {
+                        debug_color.xyz = float3(0.0f, 0.0f, 1.0f);
+                    }
+                    else if(material_id == 4)
+                    {
+                        debug_color.xyz = float3(1.0f, 0.0f, 1.0f);
+                    }
+                    else if(material_id == 5)
+                    {
+                        debug_color.xyz = float3(0.0f, 1.0f, 1.0f);
+                    }
+                    return debug_color;
                 }
+                if(_DebugLights == 1) return float4((float3)0.0f, 1.0f);
             }
-            if(_DebugMaterialIDs == 6)
-            {
-                float4 debug_color = float4(0.0f, 0.0f, 0.0f, 1.0f);
-                if(material_id == 1)
-                {
-                    debug_color.xyz = float3(1.0f, 0.0f, 0.0f);
-                }
-                else if(material_id == 2)
-                {
-                    debug_color.xyz = float3(0.0f, 1.0f, 0.0f);
-                }
-                else if(material_id == 3)
-                {
-                    debug_color.xyz = float3(0.0f, 0.0f, 1.0f);
-                }
-                else if(material_id == 4)
-                {
-                    debug_color.xyz = float3(1.0f, 0.0f, 1.0f);
-                }
-                else if(material_id == 5)
-                {
-                    debug_color.xyz = float3(0.0f, 1.0f, 1.0f);
-                }
-                return debug_color;
-            }
-            if(_DebugLights == 1) return float4((float3)0.0f, 1.0f);
-        }
+        #endif
         
     #endif
     #ifdef _IS_PASS_LIGHT // Lighting shading pass, should only include the necessary lighting things needed
@@ -523,9 +582,10 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
     float4 out_color = (float4)1.0f;
-
-    float outline_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, i.uv_a.xy, _OutlineMaskSource);
-    outline_mask = _UseHueMask ? outline_mask : 1.0f;
+    #if defined(can_shift)
+        float outline_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, i.uv_a.xy, _OutlineMaskSource);
+        outline_mask = _UseHueMask ? outline_mask : 1.0f;
+    #endif
 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, i.uv_a.xy);
     float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, i.uv_a.xy);
@@ -547,8 +607,12 @@ float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
     
     if(_MainTexAlphaUse == 1) clip(diffuse.w - _MainTexAlphaCutoff);
     if(_MainTexAlphaUse == 4) out_color.w = diffuse.w;
-    if(_UseWeapon) weapon_shit(out_color.xyz, diffuse.w, i.uv_a.zw, i.normal, i.view, i.ws_pos);
-    if(_EnableOutlineHue) out_color.xyz = hue_shift(out_color.xyz, material_ID, _OutlineHue, _OutlineHue2, _OutlineHue3, _OutlineHue4, _OutlineHue5, _GlobalOutlineHue, _AutomaticOutlineShift, _ShiftOutlineSpeed, 1.0f);
+    #if defined(weapon_mode)
+        if(_UseWeapon) weapon_shit(out_color.xyz, diffuse.w, i.uv_a.zw, i.normal, i.view, i.ws_pos);
+    #endif
+    #if defined(can_shift)
+        if(_EnableOutlineHue) out_color.xyz = hue_shift(out_color.xyz, material_ID, _OutlineHue, _OutlineHue2, _OutlineHue3, _OutlineHue4, _OutlineHue5, _GlobalOutlineHue, _AutomaticOutlineShift, _ShiftOutlineSpeed, 1.0f);
+    #endif
     if(_MultiLight && !_EnableOutlineGlow) out_color.xyz = out_color.xyz  * (UNITY_LIGHTMODEL_AMBIENT.xyz + _LightColor0.xyz);
     
     return out_color;
@@ -577,29 +641,35 @@ float4 ps_nyx(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 
         // this is basically the same code as the body nyx stuff
         // create the screen space uv for the noise to sampled from
-        float2 screen = (((i.ss_pos.xy / i.ss_pos.w) * 0.5f) * _ScreenParams.xy) / _ScreenParams.x;
-        float2 noise_uv = frac(_NyxStateOutlineColorNoiseAnim.zw * _Time.yy);
-        noise_uv = noise_uv * _NyxStateOutlineColorNoiseScale.xy + screen;
-        // Sample noise red channel
-        float nyx_noise = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, noise_uv).x;
-        // initialize ramp uv
+        float4 screen_uv;
+        screen_uv = ((i.ss_pos.xyxy / i.ss_pos.wwww) * _ScreenParams.xyxy) / _ScreenParams.xxxx;
+        screen_uv.yw = 1.0f - screen_uv.yw;
+        float4 noise_uv = _Time.yyyy * (_NyxStateOutlineColorNoiseAnim.zwxy);
+        noise_uv = frac(noise_uv);
+        screen_uv = screen_uv * _NyxStateOutlineColorNoiseScale.xyxy + noise_uv;
+        float noise_a = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, screen_uv.xy).x;
+        screen_uv.xy = noise_a.xx * (float2)_NyxStateOutlineColorNoiseTurbulence + screen_uv.zw;
         float2 ramp_uv;
-        ramp_uv.x =  nyx_noise * _NyxStateOutlineColorNoiseTurbulence + noise_uv;
-        ramp_uv.y = (_DayOrNight) ? 0.25f : 0.75f;
-        // sample ramp using the screenspace noise uvs and the noise texture itself
-        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, ramp_uv);
-
-        // increase intensity and modify color as needed
-        nyx_ramp = (nyx_ramp * (float3)_NyxStateOutlineColorScale) * _NyxStateOutlineColor;
-        // calculate brightness so it doesnt go too high
+        float2 time_uv;
+        ramp_uv.x = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, screen_uv.xy).x;
+        ramp_uv.y = float(0.75);
+        time_uv.y = float(0.25);
+        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, ramp_uv.xy, 0.0).xyz;
+        time_uv.x = (_DayOrNight) ? 0 : 1;
+        float3 time_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, time_uv.xy, 0.0).xyz;
+        nyx_ramp.xyz = time_ramp.xyz * nyx_ramp.xyz;
+        nyx_ramp.xyz = nyx_ramp.xyz * (float3)_NyxStateOutlineColorScale * _NyxStateOutlineColor;
         float nyx_brightness = max(nyx_ramp.z, nyx_ramp.y);
         nyx_brightness = max(nyx_ramp.x, nyx_brightness);
         float bright_check = 1.0f < nyx_brightness;
         color.xyz = bright_check ? (nyx_ramp * (1.0f / nyx_brightness)) : nyx_ramp;
+
+
         // depending on user choice, apply outside sources of lighting
         if(_LineAffected) color.xyz = color.xyz * light_color + gi;
         // if disabled, all pixels are clipped, this is to catch any weird issues with the nyx mode shader feature
         if(!_EnableNyxOutline) clip(-1);
+        // color.xyz = nyx_noise;
         return color;
     #else // if nyx mode is disabled, all pixels from this pass should be discarded
         clip(-1);

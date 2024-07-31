@@ -1,41 +1,75 @@
 // textures : 
 Texture2D _MainTex; // this is the diffuse color texture
 Texture2D _LightMapTex; // this is both the body/hair lightmap texture and the faceshadow texture
-Texture2D _FaceMapTex; // this is the facelightmap texture
-Texture2D _PackedShadowRampTex;
-Texture2D _CustomAO;
-Texture2D _BumpMap;
-Texture2D _MTMap;
-Texture2D _MTSpecularRamp;
-Texture2D _MaterialMasksTex;
+#if defined(faceishadow)
+    Texture2D _FaceMapTex; // this is the facelightmap texture
+#endif
+#if defined(has_sramp)
+    Texture2D _PackedShadowRampTex;
+#endif
+#if defined(use_shadow)
+    Texture2D _CustomAO;
+#endif
+#if defined(use_bump)
+    Texture2D _BumpMap;
+#endif
+#if defined(use_metal)
+    Texture2D _MTMap;
+    Texture2D _MTSpecularRamp;
+#endif
+#if defined(has_mask)
+    Texture2D _MaterialMasksTex;
+#endif
 Texture2D _CustomEmissionTex;
-Texture2D _StarTex;
-Texture2D _Star02Tex;
-Texture2D _NoiseTex01;
-Texture2D _NoiseTex02;
-Texture2D _ColorPaletteTex;
-Texture2D _ConstellationTex;
-Texture2D _CloudTex;
-Texture2D _LeatherReflect;
-Texture2D _LeatherLaserRamp;
-Texture2D _GlassSpecularTex;
-Texture2D _TempNyxStatePaintMaskTex;
-Texture2D _NyxStateOutlineColorRamp;
-Texture2D _NyxStateOutlineNoise;
-Texture2D _StarMask;
-Texture2D _BlockHighlightMask;
-Texture2D _BrightLineMask;
-Texture2D _FlowMap;
-Texture2D _FlowMap02;
-Texture2D _NoiseMap;
-Texture2D _FlowMask;
-Texture2D _Mask;
-UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+#if defined(is_cock)
+    Texture2D _StarTex;
+    #if defined(paimon_cock)
+        Texture2D _Star02Tex;
+        Texture2D _NoiseTex01;
+        Texture2D _NoiseTex02;
+        Texture2D _ColorPaletteTex;
+        Texture2D _ConstellationTex;
+        Texture2D _CloudTex;
+    #endif
+    #if defined(skirk_cock)
+        Texture2D _StarMask;
+        Texture2D _BlockHighlightMask;
+        Texture2D _BrightLineMask;
+    #endif
+    #if defined(asmoday_cock)
+        Texture2D _FlowMap;
+        Texture2D _FlowMap02;
+        Texture2D _NoiseMap;
+        Texture2D _FlowMask;
+    #endif
+#endif
+#if defined(asmogay_arm)
+    Texture2D _Mask;
+#endif
+#if defined(use_leather)
+    Texture2D _LeatherReflect;
+    Texture2D _LeatherLaserRamp;
+#endif
+#if defined(parallax_glass)
+    Texture2D _GlassSpecularTex;
+#endif
+#if defined(can_nyx)
+    Texture2D _TempNyxStatePaintMaskTex;
+    Texture2D _NyxStateOutlineColorRamp;
+    Texture2D _NyxStateOutlineNoise;
+#endif
+#if defined(use_rimlight)
+    UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+#endif
 Texture2D _ClipAlphaTex;
-Texture2D _HueMaskTexture;
-Texture2D _WeaponDissolveTex;
-Texture2D _WeaponPatternTex;
-Texture2D _ScanPatternTex;
+#if defined(can_shift)
+    Texture2D _HueMaskTexture;
+#endif
+#if defined(weapon_mode)
+    Texture2D _WeaponDissolveTex;
+    Texture2D _WeaponPatternTex;
+    Texture2D _ScanPatternTex;
+#endif
 float4 _MainTex_ST; // scale and translation offsets for main texture
 float4 _Star02Tex_ST;
 float4 _NoiseTex01_ST;
@@ -62,11 +96,19 @@ SamplerState sampler_PackedShadowRampTex;
 SamplerState sampler_MTMap;
 SamplerState sampler_MTSpecularRamp;
 SamplerState sampler_LeatherReflect;
+
 SamplerState sampler_WeaponDissolveTex;
 SamplerState sampler_WeaponPatternTex;
 SamplerState sampler_ScanPatternTex;
 SamplerState sampler_NyxStateOutlineNoise;
 SamplerState sampler_NyxStateOutlineColorRamp;
+
+
+float _gameVersion;
+
+float _EnableShadow;
+float _EnableHueShift;
+float _EnableFresnel;
 
 // main properties
 float _UseBackFaceUV2;
@@ -342,7 +384,7 @@ float  _MaxOutlineZOffset;
 // special fx
 float _StarUVSource;
 float _StarCockEmis;
-bool _StarCloakEnable;
+float _StarCloakEnable;
 int _StarCockType;
 
 // skirk specific

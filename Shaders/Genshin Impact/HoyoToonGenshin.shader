@@ -10,18 +10,21 @@ Shader "HoyoToon/Genshin/Character"
 		[HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
 		[HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
         //Header End
-        
 
+        [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
+        
         //Material Type
         [HoyoToonWideEnum(Base, 0, Face, 1, Weapon, 2, Glass, 3)]variant_selector("Material Type--{on_value_actions:[
-		{value:0,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=0.0}]},
-		{value:1,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=1.0}, {type:SET_PROPERTY,data:_UseWeapon=0.0}]},
-		{value:2,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=1.0}]},
-		{value:3,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=1.0}]}
-        ]}", Int) = 0
+            {value:0,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=0.0}]},
+            {value:1,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=1.0}, {type:SET_PROPERTY,data:_UseWeapon=0.0}]},
+            {value:2,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=1.0}]},
+            {value:3,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=1.0}]}
+            ]}", Int) = 0
         //Material Type End
 
-
+        // Hidden Game Version Variable for switching certain logics
+        [HideInInspector] [HoyoToonWideEnum(Pre Natlan, 0, Post Natlan, 1)] _gameVersion ("", Float) = 0
+        
         //Main
         [HideInInspector] m_start_main ("Main", Float) = 0
             [SmallTexture]_MainTex("Diffuse Texture",2D)= "white" { }
@@ -35,17 +38,23 @@ Shader "HoyoToon/Genshin/Character"
             // Main Color Tinting
             [HideInInspector] m_start_maincolor ("Color Options", Float) = 0
                 // Color Mask
-                [HideInInspector] m_start_colormask ("Color Mask", Float) = 0
+                //ifex _UseMaterialMasksTex == 0
+                [HideInInspector] m_start_colormask ("Color Mask--{reference_property:_UseMaterialMasksTex}", Float) = 0
                     [Toggle] _UseMaterialMasksTex("Enable Material Color Mask", Int) = 0
                     [SmallTexture] _MaterialMasksTex ("Material Color Mask--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterialMasksTex==1.0}}", 2D) = "white"{ }
                 [HideInInspector] m_end_colormask ("", Float) = 0
+                //endex
+                //ifex _MainTexColoring == 0
                 // Tint and Colors
                 _MainTexTintColor ("Main Texture Tint Colors", Color) = (0.5, 0.5, 0.5, 1.0)
+                //endex
+                //ifex _DisableColors == 1
                 _Color ("Tint Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
                 _Color2 ("Tint Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
                 _Color3 ("Tint Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
                 _Color4 ("Tint Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
                 _Color5 ("Tint Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                //endex
             [HideInInspector] m_end_maincolor ("", Float) = 0
             // Main Alpha
             [HideInInspector] m_start_mainalpha ("Alpha Options", Float) = 0
@@ -60,13 +69,15 @@ Shader "HoyoToon/Genshin/Character"
                 [HideInInspector] m_end_seethrough ("", Float) = 0   
             [HideInInspector] m_end_mainalpha ("", Float) = 0
             // Detail Line
-            [HideInInspector] m_start_maindetail ("Details", Float) = 0
-                [Toggle] _TextureLineUse ("Texture Line", Range(0.0, 1.0)) = 0.0
+            //ifex _TextureLineUse == 0
+            [HideInInspector] m_start_maindetail ("Details--{reference_property:_TextureLineUse}", Float) = 0
+                [Toggle] _TextureLineUse ("Texture Line", Float) = 0.0
                 _TextureLineSmoothness ("Texture Line Smoothness", Range(0.0, 1.0)) = 0.15
                 _TextureLineThickness ("Texture Line Thickness", Range(0.0, 1.0)) = 0.55
                 _TextureLineDistanceControl ("Texture Line Distance Control", Vector) = (0.1, 0.6, 1.0, 1.0)
-                [Gamma] [HDR] _TextureLineMultiplier ("Texture Line Color", Color) = (0.6, 0.6, 0.6, 1.0)
+                [HDR] _TextureLineMultiplier ("Texture Line Color", Color) = (0.6, 0.6, 0.6, 1.0)
             [HideInInspector] m_end_maindetail ("", Float) = 0
+            //endex
             // Material ID
             [HideInInspector] m_start_matid ("Material IDs", Float) = 0
                 [Toggle] _UseMaterial2 ("Enable Material 2", Float) = 1.0
@@ -77,8 +88,10 @@ Shader "HoyoToon/Genshin/Character"
         [HideInInspector] m_end_main ("", Float) = 0
         //Main End
 
+
         //Normal Map
-        [HideInInspector] m_start_normalmap ("Normal Map", Float) = 0
+        //ifex _UseBumpMap == 0
+        [HideInInspector] m_start_normalmap ("Normal Map--{reference_property:_UseBumpMap}", Float) = 0
             [Toggle] _UseBumpMap("Normal Map", Float) = 0.0
             [HideInInspector] [Toggle] _DummyFixedForNormal ("kms", Float) = 0
             [HideInInspector] [Toggle] _isNativeMainNormal ("", Float) = 0
@@ -86,8 +99,10 @@ Shader "HoyoToon/Genshin/Character"
             _BumpScale ("Normal Map Scale", Range(0.0, 1.0)) = 0.0
         [HideInInspector] m_end_normalmap ("", Float) = 0
         //Normal Map End
+        //endex
 
         //Face Shading
+        //ifex _UseFaceMapNew == 0 && variant_selector != 1
         [HideInInspector] m_start_faceshading("Face--{condition_show:{type:PROPERTY_BOOL,data:_UseFaceMapNew==1.0}} ", Float) = 0
             _FaceMapRotateOffset ("Face Map Rotate Offset", Range(-1, 1)) = 0
             [SmallTexture] _FaceMapTex ("Face Shadow",2D)= "white"{ }
@@ -98,21 +113,23 @@ Shader "HoyoToon/Genshin/Character"
             // Face Bloom
             [HideInInspector] m_start_faceblush ("Blush", Float) = 0
                 _FaceBlushStrength ("Face Blush Strength", Range(0.0, 1.0)) = 0.0
-                [Gamma] _FaceBlushColor ("Face Blush Color", Color) = (1.0, 0.8, 0.7, 1.0)
+                _FaceBlushColor ("Face Blush Color", Color) = (1.0, 0.8, 0.7, 1.0)
             [HideInInspector] m_end_faceblush ("", Float) = 0
         [HideInInspector] m_end_faceshading ("", Float) = 0
         //Face Shading End
+        //endex
 
+        //ifex _UseWeapon == 0
         //Weapon Shading
-        [HideInInspector] m_start_weaponshading("Weapon--{condition_show:{type:PROPERTY_BOOL,data:variant_selector>1.0}}", Float) = 0
-            [HideInInspector]_UseWeapon ("Weapon Shader", Range(0.0, 1.0)) = 0.0
-            [Toggle] _UsePattern ("Enable Weapon Pattern", Range(0.0, 1.0)) = 1.0
-            [Toggle] _ProceduralUVs ("Disable UV1", Range(0.0, 1.0)) = 0.0
+        [HideInInspector] m_start_weaponshading("Weapon--{condition_show:{type:PROPERTY_BOOL,data:variant_selector>1.0},reference_property:_UseWeapon}", Float) = 0
+            [Toggle] [HideInInspector]  _UseWeapon ("Weapon Shader", Float) = 0.0
+            [Toggle] _UsePattern ("Enable Weapon Pattern", Float) = 1.0
+            [Toggle] _ProceduralUVs ("Disable UV1", Float) = 0.0
             [SmallTexture]_WeaponDissolveTex("Weapon Dissolve",2D)= "white"{ }
             [SmallTexture]_WeaponPatternTex("Weapon Pattern",2D)= "white"{ }
             [SmallTexture]_ScanPatternTex("Scan Pattern",2D)= "black"{ }
             _WeaponDissolveValue ("Weapon Dissolve Value", Range(0.0, 1.0)) = 1.0
-            [Toggle] _DissolveDirection_Toggle ("Dissolve Direction Toggle", Range(0.0, 1.0)) = 0.0
+            [Toggle] _DissolveDirection_Toggle ("Dissolve Direction Toggle", Float) = 0.0
             [HDR] _WeaponPatternColor ("Weapon Pattern Color", Color) = (1.682, 1.568729, 0.6554853, 1.0)
             _Pattern_Speed ("Pattern Speed", Float) = -0.033
             _SkillEmisssionPower ("Skill Emisssion Power", Float) = 0.6
@@ -122,13 +139,15 @@ Shader "HoyoToon/Genshin/Character"
             [HideInInspector] m_start_weaponscan ("Scan", Float) = 0
                 _ScanColorScaler ("Scan Color Scaler", Float) = 0.0
                 _ScanColor ("Scan Color", Color) = (0.8970588, 0.8970588, 0.8970588, 1.0)
-                [Toggle] _ScanDirection_Switch ("Scan Direction Switch", Range(0.0, 1.0)) = 0.0
+                [Toggle] _ScanDirection_Switch ("Scan Direction Switch", Float) = 0.0
                 _ScanSpeed ("Scan Speed", Float) = 0.8
             [HideInInspector] m_end_weaponscan ("", Float) = 0
         [HideInInspector] m_end_weaponshading ("", Float) = 0
         //Weapon Shading End
+        //endex
 
-        [HideInInspector] m_start_parallaxglass("Glass--{condition_show:{type:PROPERTY_BOOL,data:variant_selector==3.0}}", Float) = 0
+        //ifex _UseGlassSpecularToggle == 0
+        [HideInInspector] m_start_parallaxglass("Glass--{condition_show:{type:PROPERTY_BOOL,data:variant_selector==3.0},reference_property:_UseGlassSpecularToggle}", Float) = 0
             [Toggle] _UseGlassSpecularToggle ("Use Glass Specular", Float) = 0
             _GlassSpecularTex ("Glass Specular Texture", 2D) = "black" {}
             _GlassTiling ("Tiling", Float) = 1.6
@@ -152,15 +171,18 @@ Shader "HoyoToon/Genshin/Character"
                 _GlassSpecularDetailLengthRange ("Detail Length Range", Range(0, 1)) = 0.1
             [HideInInspector] m_end_glassdetail  ("Detail", Float) = 0
         [HideInInspector] m_end_parallaxglass("", Float) = 0
+        //endex
 
         //Lightning Options
         [HideInInspector] m_start_lighting("Lighting Options", Float) = 0
-            [HideInInspector] m_start_lightandshadow("Shadow", Float) = 0
+            //ifex _EnableShadow == 0 
+            [HideInInspector] m_start_lightandshadow("Shadow--{reference_property:_EnableShadow}", Float) = 0
+                [Toggle] _EnableShadow ("Enable Shadow", Float) = 1
                 [Toggle] _DayOrNight ("Enable Nighttime", Range(0.0, 1.0)) = 0.0 // _ES_ColorTone       
                 [SmallTexture]_PackedShadowRampTex("Shadow Ramp",2D)= "white"{ }
-                [Toggle] _UseLightMapColorAO ("Enable Lightmap Ambient Occlusion", Range(0.0, 1.0)) = 1.0
+                [Toggle] _UseLightMapColorAO ("Enable Lightmap Ambient Occlusion", Float) = 1.0
                 [Toggle] _UseShadowRamp ("Enable Shadow Ramp Texture", Float) = 1.0
-                [Toggle] _UseVertexColorAO ("Enable Vertex Color Ambient Occlusion", Range(0.0, 1.0)) = 1.0
+                [Toggle] _UseVertexColorAO ("Enable Vertex Color Ambient Occlusion", Float) = 1.0
                 [Toggle] _UseVertexRampWidth ("Use Vertex Shadow Ramp Width", Float) = 0
                 [Toggle] _MultiLight ("Enable Multi Light Source Mode", float) = 1.0
                 //_EnvironmentLightingStrength ("Environment Lighting Strength", Range(0.0, 1.0)) = 1.0
@@ -169,7 +191,7 @@ Shader "HoyoToon/Genshin/Character"
                 [Toggle] _CustomAOEnable ("Enable Custom AO", Float) = 0	
                 [SmallTexture]_CustomAO ("Custom AO Texture--{condition_show:{type:PROPERTY_BOOL,data:_CustomAOEnable==1.0}}",2D)= "white"{ }
                 // Shadow Transition
-                [HideInInspector] m_start_shadowtransitions("Shadow Transitions", Float) = 0
+                [HideInInspector] m_start_shadowtransitions("Shadow Transitions--{reference_property:_UseShadowTransition}", Float) = 0
                     [Toggle] _UseShadowTransition ("Use Shadow Transition (only work when shadow ramp is off)", Float) = 0
                     _ShadowTransitionRange ("Shadow Transition Range 1", Range(0.0, 1.0)) = 0.01
                     _ShadowTransitionRange2 ("Shadow Transition Range 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Range(0.0, 1.0)) = 0.01
@@ -184,23 +206,25 @@ Shader "HoyoToon/Genshin/Character"
                 [HideInInspector] m_end_shadowtransitions ("", Float) = 0
                 // Day Shadow Color
                 [HideInInspector] m_start_shadowcolorsday("DayTime Colors", Float) = 0
-                    [Gamma] _FirstShadowMultColor ("Daytime Shadow Color 1", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _FirstShadowMultColor2 ("Daytime Shadow Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _FirstShadowMultColor3 ("Daytime Shadow Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _FirstShadowMultColor4 ("Daytime Shadow Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _FirstShadowMultColor5 ("Daytime Shadow Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _FirstShadowMultColor ("Daytime Shadow Color 1", Color) = (0.9, 0.7, 0.75, 1)
+                    _FirstShadowMultColor2 ("Daytime Shadow Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _FirstShadowMultColor3 ("Daytime Shadow Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _FirstShadowMultColor4 ("Daytime Shadow Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _FirstShadowMultColor5 ("Daytime Shadow Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
                 [HideInInspector] m_end_shadowcolorsday ("", Float) = 0
                 // Night Shadow Color
                 [HideInInspector] m_start_shadowcolorsnight("NightTime Colors", Float) = 0
-                    [Gamma] _CoolShadowMultColor ("Nighttime Shadow Color 1", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _CoolShadowMultColor2 ("Nighttime Shadow Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _CoolShadowMultColor3 ("Nighttime Shadow Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _CoolShadowMultColor4 ("Nighttime Shadow Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
-                    [Gamma] _CoolShadowMultColor5 ("Nighttime Shadow Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _CoolShadowMultColor ("Nighttime Shadow Color 1", Color) = (0.9, 0.7, 0.75, 1)
+                    _CoolShadowMultColor2 ("Nighttime Shadow Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _CoolShadowMultColor3 ("Nighttime Shadow Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _CoolShadowMultColor4 ("Nighttime Shadow Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
+                    _CoolShadowMultColor5 ("Nighttime Shadow Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.9, 0.7, 0.75, 1)
                 [HideInInspector] m_end_shadowcolorsnight ("", Float) = 0
             [HideInInspector] m_end_lightandshadow ("", Float) = 0
+            //endex
+            //ifex _UseRimLight == 0
             // Rim Light 
-            [HideInInspector] m_start_rimlight("Rim Light", Float) = 0
+            [HideInInspector] m_start_rimlight("Rim Light--{reference_property:_UseRimLight}", Float) = 0
                 [Toggle] _UseRimLight ("Enable Rim Light", Float) = 1
                 _RimThreshold ("Rim Threshold--{condition_show:{type:PROPERTY_BOOL,data:_UseRimLight==1.0}}", Range(0.0, 1.0)) = 0.5
                 _RimLightIntensity ("Rim Light Intensity--{condition_show:{type:PROPERTY_BOOL,data:_UseRimLight==1.0}}", Float) = 0.25
@@ -214,14 +238,16 @@ Shader "HoyoToon/Genshin/Character"
                     _RimColor4 (" Rim Light Color 5 | (RGB ID = 127)--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (1, 1, 1, 1)
                 [HideInInspector] m_end_lightingrimcolor("", Float) = 0
             [HideInInspector] m_end_rimlight ("", Float) = 0
+            //endex
         [HideInInspector] m_end_lightning ("", Float) = 0
         //Lightning Options End
 
         //Reflections, specular/metal/leather
         [HideInInspector] m_start_reflections("Reflections", Float) = 0
             // Specular
-            [HideInInspector] m_start_metallics("Metallics", Int) = 0
-                [Toggle] _MetalMaterial ("Enable Metallic", Range(0.0, 1.0)) = 1.0
+            //ifex _MetalMaterial == 0
+            [HideInInspector] m_start_metallics("Metallics--{reference_property:_MetalMaterial}", Int) = 0
+                [Toggle] _MetalMaterial ("Enable Metallic", Float) = 1.0
                 [SmallTexture]_MTMap("Metallic Matcap--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}",2D)= "white"{ }
                 [Toggle] _MTUseSpecularRamp ("Enable Metal Specular Ramp--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 0.0
                 [SmallTexture]_MTSpecularRamp("Specular Ramp--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_MetalMaterial==1},condition2:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1}}}",2D)= "white"{ }
@@ -240,8 +266,10 @@ Shader "HoyoToon/Genshin/Character"
                     _MTSharpLayerColor ("Metallic Sharp Layer Color", Color) = (1.0, 1.0, 1.0, 1.0)
                 [HideInInspector] m_end_metallicscolor ("", Int) = 0
             [HideInInspector] m_end_metallics("", Int) = 0
+            //endex
+            //ifex _SpecularHighlights == 0
             // Metal 
-            [HideInInspector] m_start_specular("Specular Reflections", Int) = 0
+            [HideInInspector] m_start_specular("Specular Reflections--{reference_property:_SpecularHighlights}", Int) = 0
                 [Toggle] _SpecularHighlights ("Enable Specular", Float) = 0.0
                 [HideInInspector] [Toggle] _UseToonSpecular ("Enable Specular", Float) = 0.0
                 _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
@@ -259,15 +287,17 @@ Shader "HoyoToon/Genshin/Character"
                 _SpecOpacity3 ("Specular Opacity 3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Float) = 0.1
                 _SpecOpacity4 ("Specular Opacity 4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Float) = 0.1
                 _SpecOpacity5 ("Specular Opacity 5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Float) = 0.1
-                [Gamma] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [Gamma] _SpecularColor2 ("Specular Color2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial2==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [Gamma] _SpecularColor3 ("Specular Color3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [Gamma] _SpecularColor4 ("Specular Color4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [Gamma] _SpecularColor5 ("Specular Color5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                // [Gamma] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor2 ("Specular Color2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial2==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor3 ("Specular Color3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor4 ("Specular Color4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor5 ("Specular Color5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                // [HDR] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
             [HideInInspector] m_end_specular("", Int) = 0
+            //endex
             // Leather 
-            [HideInInspector] m_start_leather("Leather", Float) = 0
+            //ifex _UseCharacterLeather == 0
+            [HideInInspector] m_start_leather("Leather--{reference_property:_UseCharacterLeather}", Float) = 0
                 [Toggle] _UseCharacterLeather("Enable Leather", Float) = 0
                 _LeatherSpecularColor ("Leather Specular Color", Color) = (1,1,1,1)
                 [HideInInspector] m_start_laser ("Holographic", Float) = 0
@@ -295,24 +325,29 @@ Shader "HoyoToon/Genshin/Character"
                     _LeatherSpecularDetailSharpe ("Leather Specualr Sharpe", Range(0.501, 1)) = 1
                 [HideInInspector] m_end_leatherdetail ("Detail", Float) = 0
             [HideInInspector] m_end_leather("", Float) = 0
+            //endex
         [HideInInspector] m_end_reflections ("", Float) = 0
         //Reflections End
         
+
         //Outlines
-        [HideInInspector] m_start_outlines("Outlines", Float) = 0
-            [Enum(None, 0, Normal, 1,  Tangent, 2)] _OutlineType ("Outline Type", Float) = 1.0
-            [Toggle] _FallbackOutlines ("Enable Static Outlines", Range(0.0, 1.0)) = 0
+        //ifex _OutlineEnabled == 0
+        [HideInInspector] m_start_outlines("Outlines--{reference_property:_OutlineEnabled}", Float) = 0
+            [HideInInspector] [Toggle] _OutlineEnabled ("Hidden Outline Bool--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_OutlineType=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_OutlineType=2}]}]}", Float) = 1
+            _saveoutlinevalue ("", Float) = 1.0
+            [Enum(None, 0, Normal, 1,  Tangent, 2)] _OutlineType ("Outline Type--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=0},{type:SET_PROPERTY,data:_saveoutlinevalue=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=1},{type:SET_PROPERTY,data:_saveoutlinevalue=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=1},{type:SET_PROPERTY,data:_saveoutlinevalue=2}]}]}", Float) = 1.0
+            [Toggle] _FallbackOutlines ("Enable Static Outlines", Float) = 0
             _OutlineWidth ("Outline Width", Float) = 0.03
             _Scale ("Outline Scale", Float) = 0.01
-            [Toggle] [HideInInspector] _UseClipPlane ("Use Clip Plane?", Range(0.0, 1.0)) = 0.0
+            [Toggle] [HideInInspector] _UseClipPlane ("Use Clip Plane?", Float) = 0.0
             [HideInInspector] _ClipPlane ("Clip Plane", Vector) = (0.0, 0.0, 0.0, 0.0)
             // Outline Color
             [HideInInspector] m_start_outlinescolor("Outline Colors", Float) = 0
-                [Gamma] _OutlineColor ("Outline Color 1", Color) = (0.0, 0.0, 0.0, 1.0)
-                [Gamma] _OutlineColor2 ("Outline Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
-                [Gamma] _OutlineColor3 ("Outline Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
-                [Gamma] _OutlineColor4 ("Outline Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
-                [Gamma] _OutlineColor5 ("Outline Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
+                _OutlineColor ("Outline Color 1", Color) = (0.0, 0.0, 0.0, 1.0)
+                _OutlineColor2 ("Outline Color 2--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
+                _OutlineColor3 ("Outline Color 3--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial3==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
+                _OutlineColor4 ("Outline Color 4--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial4==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
+                _OutlineColor5 ("Outline Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (0.0, 0.0, 0.0, 1.0)
             [HideInInspector] m_end_outlinescolor ("", Float) = 0
 
             [HideInInspector] m_start_outlineint ("Diffuse Intensity", Float) = 0
@@ -330,6 +365,7 @@ Shader "HoyoToon/Genshin/Character"
                 _MaxOutlineZOffset ("Max Z-Offset", Float) = 1.0
             [HideInInspector] m_end_outlinesoffset ("", Float) = 0
         [HideInInspector] m_end_outlines ("", Float) = 0
+        //endex
         //Outlines End
 
         //Special Effects
@@ -357,15 +393,15 @@ Shader "HoyoToon/Genshin/Character"
                     _EmissionColorEye ("Emission Color For Eye--{condition_show:{type:PROPERTY_BOOL,data:_ToggleEyeGlow==1.0}}", Color) = (1,1,1,1)
                 [HideInInspector] m_end_glowcolor("", Float) = 0
                 // Force Eye Glow
-                [HideInInspector] m_start_eyeemission("Eye Emission", Float) = 0
+                [HideInInspector] m_start_eyeemission("Eye Emission--{reference_property:_ToggleEyeGlow}", Float) = 0
                     [Toggle] _ToggleEyeGlow ("Enable Eye Glow", Float) = 1.0
                 
                     _EyeGlowStrength ("Eye Glow Strength", Float) = 0.5
                     _EyeTimeOffset ("Eye Glow Timing Offset", Range(0.0, 1.0)) = 0.1
                 [HideInInspector] m_end_eyeemission("", Float) = 0
                 // Emission Pulse
-                [HideInInspector] m_start_emissionpulse("Pulsing Emission", Float) = 0
-                    [Toggle] _TogglePulse ("Enable Pulse", Range(0.0, 1.0)) = 0.0 
+                [HideInInspector] m_start_emissionpulse("Pulsing Emission--{reference_property:_TogglePulse}", Float) = 0
+                    [Toggle] _TogglePulse ("Enable Pulse", Float) = 0.0 
                     [Toggle] _EyePulse ("Enable Pulse for Eyes", Float) = 0
                     _PulseSpeed ("Pulse Speed", Float) = 1.3
                     _PulseMinStrength ("Minimum Pulse Strength", Range(0.0, 1.0)) = 0.0
@@ -373,7 +409,8 @@ Shader "HoyoToon/Genshin/Character"
                 [HideInInspector] m_end_emissionpulse ("", Float) = 0
             [HideInInspector] m_end_emissionglow ("", Float) = 0
             // Outline Emission
-            [HideInInspector] m_start_outlineemission("Outline Emission", Float) = 0
+            //ifex _EnableOutlineGlow == 0
+            [HideInInspector] m_start_outlineemission("Outline Emission--{reference_property:_EnableOutlineGlow}", Float) = 0
                 [Toggle] _EnableOutlineGlow("Enable Outline Emission", Float) = 0
                 _OutlineGlowInt("Outline Emission Intesnity", Range(0.0000, 100.0000)) = 1.0
                 [HideInInspector] m_start_outlineemissioncolors("Outline Emission Colors", Float) = 0
@@ -384,14 +421,16 @@ Shader "HoyoToon/Genshin/Character"
                     _OutlineGlowColor5("Outline Emission Color 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
                 [HideInInspector] m_end_outlineemissioncolors("", Float) = 0
             [HideInInspector] m_end_outlineemission ("", Float) = 0
+            //endex 
             // Star Cock
-            [HideInInspector] m_start_starcock("Star Cloak", Float) = 0 //tribute to the starcock 
+            //ifex _StarCloakEnable == 0
+            [HideInInspector] m_start_starcock("Star Cloak--{reference_property:_StarCloakEnable}", Float) = 0 //tribute to the starcock 
                 [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
                 [Enum(Paimon, 0, Skirk, 1, Asmoday, 2)] _StarCockType ("Star Cloak Type Override--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
                 [Toggle] _StarCockEmis ("Star Cloak As Emission--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
                 [Enum(UV0, 0, UV1, 1, UV2, 2)] _StarUVSource ("UV Source--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
                 [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0.0
-                _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType0}}}", Range(0.0, 2.0)) = 1.0
+                _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Range(0.0, 2.0)) = 1.0
                 _StarTex ("Star Texture 1--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType<2}}}", 2D) = "black" { } // cock 
                 _Star02Tex ("Star Texture 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", 2D) = "black" { }
                 _Star01Speed ("Star 1 Scroll Speed--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0
@@ -474,7 +513,7 @@ Shader "HoyoToon/Genshin/Character"
                     _BrightLineColor ("Bright Line Color", Color) = (1,1,1,1)
                     _BrightLineMaskSpeed ("Bright Line Mask Speed", Vector) = (0,0,0,0)
                 [HideInInspector] m_end_skockbright ("", Float) = 0
-                [HideInInspector] m_start_asmodayarm("Asmoday Arm Effect", Float) = 0
+                [HideInInspector] m_start_asmodayarm("Asmoday Arm Effect--{reference_property:_HandEffectEnable}", Float) = 0
                     [Toggle] _HandEffectEnable ("Enable Asmoday Arm Effect", Float) = 0
                     _LightColor ("Light Color", Color) = (0.4117647,0.1665225,0.1665225,0)
                     _ShadowColor ("Shadow Color", Color) = (0.2941176,0.1319204,0.1319204,0)
@@ -522,15 +561,22 @@ Shader "HoyoToon/Genshin/Character"
                     [HideInInspector] m_end_asmodayspeed ("", Float) = 0
                 [HideInInspector] m_end_asmodayarm ("", Float) = 0 
             [HideInInspector] m_end_starcock ("", Float) = 0   
+            //endex
+
             // Skill Animation Fresnel
-            [HideInInspector] m_start_fresnel("Fresnel", Float) = 0
+            //ifex _EnableFresnel == 0
+            [HideInInspector] m_start_fresnel("Fresnel--{reference_property:_EnableFresnel}", Float) = 0
+                [Toggle] _EnableFresnel ("Enable Fresnel", Float) = 0
                 _HitColor ("Hit Color", Color) = (0,0,0,0)
                 _ElementRimColor ("Element Rim Color", Color) = (0,0,0,0)
                 _HitColorScaler ("Hit Color Intensity", Range(0.00, 100.00)) = 6
                 _HitColorFresnelPower ("Hit Fresnel Power", Range(0.00,100.00)) = 1.5
             [HideInInspector] m_end_fresnel ("", Float) = 0
+            //endex
+            //ifex _EnableHueShift == 0
             // Hue Controls
-            [HideInInspector] m_start_hueshift("Hue Shifting", Float) = 0
+            [HideInInspector] m_start_hueshift("Hue Shifting--{reference_property:_EnableHueShift}", Float) = 0
+                [Toggle] _EnableHueShift ("Enable Hue Shifting", Float) = 0
                 [Toggle] _UseHueMask ("Enable Hue Mask", Float) = 0
                 _HueMaskTexture ("Hue Mask--{condition_show:{type:PROPERTY_BOOL,data:_UseHueMask==1.0}}", 2D) = "white" {}
                 // Color Hue
@@ -586,19 +632,21 @@ Shader "HoyoToon/Genshin/Character"
                     _RimHue5 ("Hue Shift 5--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial5==1.0}}", Range(0.0, 1.0)) = 0
                 [HideInInspector] m_end_rimhue ("", Float) = 0
             [HideInInspector] m_end_hueshift ("", float) = 0
+            //endex
+            //ifex _EnableNyxState == 0
             // Nyx State
-            [HideInInspector] m_start_nyx("Nyx State", Float) = 0
+            [HideInInspector] m_start_nyx("Nyx State--{reference_property:_EnableNyxState}", Float) = 0
                 [Toggle] _EnableNyxState ("Enable Nyx State", Float) = 0
                 [NoScaleOffset] _NyxStateOutlineColorRamp ("Color Ramp--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", 2D) = "gray" { }
                 [NoScaleOffset] _NyxStateOutlineNoise ("Noise(RG)--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", 2D) = "gray" { }
-                [Vector2] _NyxStateOutlineColorNoiseScale ("Color Noise Scale--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Vector) = (2,2,0,0)
-                _NyxStateOutlineColorNoiseTurbulence ("Ramp Noise Scale--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Range(0, 1)) = 0.25
+                [Vector2] _NyxStateOutlineColorNoiseScale ("Noise Scale--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Vector) = (2,2,0,0)
+                _NyxStateOutlineColorNoiseAnim ("Noise Speed--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Vector) = (0.05,0.05,0,0)
+                _NyxStateOutlineColorNoiseTurbulence ("Noise Turbulence--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Range(0, 1)) = 0.25
                 [HideInInspector] m_start_bodygroup ("Body Markings--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Float) = 0
                     [Toggle] _BodyAffected ("Affected by Light", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _TempNyxStatePaintMaskChannel("Mask Channel", Float) = 1
                     [Enum(UV0, 0, UV1, 1, UV2, 2, UV3, 3)] _NyxBodyUVCoord ("UV Coord for Mask", Float) = 0
                     _TempNyxStatePaintMaskTex ("Body Mask Texture", 2D) = "black" {}
-                    _NyxStateOutlineColorNoiseAnim ("Color Noise Speed--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Vector) = (0.05,0.05,0,0)
                     _NyxStateOutlineColorOnBodyMultiplier ("Color Multiplier", Color) = (1,1,1,1)
                     _NyxStateOutlineColorOnBodyOpacity ("Blend Rate", Float) = 0
                 [HideInInspector] m_end_bodygroup ("", Float) = 0
@@ -623,6 +671,7 @@ Shader "HoyoToon/Genshin/Character"
                 [HideInInspector] m_end_nyxoutline ("", Float) = 0
 
             [HideInInspector] m_end_nyx("Nyx State", Float) = 0
+            //endex
         [HideInInspector] m_end_specialeffects ("", Float) = 0
         //Special Effects End
 
@@ -636,7 +685,8 @@ Shader "HoyoToon/Genshin/Character"
             [HideInInspector][Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("Source Blend--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_SrcBlend=2}]}, {value:3,actions:[{type:SET_PROPERTY,data:_SrcBlend=3}]}, {value:4,actions:[{type:SET_PROPERTY,data:_SrcBlend=4}]}, {value:5,actions:[{type:SET_PROPERTY,data:_SrcBlend=5}]}, {value:6,actions:[{type:SET_PROPERTY,data:_SrcBlend=6}]}, {value:7,actions:[{type:SET_PROPERTY,data:_SrcBlend=7}]}, {value:8,actions:[{type:SET_PROPERTY,data:_SrcBlend=8}]}, {value:9,actions:[{type:SET_PROPERTY,data:_SrcBlend=9}]}, {value:10,actions:[{type:SET_PROPERTY,data:_SrcBlend=10}]}, {value:11,actions:[{type:SET_PROPERTY,data:_SrcBlend=11}]}]}", Int) = 1
             [HideInInspector][Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("Destination Blend--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_DstBlend=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_DstBlend=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_DstBlend=2}]}, {value:3,actions:[{type:SET_PROPERTY,data:_DstBlend=3}]}, {value:4,actions:[{type:SET_PROPERTY,data:_DstBlend=4}]}, {value:5,actions:[{type:SET_PROPERTY,data:_DstBlend=5}]}, {value:6,actions:[{type:SET_PROPERTY,data:_DstBlend=6}]}, {value:7,actions:[{type:SET_PROPERTY,data:_DstBlend=7}]}, {value:8,actions:[{type:SET_PROPERTY,data:_DstBlend=8}]}, {value:9,actions:[{type:SET_PROPERTY,data:_DstBlend=9}]}, {value:10,actions:[{type:SET_PROPERTY,data:_DstBlend=10}]}, {value:11,actions:[{type:SET_PROPERTY,data:_DstBlend=11}]}]}", Int) = 0
             // Debug Options
-            [HideInInspector] m_start_debugOptions("Debug", Float) = 0
+            //ifex _DebugMode == 0
+            [HideInInspector] m_start_debugOptions("Debug--{reference_property:_DebugMode}", Float) = 0
                 [Toggle] _DebugMode ("Enable Debug Mode", float) = 0
                 [Enum(Off, 0, RGB, 1, A, 2)] _DebugDiffuse("Diffuse Debug Mode", Float) = 0
                 [Enum(Off, 0, R, 1, G, 2, B, 3, A, 4)] _DebugLightMap ("Light Map Debug Mode", Float) = 0
@@ -653,6 +703,7 @@ Shader "HoyoToon/Genshin/Character"
                 [Enum(Off, 0, On, 1)] _DebugLights ("Lights Debug Mode", Float) = 0
                 [HoyoToonWideEnum(Off, 0, Materail ID 1, 1, Material ID 2, 2, Material ID 3, 3, Material ID 4, 4, Material ID 5, 5, All(Color Coded), 6)] _DebugMaterialIDs ("Material ID Debug Mode", Float) = 0
             [HideInInspector] m_end_debugOptions("Debug", Float) = 0
+            //endex
         [HideInInspector] m_end_renderingOptions("Rendering Options", Float) = 0
         //Rendering Options End
     }
@@ -660,6 +711,71 @@ Shader "HoyoToon/Genshin/Character"
     {
         Tags{ "RenderType"="Opaque" "Queue"="Geometry" }
         HLSLINCLUDE
+
+        //ifex _UseBumpMap == 0
+            #define use_bump
+        //endex
+        //ifex _MainTexColoring == 0
+            #define use_texTint
+        //endex
+        //ifex _DisableColors == 0
+            #define disable_color
+        //endex
+        //ifex _UseMaterialMasksTex == 0
+            #define has_mask
+        //endex
+        //ifex _TextureLineUse == 0
+            #define sdf_line
+        //endex
+        //ifex _UseFaceMapNew == 0 && variant_selector != 1
+            #define faceishadow
+        //endex
+        //ifex _UseWeapon == 0
+            #define weapon_mode
+        //endex
+        //ifex _UseGlassSpecularToggle == 0
+            #define parallax_glass
+        //endex
+        //ifex _EnableShadow == 0
+            #define use_shadow
+        //endex
+        //ifex _UseShadowRamp == 0
+            #define has_sramp
+        //endex
+        //ifex _UseRimLight == 0
+            #define use_rimlight
+        //endex
+        //ifex _SpecularHighlights == 0
+            #define use_specular
+        //endex
+        //ifex _MetalMaterial == 0
+            #define use_metal
+        //endex
+        //ifex _UseCharacterLeather == 0
+            #define use_leather
+        //endex
+        //ifex _OutlineEnabled == 0
+            #define use_outline
+        //endex
+        //ifex _StarCloakEnable == 0
+            #define is_cock
+            #define paimon_cock
+            #define skirk_cock
+            #define asmoday_cock
+            #define asmogay_arm
+        //endex 
+        //ifex _EnableFresnel == 0
+            #define has_fresnel
+        //endex
+        //ifex _EnableHueShift == 0
+            #define can_shift
+        //endex
+        //ifex _EnableNyxState == 0
+            #define can_nyx
+        //endex
+        //ifex _DebugMode == 0
+            #define can_debug
+        //endex 
 
         #include "UnityCG.cginc"
         #include "UnityLightingCommon.cginc"
@@ -671,11 +787,10 @@ Shader "HoyoToon/Genshin/Character"
         #include "Includes/HoyoToonGenshin-inputs.hlsl"
         #include "Includes/HoyoToonGenshin-common.hlsl"
 
-
         ENDHLSL
 
         
-        Pass // Character Pass
+        Pass // Character Pass, the only REQUIRED pass
         {
             Name "Character Pass"
             Tags{ "LightMode" = "ForwardBase" }
@@ -689,6 +804,7 @@ Shader "HoyoToon/Genshin/Character"
 			}
             HLSLPROGRAM
             
+            
             #pragma multi_compile_fwdbase
             #pragma multi_compile _IS_PASS_BASE
             
@@ -698,7 +814,7 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }      
-
+        //ifex _MultiLight == 0
         Pass // Character Light Pass
         {
             Name "Character Light Pass"
@@ -723,7 +839,8 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }    
-
+        //endex
+        //ifex _OutlineEnabled == 0
         Pass // Outline Pass
         {
             Name "Outline Pass"
@@ -746,7 +863,8 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }
-
+        //endex
+        //ifex _UseRimLight == 0
         Pass // Shadow Pass, this ensures the model shows up in CameraDepthTexture
         {
             Name "Shadow Pass"
@@ -763,7 +881,8 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }   
-
+        //endex
+        //ifex _EnableNyxOutline==0
         Pass // Nyx Outline Pass, Rendered after everything so it appears behind everything thanks to the stencil settings
         {
             Name "Nyx Outline Pass"
@@ -785,6 +904,7 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }
+        //endex
     }
     CustomEditor "HoyoToon.ShaderEditor"
 }
