@@ -89,19 +89,9 @@ float4 _WeaponPatternTex_ST;
 float4 _ScanPatternTex_ST;
 
 SamplerState sampler_MainTex; 
-SamplerState sampler_LightMapTex; 
-SamplerState sampler_FaceMapTex;
-SamplerState sampler_BumpMap;
-SamplerState sampler_PackedShadowRampTex;
-SamplerState sampler_MTMap;
-SamplerState sampler_MTSpecularRamp;
-SamplerState sampler_LeatherReflect;
-
-SamplerState sampler_WeaponDissolveTex;
-SamplerState sampler_WeaponPatternTex;
-SamplerState sampler_ScanPatternTex;
-SamplerState sampler_NyxStateOutlineNoise;
-SamplerState sampler_NyxStateOutlineColorRamp;
+SamplerState sampler_linear_repeat;
+SamplerState sampler_linear_clamp;
+// reduce sampler count to just 3
 
 
 float _gameVersion;

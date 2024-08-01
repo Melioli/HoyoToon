@@ -85,7 +85,7 @@ float material_region(float alpha)
 float3 face_exp(float2 uv, float4 color)
 {
     #if defined(faceishadow)
-        float4 expression_map = _FaceExpTex.Sample(sampler_FaceExpTex, uv * _FaceExpTex_ST.xy + _FaceExpTex_ST.zw);
+        float4 expression_map = _FaceExpTex.Sample(sampler_linear_repeat, uv * _FaceExpTex_ST.xy + _FaceExpTex_ST.zw);
 
         // --- blush 
         float blush = expression_map.x * _ExpBlushIntensityR * _ExpBlushColorR.w;
@@ -189,7 +189,7 @@ float shadow_area_face(float2 uv, float3 light)
 
 
         // use only the alpha channel of the texture 
-        float facemap = _FaceMapTex.Sample(sampler_FaceMapTex, faceuv).w;
+        float facemap = _FaceMapTex.Sample(sampler_linear_repeat, faceuv).w;
         // interpolate between sharp and smooth face shading
         shadow_step = smoothstep(shadow_step - (0.001f), shadow_step + (0.001f), facemap);
     #endif
@@ -221,7 +221,7 @@ float3 shadow_base(float shadow_area, float alpha, float lightmap_shadow)
         float2 ramp_uv = _RampTexV;
         ramp_uv.x = shadow_area.x;
 
-        float3 ramp_shadow = _RampTex.Sample(sampler_RampTex, ramp_uv);
+        float3 ramp_shadow = _RampTex.Sample(sampler_linear_clamp, ramp_uv);
 
         color = lerp(first_color, ramp_shadow, shadow_area.x);
     #endif
@@ -242,7 +242,7 @@ float3 shadow_hair(float2 shadow_area, float lightmap_shadow)
         float2 ramp_uv = _RampTexV;
         ramp_uv.x = shadow_area.x;
 
-        float3 ramp_shadow = _RampTex.Sample(sampler_RampTex, ramp_uv);
+        float3 ramp_shadow = _RampTex.Sample(sampler_linear_clamp, ramp_uv);
 
         color = -_FirstShadowMultColor.xyz * enable_contrast + ramp_shadow;
         color = shadow_area.x * color + first_color;
@@ -263,7 +263,7 @@ void metal(float3 normal, float shadow_area, float3 shadow_color, float ndoth, f
         sphere_uv.x = sphere_uv.x * _MTMapTileScale; 
         sphere_uv = sphere_uv * 0.5f + 0.5f; 
 
-        float sphere = _MTMap.Sample(sampler_MTMap, sphere_uv);
+        float sphere = _MTMap.Sample(sampler_linear_repeat, sphere_uv);
 
         float sphere_base = sphere * shadow_area;
 
@@ -337,9 +337,9 @@ float3 hair_specular(float3 normal, float3 bitangent, float3 light, float3 view,
         // sample textures first
         float2 jitter_uv = uv * _JitterMap_ST.xy + _JitterMap_ST.zw;
 
-        float jitter  = _JitterMap.Sample(sampler_JitterMap, jitter_uv).x;
-        float4 mask   = _SpecularMaskMap.Sample(sampler_SpecularMaskMap, uv);
-        float pattern = _HairStripPatternsTex.SampleLevel(sampler_JitterMap, float2(uv.x, 0.5f) * _HairStripPatternsTex_ST.xy + _HairStripPatternsTex_ST.zw, 0.0f) * 2.0f - 1.0f;
+        float jitter  = _JitterMap.Sample(sampler_linear_repeat, jitter_uv).x;
+        float4 mask   = _SpecularMaskMap.Sample(sampler_linear_repeat, uv);
+        float pattern = _HairStripPatternsTex.SampleLevel(sampler_linear_repeat, float2(uv.x, 0.5f) * _HairStripPatternsTex_ST.xy + _HairStripPatternsTex_ST.zw, 0.0f) * 2.0f - 1.0f;
         
         float3 specular_offset = _SpecularOffset * float3(-1.0f, 1.0f, 1.0f);
         specular_offset = normalize(specular_offset);
@@ -388,7 +388,7 @@ float3 hair_specular(float3 normal, float3 bitangent, float3 light, float3 view,
         high_shine = max(sqrt(max(high_shine, 0.0f)), 0.001f);
         high_shine = pow(high_shine, specular_shininess);
 
-        float specular_ramp = _RampMap.Sample(sampler_RampTex, float2(high_shine, 0.5f)).w;
+        float specular_ramp = _RampMap.Sample(sampler_linear_clamp, float2(high_shine, 0.5f)).w;
         high_shine = specular_ramp * mask_lerp;
 
         float mask_region = (mask.z >= 0.5) ? 1.0 : 0.0;

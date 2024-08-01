@@ -353,7 +353,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             ENDHLSL
         }
 
-        // ifex _MultiLight == 0
+        //ifex _MultiLight == 0
         Pass // main pass
         {
             Name "Character Pass"

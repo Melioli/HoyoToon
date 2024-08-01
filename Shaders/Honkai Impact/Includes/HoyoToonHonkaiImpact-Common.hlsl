@@ -106,9 +106,9 @@ float3 hi3_rim(float ndotv, float lightmap, float ndotl, float3 diffuse)
 void dissolve_a(in float2 uv2, in float4 mask_uv, in float2 dis_angle, inout float3 color, out float blend_alpha, out float add_alpha, out float out_noise, out float2 out_mask)
 {
     #if defined(can_dissolve)
-        float noise = _NoiseTex.Sample(sampler_NoiseTex, mask_uv.zw).x * _NoiseIntensity;
+        float noise = _NoiseTex.Sample(sampler_linear_repeat, mask_uv.zw).x * _NoiseIntensity;
         float2 mUV = noise * (float2)0.0099f + mask_uv.xy;
-        float2 mask = _MaskDisTex.Sample(sampler_MaskDisTex, mUV).xy * (float2)_MaskDisTexScale;
+        float2 mask = _MaskDisTex.Sample(sampler_linear_repeat, mUV).xy * (float2)_MaskDisTexScale;
         // since the second dissolve function needs the masks and noise, output them like this
         out_mask = mask;
         out_noise = noise; 

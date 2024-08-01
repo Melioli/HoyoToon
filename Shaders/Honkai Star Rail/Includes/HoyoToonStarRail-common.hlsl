@@ -136,7 +136,7 @@ float shadow_rate_face(float2 uv, float3 light)
         // apply rotation offset
         
         // use only the alpha channel of the texture 
-        float facemap = _FaceMap.Sample(sampler_FaceMap, faceuv).w;
+        float facemap = _FaceMap.Sample(sampler_linear_repeat, faceuv).w;
         // interpolate between sharp and smooth face shading
         shadow_step = smoothstep(shadow_step - (0.0001f), shadow_step + (0.0001f), facemap);
 
@@ -238,7 +238,7 @@ void dissolve_vertex(in float4 pos_ws, float4 pos,  in float2 uv_0, in float2 uv
 void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in float2 uv)
 {
     #if defined(can_dissolve)
-        _DissolveMapAddM = lerp(_DissolveMapAddM, 0.0f, _DissolveRateM);
+        float dissolveMapAdd = lerp(_DissolveMapAddM, 0.0f, _DissolveRateM);
         float dissolve_rate = _DissolveRateM;
 
         float2 dis_tex;
@@ -254,16 +254,16 @@ void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in flo
         dis_pos_.x = (-dis_pos.y) + _DissoveDirecMaskM;
         dis_pos_.x = min(abs(dis_pos_.x), 1.0f);
         dis_tex.xy = _DissolveUVSpeedM.zw * _Time.yy + dis_tex.xy;
-        dissolve_map.xy = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).xy;
+        dissolve_map.xy = _DissolveMap.Sample(sampler_linear_repeat, dis_tex.xy).xy;
         dis_tex.xy = dissolve_map.xy + (float2)-0.5f;
         distort.xy = -(dis_tex.xy) * (float2)_DissolveDistortionIntensityM + dis_uv.xy;
         dis_tex.xy = _DissolveUVSpeedM.xy * _Time.yy + distort.xy;
-        dissolve_map_2 = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).x;
-        dissolve_mask = _DissolveMask.Sample(sampler_DissolveMap, uv.xy);
+        dissolve_map_2 = _DissolveMap.Sample(sampler_linear_repeat, dis_tex.xy).x;
+        dissolve_mask = _DissolveMask.Sample(sampler_linear_repeat, uv.xy);
         if(_InvertDissovle) dissolve_mask = 1.0f - dissolve_mask;
 
         dissolve_comp = dot(dissolve_mask, _DissolveComponentM);     
-        dis_map_add = dissolve_map_2 + _DissolveMapAddM; 
+        dis_map_add = dissolve_map_2 + dissolveMapAdd; 
         dis_clip = dis_pos_.x * dis_map_add;
         dis_clip.x = dissolve_comp * dis_clip.x;
         dis_clip.x = dis_clip.x * dis_pos.y;
@@ -280,7 +280,7 @@ void dissolve_clip(in float4 ws_pos, in float4 dis_pos, in float4 dis_uv, in flo
 float4 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, float4 color)
 {
     #if defined(can_dissolve)
-        _DissolveMapAddM = lerp(_DissolveMapAddM, 0.0f, _DissolveRateM);
+        float dissolveMapAdd = lerp(_DissolveMapAddM, 0.0f, _DissolveRateM);
         float dissolve_rate = _DissolveRateM;
         float disolve_direct_mask = -dis_pos.y + _DissoveDirecMaskM;
         float2 dis_tex;
@@ -295,15 +295,15 @@ float4 dissolve_color(float4 ws_pos, float4 dis_pos, float4 dis_uv, float2 uv, f
         dis_pos_.x = (-dis_pos.y) + _DissoveDirecMaskM;
         dis_pos_.x = min(abs(dis_pos_.x), 1.0f);
         dis_tex.xy = _DissolveUVSpeedM.zw * _Time.yy + dis_uv.zw;
-        dissolve_map.xy = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).xy;
+        dissolve_map.xy = _DissolveMap.Sample(sampler_linear_repeat, dis_tex.xy).xy;
         dis_tex.xy = dissolve_map.xy + (float2)-0.5f;
         distort = -(dis_tex.xy) * (float2)_DissolveDistortionIntensityM + dis_uv.xy;
         dis_tex.xy = _DissolveUVSpeedM.xy * _Time.yy + distort.xy;
-        dissolve_map_2 = _DissolveMap.Sample(sampler_DissolveMap, dis_tex.xy).z;
-        dissolve_mask = _DissolveMask.Sample(sampler_DissolveMap, uv.xy);   
+        dissolve_map_2 = _DissolveMap.Sample(sampler_linear_repeat, dis_tex.xy).z;
+        dissolve_mask = _DissolveMask.Sample(sampler_linear_repeat, uv.xy);   
         if(_InvertDissovle) dissolve_mask = 1.0f - dissolve_mask;
         dissolve_comp = dot(dissolve_mask, _DissolveComponentM);     
-        dis_map_add = dissolve_map_2 + _DissolveMapAddM; 
+        dis_map_add = dissolve_map_2 + dissolveMapAdd; 
         dis_clip = dis_pos_.x * dis_map_add;
         dis_clip.x = dissolve_comp * dis_clip.x;
         dis_clip.x = dis_clip.x * dis_pos.y;
@@ -376,11 +376,11 @@ void simple_dissolve(in float4 primary_diffuse, in float2 uv0, in float2 uv1, in
         uv2
     };
 
-    float gradient = _DissolveGradientMask.Sample(sampler_DissolveGradientMask, dissolve_uv[_DissolveUVChannel]).x + _DissolveGradientOffset;
+    float gradient = _DissolveGradientMask.Sample(sampler_linear_repeat, dissolve_uv[_DissolveUVChannel]).x + _DissolveGradientOffset;
     if(_DisableDissolveGradient) gradient = 1.0f; // fail safe incase of missing texture or unity fuckery
 
     float2 distortion_uv = _Time.yy * float2(_DissolveAnimDirection.xy * _DissolveAnimSpeed) + (_DissolveAnimSO.xy * dissolve_uv[_DissolveUVChannel] + _DissolveAnimSO.zw);
-    float distortion = _DissolveAnimTex.Sample(sampler_DissolveGradientMask, distortion_uv).x;
+    float distortion = _DissolveAnimTex.Sample(sampler_linear_repeat, distortion_uv).x;
 
     gradient = gradient + _DissolveGradientOffset;
     gradient = gradient * distortion;

@@ -49,10 +49,10 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     
     // sample main textures : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv * _MainTex_ST.xy + _MainTex_ST.zw);
-    float4 bump    = _BumpMap.Sample(sampler_BumpMap, uv);
-    float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv);
-    float4 facemap = _FaceMapTex.Sample(sampler_FaceMapTex, uv);
-    float4 expmap = _FaceExpTex.Sample(sampler_FaceExpTex, uv * _FaceExpTex_ST.xy + _FaceExpTex_ST.zw);
+    float4 bump    = _BumpMap.Sample(sampler_linear_repeat, uv);
+    float4 lightmap = _LightMapTex.Sample(sampler_linear_repeat, uv);
+    float4 facemap = _FaceMapTex.Sample(sampler_linear_repeat, uv);
+    float4 expmap = _FaceExpTex.Sample(sampler_linear_repeat, uv * _FaceExpTex_ST.xy + _FaceExpTex_ST.zw);
 
     // material region
     float region = material_region(lightmap.w);
@@ -305,7 +305,7 @@ edge_out vs_edge(edge_in v)
     #if defined(faceishadow)
         if(variant_selector == 1 && _ExpOutlineToggle)
         {
-            float exp_map =_FaceExpTex.SampleLevel(sampler_FaceExpTex, v.uv_0.xy, 0).w;
+            float exp_map =_FaceExpTex.SampleLevel(sampler_linear_repeat, v.uv_0.xy, 0).w;
             exp_fix = saturate((1.0f - exp_map) * _ExpOutlineFix);
             exp_fix = exp_map + exp_fix;
         } 
@@ -341,7 +341,7 @@ float4 ps_edge(edge_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 
     clip(i.color.w - 0.01f);
 
-    float lightmap_alpha = _LightMapTex.Sample(sampler_LightMapTex, i.uv_a.xy).w;
+    float lightmap_alpha = _LightMapTex.Sample(sampler_linear_repeat, i.uv_a.xy).w;
     float region = material_region(lightmap_alpha);
 
     float4 outline_color[5] =

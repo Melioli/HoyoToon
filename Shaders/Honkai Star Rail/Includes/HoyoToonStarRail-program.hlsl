@@ -247,27 +247,27 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
-    float4 lightmap = _LightMap.Sample(sampler_LightMap, uv);
-    float lightmap_alpha = _LightMap.Sample(sampler_LightMap, i.uv.xy).w;
+    float4 lightmap = _LightMap.Sample(sampler_linear_repeat, uv);
+    float lightmap_alpha = _LightMap.Sample(sampler_linear_repeat, i.uv.xy).w;
     #if defined(faceishadow)
-        float4 facemap = _FaceMap.Sample(sampler_FaceMap, uv);
-        float4 faceexp = _FaceExpression.Sample(sampler_LightMap, uv);
+        float4 facemap = _FaceMap.Sample(sampler_linear_repeat, uv);
+        float4 faceexp = _FaceExpression.Sample(sampler_linear_repeat, uv);
     #endif
     #if defined(use_emission)
-        float4 emistex = _EmissionTex.Sample(sampler_LightMap, uv);
+        float4 emistex = _EmissionTex.Sample(sampler_linear_repeat, uv);
     #endif
     #if defined(second_diffuse)
         if(_UseSecondaryTex)
         {
-            float4 secondary = _SecondaryDiff.Sample(sampler_MainTex, uv);
+            float4 secondary = _SecondaryDiff.Sample(sampler_linear_repeat, uv);
             diffuse = lerp(diffuse, secondary, _SecondaryFade);
         }
     #endif
 
     #if defined(can_shift)
-        float diffuse_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _DiffuseMaskSource);
-        float rim_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _RimMaskSource);
-        float emission_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _EmissionMaskSource);
+        float diffuse_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv, _DiffuseMaskSource);
+        float rim_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv, _RimMaskSource);
+        float emission_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv, _EmissionMaskSource);
         if(!_UseHueMask) 
         {
             diffuse_mask = 1.0f;
@@ -382,8 +382,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
 
             rim_depth = rim_depth * saturate(lerp(1.0f, lightmap.r, _RimLightMode));
 
-            rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
-            rim_light = rim_light;
+            if(_EnableRimLight) rim_light = (rim_color[curr_region].xyz * rim_depth * _Rimintensity) * _ES_Rimintensity * max(0.5f, camera_dist) * saturate(vface);
             #if defined(can_shift)
                 if(_EnableRimHue) rim_light.xyz = hue_shift(rim_light.xyz, curr_region, _RimHue, _RimHue2, _RimHue3, _RimHue4, _RimHue5, _RimHue6, _RimHue7, _RimHue8, _GlobalRimHue, _AutomaticRimShift, _ShiftRimSpeed, rim_mask);
                 // rim_light.xyz = rim_light * saturate(diffuse.xyz * 5.0f);
@@ -441,83 +440,90 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         // // ================================================================================================ //
         // SHADOW AREA :
         float3 shadow_color = (float3)1.0f;
+        float shadow_area = 1.0f;
         #if defined(use_shadow)
-            float shadow_area = shadow_rate((ndotl), (lightmap.y), vcol.x, _ShadowRamp);
-            if(_BaseMaterial) shadow_area = lerp(_SelfShadowDarken, shadow_area, unity_shadow);
+            if(_EnableShadow == 1)
+            {
+                shadow_area = shadow_rate((ndotl), (lightmap.y), vcol.x, _ShadowRamp);
+                if(_BaseMaterial) shadow_area = lerp(_SelfShadowDarken, shadow_area, unity_shadow);
 
-            // RAMP UVS 
-            float2 ramp_uv = {shadow_area, ramp_ID};
+                // RAMP UVS 
+                float2 ramp_uv = {shadow_area, ramp_ID};
 
-            // SAMPLE RAMP TEXTURES
-            float3 warm_ramp = _DiffuseRampMultiTex.Sample(sampler_DiffuseRampMultiTex, ramp_uv).xyz; 
-            float3 cool_ramp = _DiffuseCoolRampMultiTex.Sample(sampler_DiffuseRampMultiTex, ramp_uv).xyz;
+                // SAMPLE RAMP TEXTURES
+                float3 warm_ramp = _DiffuseRampMultiTex.Sample(sampler_linear_clamp, ramp_uv).xyz; 
+                float3 cool_ramp = _DiffuseCoolRampMultiTex.Sample(sampler_linear_clamp, ramp_uv).xyz;
 
-            shadow_color = lerp(warm_ramp, cool_ramp, 0.0f);
-            #if defined(faceishadow)
-                if(_FaceMaterial)
-                {
-                    float face_sdf_right = _FaceMap.Sample(sampler_FaceMap, uv).w;
-                    float face_sdf_left  = _FaceMap.Sample(sampler_FaceMap, float2(1.0f - uv.x, uv.y)).w;
+                shadow_color = lerp(warm_ramp, cool_ramp, 0.0f);
+                #if defined(faceishadow)
+                    if(_FaceMaterial)
+                    {
+                        float face_sdf_right = _FaceMap.Sample(sampler_linear_repeat, uv).w;
+                        float face_sdf_left  = _FaceMap.Sample(sampler_linear_repeat, float2(1.0f - uv.x, uv.y)).w;
 
-                    shadow_area = shadow_rate_face(uv, light);
+                        shadow_area = shadow_rate_face(uv, light);
 
-                    shadow_color = lerp(_ShadowColor, 1.0f, shadow_area);
-                }
-            #endif
+                        shadow_color = lerp(_ShadowColor, 1.0f, shadow_area);
+                    }
+                #endif
+            }
         #endif
 
         // ================================================================================================ //
         // specular : 
         #if defined(use_specular)
-            float4 specular_color[8] =
+            if(_EnableSpecular)
             {
-                _SpecularColor0,
-                _SpecularColor1,
-                _SpecularColor2,
-                _SpecularColor3,
-                _SpecularColor4,
-                _SpecularColor5,
-                _SpecularColor6,
-                _SpecularColor7,
-            };
+                float4 specular_color[8] =
+                {
+                    _SpecularColor0,
+                    _SpecularColor1,
+                    _SpecularColor2,
+                    _SpecularColor3,
+                    _SpecularColor4,
+                    _SpecularColor5,
+                    _SpecularColor6,
+                    _SpecularColor7,
+                };
 
-            float3 specular_values[8] =
-            {
-                float3(_SpecularShininess0, _SpecularRoughness0, _SpecularIntensity0),
-                float3(_SpecularShininess1, _SpecularRoughness1, _SpecularIntensity1),
-                float3(_SpecularShininess2, _SpecularRoughness2, _SpecularIntensity2),
-                float3(_SpecularShininess3, _SpecularRoughness3, _SpecularIntensity3),
-                float3(_SpecularShininess4, _SpecularRoughness4, _SpecularIntensity4),
-                float3(_SpecularShininess5, _SpecularRoughness5, _SpecularIntensity5),
-                float3(_SpecularShininess6, _SpecularRoughness6, _SpecularIntensity6),
-                float3(_SpecularShininess7, _SpecularRoughness7, _SpecularIntensity7),
-            };
-            
-            if(_UseMaterialValuesLUT)
-            {
-                specular_color[curr_region] = lut_speccol;
-                specular_values[curr_region] = lut_specval.xyz * float3(10.0f, 2.0f, 2.0f); // weird fix, not accurate to ingame code but whatever if it works it works
-            }
-            if(_FaceMaterial)
-            {
-                specular_color[curr_region] = (float4)0.0f;
-            }
-            specular_values[curr_region].z = max(0.0f, specular_values[curr_region].z); // why would there ever be a reason for a negative specular intensity
+                float3 specular_values[8] =
+                {
+                    float3(_SpecularShininess0, _SpecularRoughness0, _SpecularIntensity0),
+                    float3(_SpecularShininess1, _SpecularRoughness1, _SpecularIntensity1),
+                    float3(_SpecularShininess2, _SpecularRoughness2, _SpecularIntensity2),
+                    float3(_SpecularShininess3, _SpecularRoughness3, _SpecularIntensity3),
+                    float3(_SpecularShininess4, _SpecularRoughness4, _SpecularIntensity4),
+                    float3(_SpecularShininess5, _SpecularRoughness5, _SpecularIntensity5),
+                    float3(_SpecularShininess6, _SpecularRoughness6, _SpecularIntensity6),
+                    float3(_SpecularShininess7, _SpecularRoughness7, _SpecularIntensity7),
+                };
+                
+                if(_UseMaterialValuesLUT)
+                {
+                    specular_color[curr_region] = lut_speccol;
+                    specular_values[curr_region] = lut_specval.xyz * float3(10.0f, 2.0f, 2.0f); // weird fix, not accurate to ingame code but whatever if it works it works
+                }
+                if(_FaceMaterial)
+                {
+                    specular_color[curr_region] = (float4)0.0f;
+                }
+                specular_values[curr_region].z = max(0.0f, specular_values[curr_region].z); // why would there ever be a reason for a negative specular intensity
 
-            specular = specular_base(shadow_area, ndoth, lightmap.z, specular_color[curr_region], specular_values[curr_region], _ES_SPColor, _ES_SPIntensity);
-        #endif
+                specular = specular_base(shadow_area, ndoth, lightmap.z, specular_color[curr_region], specular_values[curr_region], _ES_SPColor, _ES_SPIntensity);
+            }
+          #endif
         // ================================================================================================ //
         #if defined(use_stocking)
             float2 tile_uv = uv.xy * _StockRangeTex_ST.xy + _StockRangeTex_ST.zw;
 
-            float stock_tile = _StockRangeTex.Sample(sampler_LightMap, tile_uv).z; 
+            float stock_tile = _StockRangeTex.Sample(sampler_linear_repeat, tile_uv).z; 
             // blue channel is a tiled texture that when used adds the rough mesh textured feel
             stock_tile = stock_tile * 0.5f - 0.5f;
             stock_tile = _StockRoughness * stock_tile + 1.0f;
             // extract and remap 
 
             // sample untiled texture 
-            float4 stocking_tex = _StockRangeTex.Sample(sampler_LightMap, uv.xy);
+            float4 stocking_tex = _StockRangeTex.Sample(sampler_linear_repeat, uv.xy);
             // determine which areas area affected by the stocking
             float stock_area = (stocking_tex.x > 0.001f) ? 1.0f : 0.0f;
 
@@ -525,9 +531,9 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             // i dont remember where i got this from but its in my mmd shader so it must be right... right? 
             float stock_rim = max(0.001f, ndotv);
 
-            _Stockpower = max(0.039f, _Stockpower);
+            float stock_power = max(0.039f, _Stockpower);
             
-            stock_rim = smoothstep(_Stockpower, _StockDarkWidth * _Stockpower, stock_rim) * _StockSP;
+            stock_rim = smoothstep(stock_power, _StockDarkWidth * stock_power, stock_rim) * _StockSP;
 
             stocking_tex.x = stocking_tex.x * stock_area * stock_rim;
             float3 stock_dark_area = (float3)-1.0f * _StockDarkcolor;
@@ -636,7 +642,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         #endif
         out_color = out_color * diffuse;
         if(_EnableAlphaCutoff) clip(diffuse.w - saturate(testTresh));
-        out_color.xyz = out_color * shadow_color + (specular); 
+        #if defined(use_shadow)
+            out_color.xyz = (_EnableShadow == 1) ? out_color * shadow_color : out_color; 
+        #endif
+        #if defined(use_specular)
+            out_color.xyz = (_EnableSpecular == 1) ? out_color + specular : out_color; 
+        #endif
         #if defined(can_shift)
             if(_EnableColorHue) out_color.xyz = hue_shift(out_color.xyz, curr_region, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _ColorHue6, _ColorHue7, _ColorHue8, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
         #endif
@@ -644,7 +655,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             if(_EnableEmission > 0) out_color.xyz = emis_area * (out_color.xyz * emission_color) + out_color.xyz;
         #endif
         #if defined(use_rimlight)
-            if(!_FaceMaterial) out_color.xyz = lerp(out_color.xyz.xyz - rim_light.xyz, out_color.xyz + rim_light.xyz, rim_values[curr_region].z);
+            if(!_FaceMaterial && _EnableRimLight) out_color.xyz = lerp(out_color.xyz.xyz - rim_light.xyz, out_color.xyz + rim_light.xyz, rim_values[curr_region].z);
         #endif
         if(!_IsTransparent && !_EnableAlphaCutoff) out_color.w = 1.0f;
         if(_EyeShadowMat) out_color = _Color;
@@ -677,19 +688,19 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
                 float3 caus_b = (float3)0.0f;
                 if(_EnableSplit)
                 {
-                    float caus_a_r = _CausTexture.Sample(sampler_LightMap, caus_uv_a + float2(_CausSplit, _CausSplit)).x;
-                    float caus_a_g = _CausTexture.Sample(sampler_LightMap, caus_uv_a + float2(_CausSplit, -_CausSplit)).x;
-                    float caus_a_b = _CausTexture.Sample(sampler_LightMap, caus_uv_a + float2(-_CausSplit, -_CausSplit)).x;
-                    float caus_b_r = _CausTexture.Sample(sampler_LightMap, caus_uv_b + float2(_CausSplit, _CausSplit)).x;
-                    float caus_b_g = _CausTexture.Sample(sampler_LightMap, caus_uv_b + float2(_CausSplit, -_CausSplit)).x;
-                    float caus_b_b = _CausTexture.Sample(sampler_LightMap, caus_uv_b + float2(-_CausSplit, -_CausSplit)).x;
+                    float caus_a_r = _CausTexture.Sample(sampler_linear_repeat, caus_uv_a + float2(_CausSplit, _CausSplit)).x;
+                    float caus_a_g = _CausTexture.Sample(sampler_linear_repeat, caus_uv_a + float2(_CausSplit, -_CausSplit)).x;
+                    float caus_a_b = _CausTexture.Sample(sampler_linear_repeat, caus_uv_a + float2(-_CausSplit, -_CausSplit)).x;
+                    float caus_b_r = _CausTexture.Sample(sampler_linear_repeat, caus_uv_b + float2(_CausSplit, _CausSplit)).x;
+                    float caus_b_g = _CausTexture.Sample(sampler_linear_repeat, caus_uv_b + float2(_CausSplit, -_CausSplit)).x;
+                    float caus_b_b = _CausTexture.Sample(sampler_linear_repeat, caus_uv_b + float2(-_CausSplit, -_CausSplit)).x;
                     caus_a = float3(caus_a_r, caus_a_g, caus_a_b);
                     caus_b = float3(caus_b_r, caus_b_g, caus_b_b);
                 }
                 else
                 {
-                    caus_a = _CausTexture.Sample(sampler_LightMap, caus_uv_a).xxx;
-                    caus_b = _CausTexture.Sample(sampler_LightMap, caus_uv_b).xxx;
+                    caus_a = _CausTexture.Sample(sampler_linear_repeat, caus_uv_a).xxx;
+                    caus_b = _CausTexture.Sample(sampler_linear_repeat, caus_uv_b).xxx;
                 }
 
                 float3 caus = min(caus_a, caus_b);  
@@ -926,7 +937,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     #if defined(can_dissolve)
         if(_DissoveONM && (_DissolveMode == 2.0)) dissolve_clip(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy);
     #endif
-    float lightmap = _LightMap.Sample(sampler_LightMap, uv).w;
+    float lightmap = _LightMap.Sample(sampler_linear_repeat, uv).w;
     float alpha = _MainTex.Sample(sampler_MainTex, uv).w;
 
 
@@ -952,7 +963,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     if(_FaceMaterial) out_color = _OutlineColor;
     out_color.a = 1.0f;
     #if defined(can_shift)
-        float outline_mask = packed_channel_picker(sampler_LightMap, _HueMaskTexture, uv, _OutlineMaskSource);
+        float outline_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv, _OutlineMaskSource);
         if(!_UseHueMask) outline_mask = 1.0f;
         if(_EnableOutlineHue) out_color.xyz = hue_shift(out_color.xyz, material, _OutlineHue, _OutlineHue2, _OutlineHue3, _OutlineHue4, _OutlineHue5, _OutlineHue6, _OutlineHue7, _OutlineHue8, _GlobalOutlineHue, _AutomaticOutlineShift, _ShiftOutlineSpeed, outline_mask);
     #endif

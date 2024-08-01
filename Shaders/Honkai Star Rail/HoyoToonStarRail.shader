@@ -117,7 +117,7 @@ Shader "HoyoToon/Star Rail/Character"
         [HideInInspector] m_start_lighting("Lighting Options", Float) = 0
             //ifex _EnableShadow == 0
             [HideInInspector] m_start_lightandshadow("Shadow--{reference_property:_EnableShadow}", Float) = 0
-                [HideInInspector] [Toggle] _EnableShadow ("", Float) = 1
+                [Toggle] _EnableShadow ("Enable Shadow", Float) = 1
                 [SmallTexture]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
                 [SmallTexture]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
                 //[Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
@@ -144,7 +144,7 @@ Shader "HoyoToon/Star Rail/Character"
             //endex
             //ifex _EnableRimLight == 0
             [HideInInspector] m_start_lightingrim("Rim Light--{reference_property:_EnableRimLight}", Float) = 0
-                [HideInInspector] [Toggle] _EnableRimLight ("Enable Rim Light", Float) = 1
+                [Toggle] _EnableRimLight ("Enable Rim Light", Float) = 1
                 _RimLightMode ("Rim Light Use LightMap.r", Range(0, 1)) = 1
                 //_RimCt ("Rim CT", Float) = 5
                 _Rimintensity ("Rim Intensity", Float) = 1
@@ -248,7 +248,7 @@ Shader "HoyoToon/Star Rail/Character"
         //ifex _EnableSpecular == 0
         // specular 
         [HideInInspector] m_start_specular("Specular--{reference_property:_EnableSpecular}", Float) = 0
-            [HideInInspector] [Toggle] _EnableSpecular ("Enable Specular", Float) = 1
+            [Toggle] _EnableSpecular ("Enable Specular", Float) = 1
             _ES_SPColor ("Global Specular Color", Color) = (1, 1, 1, 1)
             _ES_SPIntensity ("Global Specular Intensity", Float) = 0.5
             [HideInInspector] m_start_specularcolor("Specular Color", Float) = 0

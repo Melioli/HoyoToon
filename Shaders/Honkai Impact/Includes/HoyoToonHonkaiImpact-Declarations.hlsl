@@ -11,6 +11,7 @@ Texture2D _NoiseTex;
 Texture2D _MainTex2;
 #endif
 SamplerState sampler_MainTex;
+SamplerState sampler_linear_repeat;
 SamplerState sampler_LightMapTex;
 SamplerState sampler_FaceMapTex;
 SamplerState sampler_FacExpTex;

@@ -36,13 +36,11 @@ Texture2D _HueMaskTexture;
 #endif
 
 float4 _CausTexture_ST;
-SamplerState sampler_DissolveMap;
-SamplerState sampler_DissolveGradientMask;
-SamplerState sampler_MaterialValuesPackLUT;
+
+
 SamplerState sampler_MainTex;
-SamplerState sampler_LightMap;
-SamplerState sampler_DiffuseRampMultiTex;
-SamplerState sampler_FaceMap;
+SamplerState sampler_linear_repeat;
+SamplerState sampler_linear_clamp;
 
 #if defined(use_rimlight)
 UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
@@ -58,6 +56,10 @@ float _HairMaterial;
 float _IsTransparent;
 
 float _FilterLight;
+
+float _EnableSpecular;
+float _EnableShadow;
+float _EnableRimLight;
 
 // COLORS
 float4 _Color;

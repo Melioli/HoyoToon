@@ -3,39 +3,27 @@ float variant_selector;
 float _FilterLight;
 // === textures === //
 Texture2D _MainTex;
-SamplerState sampler_MainTex;
 float4 _MainTex_ST;
 Texture2D _BumpMap;
 Texture2D _NormalMap;
-SamplerState sampler_BumpMap;
 Texture2D _LightMapTex;
-SamplerState sampler_LightMapTex;
 Texture2D _FaceMapTex;
-SamplerState sampler_FaceMapTex;
 Texture2D _RampTex;
-SamplerState sampler_RampTex;
 Texture2D _MTMap;
-SamplerState sampler_MTMap;
 Texture2D _SpecularMaskMap;
-SamplerState sampler_SpecularMaskMap;
 Texture2D _RampMap;
-// SamplerState sampler_RampMap;
 Texture2D _JitterMap;
-float4 _JitterMap_ST;
 Texture2D _HairStripPatternsTex;
-float4 _HairStripPatternsTex_ST;
-SamplerState sampler_JitterMap;
-// Texture2D _DiffuseTex1;
-// SamplerState sampler_DiffuseTex1;
-// Texture2D _DiffuseTex2;
-// Texture2D _DissolveTex;
-// Texture2D _DissolveMask;
-// Texture2D _MaskTex;
-// Texture2D _NoiseTex;
-// Texture2D _VertexOffsetTex;
 Texture2D _FaceExpTex;
-SamplerState sampler_FaceExpTex;
+float4 _JitterMap_ST;
+float4 _HairStripPatternsTex_ST;
 float4 _FaceExpTex_ST;
+
+SamplerState sampler_MainTex;
+SamplerState sampler_linear_repeat;
+SamplerState sampler_linear_clamp;
+
+
 
 // === MATERIAL TOGGLES ===//
 float _EnableShadow;

@@ -60,7 +60,7 @@ float4 ps_edge(edge_out i) : COLOR0
     {
         float4 main_tex = _MainTex.Sample(sampler_MainTex, i.uv);
 
-        float4 out_col = edge_cols(_LightMapTex.Sample(sampler_LightMapTex, i.uv).w);
+        float4 out_col = edge_cols(_LightMapTex.Sample(sampler_linear_repeat, i.uv).w);
         #if defined(faceishadow)
             if(variant_selector == 1 || variant_selector == 3) out_col = _OutlineColor;
         #endif
@@ -144,16 +144,16 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
 
     // textures
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv);
-    float4 Alpha = _MaskDisTex.Sample(sampler_MaskDisTex, uv);
-    float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv); 
+    float4 Alpha = _MaskDisTex.Sample(sampler_linear_repeat, uv);
+    float4 lightmap = _LightMapTex.Sample(sampler_linear_repeat, uv); 
     
     float s = 1.0f;
     
     #if defined(use_shadow)
         #if defined(faceishadow)
             // shadow stuff
-            float shadow_right = (_FaceMapTex.Sample(sampler_FaceMapTex, float2(      uv.x, uv.y)).a);
-            float shadow_left  = (_FaceMapTex.Sample(sampler_FaceMapTex, float2(1.0 - uv.x, uv.y)).a);
+            float shadow_right = (_FaceMapTex.Sample(sampler_linear_repeat, float2(      uv.x, uv.y)).a);
+            float shadow_left  = (_FaceMapTex.Sample(sampler_linear_repeat, float2(1.0 - uv.x, uv.y)).a);
         #endif
 
 
@@ -240,7 +240,7 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
         #if defined(faceishadow)
             if(variant_selector == 1)
             { // face expression
-                float4 expressionmap = _FacExpTex.Sample(sampler_FacExpTex, uv.xy);
+                float4 expressionmap = _FacExpTex.Sample(sampler_linear_repeat, uv.xy);
 
                 float blush = saturate(pow(expressionmap.x * _ExpBlushIntensity, 2));
                 float2 otherexp = saturate(float2(expressionmap.y * _ExpShadowIntensity, expressionmap.z * _ExpShadowIntensity2));
@@ -255,7 +255,7 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
             }else if(variant_selector == 3)
             {
                 float2 eye_uv = (uv - _EyeEffectCenterPos.xy) / (_EyeEffectLocalScale.xy * 0.5) + float2(0.5, 0.5);
-                float4 eye_star = _EyeEffectTex.Sample(sampler_FaceMapTex, eye_uv);
+                float4 eye_star = _EyeEffectTex.Sample(sampler_linear_repeat, eye_uv);
                 out_col = lerp(out_col, eye_star, eye_star.w * _EyeEffectPupil);
             }
         #endif

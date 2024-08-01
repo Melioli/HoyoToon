@@ -334,7 +334,6 @@ Shader "HoyoToon/Genshin/Character"
         //ifex _OutlineEnabled == 0
         [HideInInspector] m_start_outlines("Outlines--{reference_property:_OutlineEnabled}", Float) = 0
             [HideInInspector] [Toggle] _OutlineEnabled ("Hidden Outline Bool--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_OutlineType=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_OutlineType=2}]}]}", Float) = 1
-            _saveoutlinevalue ("", Float) = 1.0
             [Enum(None, 0, Normal, 1,  Tangent, 2)] _OutlineType ("Outline Type--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=0},{type:SET_PROPERTY,data:_saveoutlinevalue=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=1},{type:SET_PROPERTY,data:_saveoutlinevalue=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=1},{type:SET_PROPERTY,data:_saveoutlinevalue=2}]}]}", Float) = 1.0
             [Toggle] _FallbackOutlines ("Enable Static Outlines", Float) = 0
             _OutlineWidth ("Outline Width", Float) = 0.03
@@ -423,8 +422,8 @@ Shader "HoyoToon/Genshin/Character"
             [HideInInspector] m_end_outlineemission ("", Float) = 0
             //endex 
             // Star Cock
-            //ifex _StarCloakEnable == 0
             [HideInInspector] m_start_starcock("Star Cloak--{reference_property:_StarCloakEnable}", Float) = 0 //tribute to the starcock 
+                //ifex _StarCloakEnable == 0
                 [Toggle] _StarCloakEnable("Enable Star Cloak", Float) = 0.0
                 [Enum(Paimon, 0, Skirk, 1, Asmoday, 2)] _StarCockType ("Star Cloak Type Override--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
                 [Toggle] _StarCockEmis ("Star Cloak As Emission--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
@@ -513,6 +512,8 @@ Shader "HoyoToon/Genshin/Character"
                     _BrightLineColor ("Bright Line Color", Color) = (1,1,1,1)
                     _BrightLineMaskSpeed ("Bright Line Mask Speed", Vector) = (0,0,0,0)
                 [HideInInspector] m_end_skockbright ("", Float) = 0
+                //endex
+                //ifex _HandEffectEnable == 0
                 [HideInInspector] m_start_asmodayarm("Asmoday Arm Effect--{reference_property:_HandEffectEnable}", Float) = 0
                     [Toggle] _HandEffectEnable ("Enable Asmoday Arm Effect", Float) = 0
                     _LightColor ("Light Color", Color) = (0.4117647,0.1665225,0.1665225,0)
@@ -560,8 +561,8 @@ Shader "HoyoToon/Genshin/Character"
                         _Tex05_Speed_V ("Mask 5 Y Scroll Speed", Float) = 0 
                     [HideInInspector] m_end_asmodayspeed ("", Float) = 0
                 [HideInInspector] m_end_asmodayarm ("", Float) = 0 
+                //endex
             [HideInInspector] m_end_starcock ("", Float) = 0   
-            //endex
 
             // Skill Animation Fresnel
             //ifex _EnableFresnel == 0
@@ -762,8 +763,10 @@ Shader "HoyoToon/Genshin/Character"
             #define paimon_cock
             #define skirk_cock
             #define asmoday_cock
-            #define asmogay_arm
         //endex 
+        //ifex _HandEffectEnable == 0
+        #define asmogay_arm
+        //endex
         //ifex _EnableFresnel == 0
             #define has_fresnel
         //endex
@@ -885,7 +888,7 @@ Shader "HoyoToon/Genshin/Character"
             ENDHLSL
         }   
         //endex
-        
+        //ifex _EnableNyxState == 0 && _EnableNyxOutline 
         Pass // Nyx Outline Pass, Rendered after everything so it appears behind everything thanks to the stencil settings
         {
             Name "Nyx Outline Pass"
@@ -907,7 +910,7 @@ Shader "HoyoToon/Genshin/Character"
             #include "Includes/HoyoToonGenshin-program.hlsl"
             ENDHLSL
         }
-        
+        //endex
     }
     CustomEditor "HoyoToon.ShaderEditor"
 }

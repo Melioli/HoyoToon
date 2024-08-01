@@ -103,7 +103,7 @@ vs_out vs_edge(vs_in v)
             outline_scale = outline_scale * 0.414f;
             outline_scale = outline_scale * v.v_col.w;
             #if defined(faceisshadow)
-                if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_FaceMapTex, v.uv_0.xy, 0.0f).z;
+                if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_linear_repeat, v.uv_0.xy, 0.0f).z;
             #endif
 
             float offset_depth = saturate(1.0f - depth);
@@ -169,7 +169,7 @@ vs_out vs_nyx(vs_in v)
         noise_uv = frac(noise_uv);
         noise_uv = noise_uv + screen_pos.xy;
 
-        float noise_a = _NyxStateOutlineNoise.SampleLevel(sampler_NyxStateOutlineNoise, noise_uv, 0).y;
+        float noise_a = _NyxStateOutlineNoise.SampleLevel(sampler_linear_repeat, noise_uv, 0).y;
         
         float widthScale = _NyxStateOutlineWidthScale * _NyxStateOutlineWidthScaleRange.x;
         float nyx_outline_width = saturate((-wv_pos.y) * _NyxStateOutlineWidthScaleLerpHeightRange.z + (-_NyxStateOutlineWidthScaleLerpHeightRange.w));
@@ -254,15 +254,15 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 
     // SAMPLE TEXTURES : 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, uv_a);
-    float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, uv_a);
+    float4 lightmap = _LightMapTex.Sample(sampler_linear_repeat, uv_a);
     #if defined(use_shadow)
-        float customao  = _CustomAO.Sample(sampler_LightMapTex, uv_a);
+        float customao  = _CustomAO.Sample(sampler_linear_repeat, uv_a);
     #endif
     #if defined(use_bump)
-        float4 normalmap = _BumpMap.Sample(sampler_BumpMap, uv_a);
+        float4 normalmap = _BumpMap.Sample(sampler_linear_repeat, uv_a);
     #endif
     #if defined(faceishadow)
-        float4 facemap = _FaceMapTex.Sample(sampler_FaceMapTex, uv_a);
+        float4 facemap = _FaceMapTex.Sample(sampler_linear_repeat, uv_a);
     #endif
 
     #ifdef _IS_PASS_BASE // Basic character shading pass, should only include the basic enviro light stuff + debug rendering shit
@@ -306,13 +306,13 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         #endif
         // sample mask texture
         #if defined (has_mask)
-        float4 material_mask = _MaterialMasksTex.Sample(sampler_LightMapTex, uv_a);
+        float4 material_mask = _MaterialMasksTex.Sample(sampler_linear_repeat, uv_a);
         #endif
         #if defined(can_shift)
             // HUE MASKS: 
-            float diffuse_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _DiffuseMaskSource);
-            float rim_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _RimMaskSource);
-            float emission_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, uv_a, _EmissionMaskSource);
+            float diffuse_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv_a, _DiffuseMaskSource);
+            float rim_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv_a, _RimMaskSource);
+            float emission_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, uv_a, _EmissionMaskSource);
 
             if(!_UseHueMask)
             {
@@ -331,7 +331,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float emis_check_eye = _EyePulse ? _ToggleEyeGlow * pulsate(_PulseSpeed, _PulseMinStrength, _PulseMaxStrength, _EyeTimeOffset) : _ToggleEyeGlow;
         float mask = diffuse.w; 
         float eye_mask = 0.0f;
-        if(_EmissionType == 1) mask = _CustomEmissionTex.Sample(sampler_MainTex, uv_a).x;
+        if(_EmissionType == 1) mask = _CustomEmissionTex.Sample(sampler_linear_repeat, uv_a).x;
         if(_ToggleEyeGlow == 1) eye_mask = lightmap.y > 0.95f;
         mask = saturate(mask - 0.02f); // removing any artifacts
         if(_StarCloakEnable && _StarCockEmis) mask = 1.0f;
@@ -346,8 +346,8 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         }
 
         // SHADOW
-        float3 shadow = 1.0f;
-        float3 metalshadow;
+        float3 shadow = (float3)1.0f;
+        float3 metalshadow = (float3)0.0f;
         float3 s_color = (float3)1.0f;
         float3 leather = (float3)0;
         #if defined(use_shadow)
@@ -583,12 +583,12 @@ float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
     float4 out_color = (float4)1.0f;
     #if defined(can_shift)
-        float outline_mask = packed_channel_picker(sampler_LightMapTex, _HueMaskTexture, i.uv_a.xy, _OutlineMaskSource);
+        float outline_mask = packed_channel_picker(sampler_linear_repeat, _HueMaskTexture, i.uv_a.xy, _OutlineMaskSource);
         outline_mask = _UseHueMask ? outline_mask : 1.0f;
     #endif
 
     float4 diffuse = _MainTex.Sample(sampler_MainTex, i.uv_a.xy);
-    float4 lightmap = _LightMapTex.Sample(sampler_LightMapTex, i.uv_a.xy);
+    float4 lightmap = _LightMapTex.Sample(sampler_linear_repeat, i.uv_a.xy);
 
     float material_ID = materialID(lightmap.w);
 
@@ -647,16 +647,16 @@ float4 ps_nyx(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
         float4 noise_uv = _Time.yyyy * (_NyxStateOutlineColorNoiseAnim.zwxy);
         noise_uv = frac(noise_uv);
         screen_uv = screen_uv * _NyxStateOutlineColorNoiseScale.xyxy + noise_uv;
-        float noise_a = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, screen_uv.xy).x;
+        float noise_a = _NyxStateOutlineNoise.Sample(sampler_linear_repeat, screen_uv.xy).x;
         screen_uv.xy = noise_a.xx * (float2)_NyxStateOutlineColorNoiseTurbulence + screen_uv.zw;
         float2 ramp_uv;
         float2 time_uv;
-        ramp_uv.x = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, screen_uv.xy).x;
+        ramp_uv.x = _NyxStateOutlineNoise.Sample(sampler_linear_repeat, screen_uv.xy).x;
         ramp_uv.y = float(0.75);
         time_uv.y = float(0.25);
-        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, ramp_uv.xy, 0.0).xyz;
+        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_linear_repeat, ramp_uv.xy, 0.0).xyz;
         time_uv.x = (_DayOrNight) ? 0 : 1;
-        float3 time_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, time_uv.xy, 0.0).xyz;
+        float3 time_ramp = _NyxStateOutlineColorRamp.Sample(sampler_linear_repeat, time_uv.xy, 0.0).xyz;
         nyx_ramp.xyz = time_ramp.xyz * nyx_ramp.xyz;
         nyx_ramp.xyz = nyx_ramp.xyz * (float3)_NyxStateOutlineColorScale * _NyxStateOutlineColor;
         float nyx_brightness = max(nyx_ramp.z, nyx_ramp.y);

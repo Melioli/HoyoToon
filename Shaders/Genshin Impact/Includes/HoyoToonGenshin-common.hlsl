@@ -222,7 +222,7 @@ float shadow_area_face(float2 uv, float3 light)
         shadow_step = smoothstep(max(_FaceMapRotateOffset, 0.0), min(_FaceMapRotateOffset + 1.0f, 1.0f), shadow_step);
         
         // use only the alpha channel of the texture 
-        float facemap = _FaceMapTex.Sample(sampler_FaceMapTex, faceuv).w;
+        float facemap = _FaceMapTex.Sample(sampler_linear_repeat, faceuv).w;
         // interpolate between sharp and smooth face shading
         shadow_step = smoothstep(shadow_step - (_FaceMapSoftness), shadow_step + (_FaceMapSoftness), facemap);
 
@@ -366,8 +366,8 @@ void shadow_color(in float lightmapao, in float vertexao, in float customao, in 
             day_ramp_coords.x = shadow.x;
             float2 night_ramp_coords = -((get_index(material_id)) * 0.1f + 0.55f) + 1.0f;
             night_ramp_coords.x = shadow.x;
-            float3 dayramp = _PackedShadowRampTex.SampleLevel(sampler_PackedShadowRampTex, day_ramp_coords, 0.0f).xyz;
-            float3 nightramp = _PackedShadowRampTex.SampleLevel(sampler_PackedShadowRampTex, night_ramp_coords, 0.0f);
+            float3 dayramp = _PackedShadowRampTex.SampleLevel(sampler_linear_clamp, day_ramp_coords, 0.0f).xyz;
+            float3 nightramp = _PackedShadowRampTex.SampleLevel(sampler_linear_clamp, night_ramp_coords, 0.0f);
             float3 ramp = lerp(dayramp, nightramp, _DayOrNight);
             color = lerp(1.0f, ramp, shadow.y);
             #endif
@@ -386,66 +386,65 @@ void shadow_color(in float lightmapao, in float vertexao, in float customao, in 
 void metalics(in float3 shadow, in float3 normal, float3 ndoth, float speculartex, float backfacing, inout float3 color)
 {
     #if defined(use_metal)
-    float shadow_transition = ((bool)shadow.y) ? shadow.z : 0.0f;
-    shadow_transition = saturate(shadow_transition);
-    float2 ugh = backfacing ? 1.0f : shadow.y;
+        float shadow_transition = ((bool)shadow.y) ? shadow.z : 0.0f;
+        shadow_transition = saturate(shadow_transition);
 
-    // calculate centered sphere coords for spheremapping
-    float2 sphere_uv = mul(normal, (float3x3)UNITY_MATRIX_I_V ).xy;
-    sphere_uv.x = sphere_uv.x * _MTMapTileScale; 
-    sphere_uv = sphere_uv * 0.5f + 0.5f;  
+        // calculate centered sphere coords for spheremapping
+        float2 sphere_uv = mul(normal, (float3x3)UNITY_MATRIX_I_V ).xy;
+        sphere_uv.x = sphere_uv.x * _MTMapTileScale; 
+        sphere_uv = sphere_uv * 0.5f + 0.5f;  
 
-    // sample sphere map 
-    float sphere = _MTMap.Sample(sampler_MTMap, sphere_uv).x;
-    sphere = sphere * _MTMapBrightness;
-    sphere = saturate(sphere);
-    
-    // float3 metal_color = sphere.xxx;
-    float3 metal_color = lerp(_MTMapDarkColor, _MTMapLightColor, sphere.xxx);
-    metal_color = color * metal_color;
+        // sample sphere map 
+        float sphere = _MTMap.Sample(sampler_linear_repeat, sphere_uv).x;
+        sphere = sphere * _MTMapBrightness;
+        sphere = saturate(sphere);
+        
+        // float3 metal_color = sphere.xxx;
+        float3 metal_color = lerp(_MTMapDarkColor, _MTMapLightColor, sphere.xxx);
+        metal_color = color * metal_color;
 
-    ndoth = max(0.001f, ndoth);
-    ndoth = pow(ndoth, _MTShininess) * _MTSpecularScale;
-    ndoth = saturate(ndoth);
+        ndoth = max(0.001f, ndoth);
+        ndoth = pow(ndoth, _MTShininess) * _MTSpecularScale;
+        ndoth = saturate(ndoth);
 
-    float specular_sharp = _MTSharpLayerOffset<ndoth;
+        float specular_sharp = _MTSharpLayerOffset<ndoth;
 
-    float3 metal_specular = (float3)ndoth;
-    if(specular_sharp)
-    {
-        metal_specular = _MTSharpLayerColor;
-    }
-    else
-    {
-        if(_MTUseSpecularRamp)
+        float3 metal_specular = (float3)ndoth;
+        if(specular_sharp)
         {
-            metal_specular = _MTSpecularRamp.Sample(sampler_MTSpecularRamp, float2(metal_specular.x, 0.5f)) * _MTSpecularColor;
-            metal_specular = metal_specular * speculartex; 
+            metal_specular = _MTSharpLayerColor;
         }
         else
-        {  
-            metal_specular = metal_specular * _MTSpecularColor;
-            metal_specular = metal_specular * speculartex; 
-        }    
-    }
+        {
+            if(_MTUseSpecularRamp)
+            {
+                metal_specular = _MTSpecularRamp.Sample(sampler_linear_clamp, float2(metal_specular.x, 0.5f)) * _MTSpecularColor;
+                metal_specular = metal_specular * speculartex; 
+            }
+            else
+            {  
+                metal_specular = metal_specular * _MTSpecularColor;
+                metal_specular = metal_specular * speculartex; 
+            }    
+        }
 
-    float3 metal_shadow = lerp(1.0f, _MTShadowMultiColor, shadow_transition);
-    metal_specular = lerp(metal_specular , metal_specular* _MTSpecularAttenInShadow, shadow_transition);
-    float3 metal = metal_color + (metal_specular * (float3)0.5f);
-    metal = metal * metal_shadow;  
+        float3 metal_shadow = lerp(1.0f, _MTShadowMultiColor, shadow_transition);
+        metal_specular = lerp(metal_specular , metal_specular * _MTSpecularAttenInShadow, shadow_transition);
+        float3 metal = metal_color + (metal_specular * (float3)0.5f);
+        metal = metal * metal_shadow;  
 
-    float metal_area = saturate((speculartex > 0.89f) - _UseCharacterLeather);
+        float metal_area = saturate((speculartex > 0.89f) - _UseCharacterLeather);
 
-    if(_DebugMode && (_DebugMetal == 1))
-    {
-        metal = (metal_area) ? metal : (float3)0.0f;
-        color.xyz = metal;
-    }
-    else
-    {
-        metal = (metal_area) ? metal : color;
-        color.xyz = metal; 
-    }
+        if(_DebugMode && (_DebugMetal == 1))
+        {
+            metal = (metal_area) ? metal : (float3)0.0f;
+            color.xyz = metal;
+        }
+        else
+        {
+            metal = (metal_area) ? metal : color;
+            color.xyz = metal; 
+        }
     #endif
 
 }
@@ -490,7 +489,7 @@ void leather_color(in float ndoth, in float3 normal, in float3 light, in float l
         sphere_uv = sphere_uv * 0.5f + 0.5f;  
 
         // sample the leather matcap first before calculating the specular shines, i just felt like it
-        float3 matcap = _LeatherReflect.SampleLevel(sampler_LeatherReflect, sphere_uv, _LeatherReflectBlur) * _LeatherReflectScale;
+        float3 matcap = _LeatherReflect.SampleLevel(sampler_linear_repeat, sphere_uv, _LeatherReflectBlur) * _LeatherReflectScale;
         // blur controls the miplevel of the matcap giving a quick way to blur/soften the shine
 
         // main shine
@@ -610,23 +609,23 @@ void nyx_state_marking(inout float3 color, in float2 uv0, in float2 uv1, in floa
         };
 
 
-        float nyx_mask = packed_channel_picker(sampler_MainTex, _TempNyxStatePaintMaskTex, uv[_NyxBodyUVCoord], _TempNyxStatePaintMaskChannel); 
+        float nyx_mask = packed_channel_picker(sampler_linear_repeat, _TempNyxStatePaintMaskTex, uv[_NyxBodyUVCoord], _TempNyxStatePaintMaskChannel); 
         
         
         float4 screen_uv = (((ws_pos.xyxy / ws_pos.wwww) * _ScreenParams.xyxy) / _ScreenParams.xxxx);
         float4 noise_uv = _Time.yyyy * _NyxStateOutlineColorNoiseAnim.zwxy;
         noise_uv = frac(noise_uv);
         screen_uv = screen_uv * _NyxStateOutlineColorNoiseScale.xyxy + noise_uv;
-        float noise_a = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, screen_uv.xy).x;
+        float noise_a = _NyxStateOutlineNoise.Sample(sampler_linear_repeat, screen_uv.xy).x;
         screen_uv.xy = noise_a.xx * (float2)_NyxStateOutlineColorNoiseTurbulence + screen_uv.zw;
         float2 ramp_uv;
         float2 time_uv;
-        ramp_uv.x = _NyxStateOutlineNoise.Sample(sampler_NyxStateOutlineNoise, screen_uv.xy).x;
+        ramp_uv.x = _NyxStateOutlineNoise.Sample(sampler_linear_repeat, screen_uv.xy).x;
         ramp_uv.y = float(0.75);
         time_uv.y = float(0.25);
-        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, ramp_uv.xy, 0.0).xyz;
+        float3 nyx_ramp = _NyxStateOutlineColorRamp.Sample(sampler_linear_repeat, ramp_uv.xy, 0.0).xyz;
         time_uv.x = (_DayOrNight) ? 0 : 1;
-        float3 time_ramp = _NyxStateOutlineColorRamp.Sample(sampler_NyxStateOutlineColorRamp, time_uv.xy, 0.0).xyz;
+        float3 time_ramp = _NyxStateOutlineColorRamp.Sample(sampler_linear_repeat, time_uv.xy, 0.0).xyz;
 
         float nyx_brightness = max(nyx_ramp.z, nyx_ramp.y);
         nyx_brightness = max(nyx_ramp.x, nyx_brightness);
@@ -782,11 +781,11 @@ void weapon_shit(inout float3 diffuse_color, float diffuse_alpha, float2 uv, flo
         }
         weapon_uv.y = (_WeaponDissolveValue * 2.09f + weapon_uv.y) + -1.0f;
         
-        float2 weapon_tex = _WeaponDissolveTex.Sample(sampler_WeaponDissolveTex, weapon_uv).xy;
+        float2 weapon_tex = _WeaponDissolveTex.Sample(sampler_linear_repeat, weapon_uv).xy;
 
         float2 pattern_uv = _Time.yy * (float2)_Pattern_Speed + uv_wp;
 
-        float pattern_tex = _WeaponPatternTex.Sample(sampler_WeaponPatternTex, pattern_uv).x;
+        float pattern_tex = _WeaponPatternTex.Sample(sampler_linear_clamp, pattern_uv).x;
 
         ndotv = ndotv * 1.1f + pattern_tex;
 
@@ -809,7 +808,7 @@ void weapon_shit(inout float3 diffuse_color, float diffuse_alpha, float2 uv, flo
             scan_uv.y = -scan_uv.y + 1.0f;
         }
         scan_uv.y = scan_uv.y * 0.5f + (_Time.y * _ScanSpeed);
-        float scan_tex = _ScanPatternTex.Sample(sampler_ScanPatternTex, scan_uv).x;
+        float scan_tex = _ScanPatternTex.Sample(sampler_linear_repeat, scan_uv).x;
 
         float3 weapon_color = ndotv * _WeaponPatternColor.xyz + diffuse_color;
         weapon_color = skill_fresnel * (float3)_SkillEmissionScaler + weapon_color; 
@@ -881,19 +880,19 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
 
                 float2 color_uv = uv.xy * _ColorPaletteTex_ST.xy + _ColorPaletteTex_ST.zw;
                 color_uv.x = _Time.y * _ColorPalletteSpeed + color_uv.x;
-                float3 color_palette = _ColorPaletteTex.Sample(sampler_PackedShadowRampTex, color_uv);
+                float3 color_palette = _ColorPaletteTex.Sample(sampler_linear_clamp, color_uv);
 
                 float2 noise_1_uv = uv.xy * _NoiseTex01_ST.xy + _NoiseTex01_ST.zw;
                 noise_1_uv = _Time.yy * (float2)_Noise01Speed + noise_1_uv;
                 float2 noise_2_uv = uv.xy * _NoiseTex02_ST.xy + _NoiseTex02_ST.zw;
                 noise_2_uv = _Time.yy * (float2)_Noise02Speed + noise_2_uv;
 
-                float noise_1 = _NoiseTex01.Sample(sampler_LightMapTex, noise_1_uv).x;
-                float noise_2 = _NoiseTex02.Sample(sampler_LightMapTex, noise_2_uv).x;
+                float noise_1 = _NoiseTex01.Sample(sampler_linear_repeat, noise_1_uv).x;
+                float noise_2 = _NoiseTex02.Sample(sampler_linear_repeat, noise_2_uv).x;
 
                 float noise = noise_1 * noise_2;
-                float star_1 = _StarTex.Sample(sampler_LightMapTex, star_1_uv).x;
-                float star_2 = _Star02Tex.Sample(sampler_LightMapTex, star_2_uv).y;
+                float star_1 = _StarTex.Sample(sampler_linear_repeat, star_1_uv).x;
+                float star_2 = _Star02Tex.Sample(sampler_linear_repeat, star_2_uv).y;
                 
                 float3 stars = star_2 + star_1;
                 stars = diffuse_color.w * stars;
@@ -904,7 +903,7 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
                 float2 const_uv = uv.xy * _ConstellationTex_ST.xy + _ConstellationTex_ST.zw;
                 star_parallax = parallax * (_ConstellationHeight + -1.0f);
                 const_uv = star_parallax * (float2)-0.1f + const_uv;
-                float3 constellation = _ConstellationTex.Sample(sampler_LightMapTex, const_uv).xyz;
+                float3 constellation = _ConstellationTex.Sample(sampler_linear_repeat, const_uv).xyz;
                 constellation = constellation * (float3)_ConstellationBrightness;
 
                 float2 cloud_uv = uv.xy * _CloudTex_ST.xy + _CloudTex_ST.zw;
@@ -912,7 +911,7 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
 
                 cloud_uv = noise * (float2)_Noise03Brightness + cloud_uv;
                 cloud_uv = star_parallax * (float2)-0.1f + cloud_uv;
-                float cloud = _CloudTex.Sample(sampler_LightMapTex, cloud_uv).x;
+                float cloud = _CloudTex.Sample(sampler_linear_repeat, cloud_uv).x;
 
                 cloud = cloud * diffuse_color.w;
                 cloud = cloud * _CloudBrightness;
@@ -955,11 +954,11 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
                 star_uv = (float2)_UseScreenUV * screen_uv + star_uv;
                 star_uv = star_uv + frac(_Time.yy * _StarTexSpeed.xy);
 
-                float3 star_tex = _StarTex.Sample(sampler_LightMapTex, star_uv);
+                float3 star_tex = _StarTex.Sample(sampler_linear_repeat, star_uv);
                 float star_grey =  dot(star_tex, float3(0.03968f, 0.4580f, 0.006f));
                 float star_flick = star_grey >= _StarFlickRange;
 
-                float2 star_mask = _StarMask.Sample(sampler_LightMapTex, uv).xy;
+                float2 star_mask = _StarMask.Sample(sampler_linear_repeat, uv).xy;
                 float mask_red = -star_mask.x + 1.0f;
 
                 float3 flicker_color = lerp(0.0f, star_flicker.y * _StarFlickColor.xyz, star_flick);
@@ -970,7 +969,7 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
 
                 float block_masked = star_mask.y * block_stuff.x + _BlockHighlightViewWeight;
 
-                float4 blockhighmask = _BlockHighlightMask.Sample(sampler_LightMapTex, uv.xy);
+                float4 blockhighmask = _BlockHighlightMask.Sample(sampler_linear_repeat, uv.xy);
 
 
 
@@ -985,7 +984,7 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
                 float2 blocks = blockhighmask.xy * block_light.xy;
 
                 float2 brightuv = uv.xy + frac(_Time.yy * _BrightLineMaskSpeed.xy);
-                float brightmask = _BrightLineMask.Sample(sampler_LightMapTex, brightuv).x;
+                float brightmask = _BrightLineMask.Sample(sampler_linear_repeat, brightuv).x;
                 brightmask = pow(brightmask, _BrightLineMaskContrast) * _BrightLineColor;
 
                 float3 block_thing = blocks.y + blocks.x;
@@ -1005,7 +1004,7 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
             #if defined(asmoday_cock)
                 float2 noise_uv = uv * _NoiseMap_ST.xy + _NoiseMap_ST.zw;
                 noise_uv = _Time.yy * _NoiseSpeed.xy + noise_uv;
-                float noise = _NoiseMap.Sample(sampler_LightMapTex, noise_uv).x;
+                float noise = _NoiseMap.Sample(sampler_linear_repeat, noise_uv).x;
 
                 float2 flow_1_uv = uv * _FlowMap_ST.xy + _FlowMap_ST.zw;
                 flow_1_uv = noise.xx * (float2)_NoiseScale + flow_1_uv;
@@ -1021,8 +1020,8 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
                 float3 bottom_grad = lerp(_BottomColor01, _BottomColor02, grad_bottom_area);
 
                 float3 flow_color = _FlowColor.xyz * (float3)_FlowScale;
-                float flow_map_1 = _FlowMap.Sample(sampler_LightMapTex, flow_1_uv).x;
-                float flow_map_2 = _FlowMap02.Sample(sampler_LightMapTex, flow_2_uv).x;
+                float flow_map_1 = _FlowMap.Sample(sampler_linear_repeat, flow_1_uv).x;
+                float flow_map_2 = _FlowMap02.Sample(sampler_linear_repeat, flow_2_uv).x;
                 
                 float3 flow = flow_map_1 + flow_map_2;
                 flow = flow * flow_color;
@@ -1033,7 +1032,7 @@ void star_cocks(inout float4 diffuse_color, float2 uv0, float2 uv1, float2 uv2, 
 
                 flow = flow * grad_mask_area;
 
-                float flow_mask = _FlowMask.Sample(sampler_LightMapTex, mask_uv).x;
+                float flow_mask = _FlowMask.Sample(sampler_linear_repeat, mask_uv).x;
                 bottom_grad = flow * flow_mask + bottom_grad;
 
                 diffuse_color.xyz = lerp(diffuse_color.xyz, bottom_grad, diffuse_color.w);
@@ -1050,18 +1049,18 @@ void arm_effect(inout float4 diffuse, float2 uv0, float2 uv1, float2 uv2, float3
 
         float2 mask_uv = uv * _Mask_ST.xy + _Mask_ST.zw;
         mask_uv.xy = _Time.y * float2(_Mask_Speed_U, 0.0f) + mask_uv;
-        float3 masktex = _Mask.Sample(sampler_LightMapTex, mask_uv.xy).xyz;
+        float3 masktex = _Mask.Sample(sampler_linear_repeat, mask_uv.xy).xyz;
 
         float2 effuv1 = uv * _Tex01_UV.xy + _Tex01_UV.zw;
         effuv1.xy = _Time.yy * float2(_Tex01_Speed_U, _Tex01_Speed_V) + effuv1.xy;
-        float3 eff1 = _MainTex.Sample(sampler_MainTex, effuv1.xy).xyw;
+        float3 eff1 = _MainTex.Sample(sampler_linear_repeat, effuv1.xy).xyw;
         float2 effuv2 = uv * _Tex02_UV.xy + _Tex02_UV.zw;
         effuv2.xy = _Time.yy * float2(_Tex02_Speed_U, _Tex02_Speed_V) + effuv2.xy;
-        float3 eff2 = _MainTex.Sample(sampler_MainTex, effuv2.xy).xyw;
+        float3 eff2 = _MainTex.Sample(sampler_linear_repeat, effuv2.xy).xyw;
         float3 effmax = max(eff1.y, eff2.y);
         float2 effuv3 = uv * _Tex03_UV.xy + _Tex03_UV.zw;
         effuv3.xy = _Time.yy * float2(_Tex03_Speed_U, _Tex03_Speed_V) + effuv3.xy;
-        float3 eff3 = _MainTex.Sample(sampler_MainTex, effuv3.xy).xyw;
+        float3 eff3 = _MainTex.Sample(sampler_linear_repeat, effuv3.xy).xyw;
         effmax = max(effmax, eff3.y);
         float2 effmul = masktex.xz * eff3.zx;
         effmax = max(masktex.y, effmax);
