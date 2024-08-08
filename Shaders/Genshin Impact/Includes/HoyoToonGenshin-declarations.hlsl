@@ -53,7 +53,7 @@ Texture2D _CustomEmissionTex;
 #if defined(parallax_glass)
     Texture2D _GlassSpecularTex;
 #endif
-#if defined(can_nyx)
+#if defined(nyx_body) || defined(nyx_outline)
     Texture2D _TempNyxStatePaintMaskTex;
     Texture2D _NyxStateOutlineColorRamp;
     Texture2D _NyxStateOutlineNoise;
@@ -325,6 +325,7 @@ float _HitColorFresnelPower;
 
 // nyx state properties
 float _EnableNyxState;
+float _EnableNyxBody;
 float _EnableNyxOutline;
 float _NyxBodyUVCoord;
 float _BodyAffected;

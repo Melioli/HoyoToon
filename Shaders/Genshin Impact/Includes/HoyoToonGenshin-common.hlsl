@@ -598,7 +598,7 @@ float3 outline_emission(in float3 color, in float material_id)
 
 void nyx_state_marking(inout float3 color, in float2 uv0, in float2 uv1, in float2 uv2, in float2 uv3, in float3 normal, in float3 view, in float4 ws_pos)
 {
-    #if defined(can_nyx)
+    #if defined(nyx_body)
 
         float2 uv[4] = 
         {

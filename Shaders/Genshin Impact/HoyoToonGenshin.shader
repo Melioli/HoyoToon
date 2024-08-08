@@ -634,16 +634,16 @@ Shader "HoyoToon/Genshin/Character"
                 [HideInInspector] m_end_rimhue ("", Float) = 0
             [HideInInspector] m_end_hueshift ("", float) = 0
             //endex
-            //ifex _EnableNyxState == 0
             // Nyx State
             [HideInInspector] m_start_nyx("Nyx State--{reference_property:_EnableNyxState}", Float) = 0
-                [Toggle] _EnableNyxState ("Enable Nyx State", Float) = 0
+                [Toggle] _EnableNyxState ("Enable Nyx State--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_EnableNyxBody=0},{type:SET_PROPERTY,data:_EnableNyxOutline=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_EnableNyxBody=1},{type:SET_PROPERTY,data:_EnableNyxOutline=1}]}]}", Float) = 0
                 [NoScaleOffset] _NyxStateOutlineColorRamp ("Color Ramp--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", 2D) = "gray" { }
                 [NoScaleOffset] _NyxStateOutlineNoise ("Noise(RG)--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", 2D) = "gray" { }
                 [Vector2] _NyxStateOutlineColorNoiseScale ("Noise Scale--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Vector) = (2,2,0,0)
                 _NyxStateOutlineColorNoiseAnim ("Noise Speed--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Vector) = (0.05,0.05,0,0)
                 _NyxStateOutlineColorNoiseTurbulence ("Noise Turbulence--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Range(0, 1)) = 0.25
                 [HideInInspector] m_start_bodygroup ("Body Markings--{condition_show:{type:PROPERTY_BOOL,data:_EnableNyxState==1.0}}", Float) = 0
+                    [Toggle] _EnableNyxBody ("Enable Body Markings", Float) = 0
                     [Toggle] _BodyAffected ("Affected by Light", Float) = 0
                     [Enum(R, 0, G, 1, B, 2, A, 3)] _TempNyxStatePaintMaskChannel("Mask Channel", Float) = 1
                     [Enum(UV0, 0, UV1, 1, UV2, 2, UV3, 3)] _NyxBodyUVCoord ("UV Coord for Mask", Float) = 0
@@ -672,7 +672,6 @@ Shader "HoyoToon/Genshin/Character"
                 [HideInInspector] m_end_nyxoutline ("", Float) = 0
 
             [HideInInspector] m_end_nyx("Nyx State", Float) = 0
-            //endex
         [HideInInspector] m_end_specialeffects ("", Float) = 0
         //Special Effects End
 
@@ -765,7 +764,7 @@ Shader "HoyoToon/Genshin/Character"
             #define asmoday_cock
         //endex 
         //ifex _HandEffectEnable == 0
-        #define asmogay_arm
+            #define asmogay_arm
         //endex
         //ifex _EnableFresnel == 0
             #define has_fresnel
@@ -773,8 +772,8 @@ Shader "HoyoToon/Genshin/Character"
         //ifex _EnableHueShift == 0
             #define can_shift
         //endex
-        //ifex _EnableNyxState == 0
-            #define can_nyx
+        //ifex _EnableNyxBody == 0
+            #define nyx_body
         //endex 
         //ifex _EnableNyxOutline == 0
             #define nyx_outline
@@ -888,7 +887,7 @@ Shader "HoyoToon/Genshin/Character"
             ENDHLSL
         }   
         //endex
-        //ifex _EnableNyxState == 0 && _EnableNyxOutline 
+        //ifex _EnableNyxOutline == 0
         Pass // Nyx Outline Pass, Rendered after everything so it appears behind everything thanks to the stencil settings
         {
             Name "Nyx Outline Pass"

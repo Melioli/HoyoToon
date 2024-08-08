@@ -474,7 +474,7 @@ namespace HoyoToon
             Rect bgRect = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none, GUILayout.ExpandWidth(true), GUILayout.Height(145.0f));
             bgRect.x = 0;
             bgRect.width = EditorGUIUtility.currentViewWidth;
-            Rect logoRect = new Rect(bgRect.width / 2 - 375f, bgRect.height / 2 - 65f, 750f, 130f);
+            Rect logoRect = new Rect(bgRect.width / 2 - 375f, bgRect.height / 3f - 65f, 750f, 200f);
 
             if (bgPathProperty != null && !string.IsNullOrEmpty(bgPathProperty.displayName))
             {
@@ -498,7 +498,9 @@ namespace HoyoToon
                 }
             }
 
+            GUILayout.Space(5);
             GUITopBar();
+            GUILayout.Space(5);
             GUISearchBar();
             ShaderTranslator.SuggestedTranslationButtonGUI(this);
 
@@ -564,11 +566,11 @@ namespace HoyoToon
             if (_shaderHeader != null && drawAboveToolbar) _shaderHeader.Draw(new CRect(EditorGUILayout.GetControlRect()));
 
             Rect mainHeaderRect = EditorGUILayout.BeginHorizontal();
-            if (GuiHelper.ButtonWithCursor(Styles.icon_style_search, "Search", 25, 25))
-            {
-                DoShowSearchBar = !DoShowSearchBar;
-                if (!DoShowSearchBar) ClearSearch();
-            }
+            // if (GuiHelper.ButtonWithCursor(Styles.icon_style_search, "Search", 25, 25))
+            // {
+            //     DoShowSearchBar = !DoShowSearchBar;
+            //     if (!DoShowSearchBar) ClearSearch();
+            // }
 
             //draw master label text after ui elements, so it can be positioned between
             if (_shaderHeader != null && !drawAboveToolbar)
@@ -580,24 +582,21 @@ namespace HoyoToon
 
             GUILayout.FlexibleSpace();
             Rect popupPosition;
-            if (GuiHelper.ButtonWithCursor(Styles.icon_style_tools, "Tools", 25, 25, out popupPosition))
-            {
-                PopupTools(popupPosition);
-            }
+            // if (GuiHelper.ButtonWithCursor(Styles.icon_style_tools, "Tools", 25, 25, out popupPosition))
+            // {
+            //     PopupTools(popupPosition);
+            // }
             EditorGUILayout.EndHorizontal();
         }
 
         private void GUISearchBar()
         {
-            if (DoShowSearchBar)
+            EditorGUI.BeginChangeCheck();
+            _enteredSearchTerm = EditorGUILayout.TextField(_enteredSearchTerm, EditorStyles.toolbarSearchField);
+            if (EditorGUI.EndChangeCheck())
             {
-                EditorGUI.BeginChangeCheck();
-                _enteredSearchTerm = EditorGUILayout.TextField(_enteredSearchTerm);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    _appliedSearchTerm = _enteredSearchTerm.ToLower();
-                    UpdateSearch(MainGroup);
-                }
+                _appliedSearchTerm = _enteredSearchTerm.ToLower();
+                UpdateSearch(MainGroup);
             }
         }
 

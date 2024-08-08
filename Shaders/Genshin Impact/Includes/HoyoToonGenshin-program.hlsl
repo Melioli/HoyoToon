@@ -140,7 +140,7 @@ vs_out vs_edge(vs_in v)
 vs_out vs_nyx(vs_in v)
 {
     vs_out o = (vs_out)0.0f; // cast all output values to zero to prevent potential errors
-    #if defined(nyx_outline) && defined(can_nyx)
+    #if defined(nyx_outline)
     if(_OutlineType ==  0.0f)
     {
         vs_out o = (vs_out)0.0f;
@@ -438,8 +438,8 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         #if defined(parallax_glass)
             if(_UseGlassSpecularToggle) glass_color(out_color, i.uv_a, view, normal);
         #endif
-        #if defined(can_nyx)
-            if(_EnableNyxState && _BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
+        #if defined(nyx_body)
+            if(_EnableNyxBody && _BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
         #endif
         // Apply scene light color, only taking the main directional light color * ambient color settings
         out_color.xyz = out_color.xyz * light_color;
@@ -452,8 +452,8 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         out_color.xyz = lerp(out_color.xyz, emis_color, ((mask * emis_color.w) * emis_check));
         out_color.xyz = lerp(out_color.xyz, emis_color_eye, (eye_mask * emis_check_eye) * emis_color_eye.w);
         
-        #if defined(can_nyx)
-            if(_EnableNyxState && !_BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
+        #if defined(nyx_body)
+            if(_EnableNyxBody && !_BodyAffected) nyx_state_marking(out_color.xyz, uv_a.xy, i.uv_a.zw, uv_b.xy, uv_b.zw, normal, view, i.ss_pos);
         #endif
         // Rim light moved to last thing done to the model so to ensure that all parts get it
         // previous versions it was added to the color before certain things and they didnt recieve any rim lights as a result
@@ -620,7 +620,7 @@ float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 
 float4 ps_nyx(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
-    #if defined(can_nyx) && defined(nyx_outline)
+    #if defined(nyx_outline)
         // calculate lighting colors
         float3 normal = normalize(i.normal);
         float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
