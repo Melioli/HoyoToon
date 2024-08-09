@@ -1,0 +1,14 @@
+{
+  "name": "com.meliverse.hoyotoon.Editor",
+  "references": [
+    "com.meliverse.hoyotoon"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "defineConstraints": [],
+  "optionalUnityReferences": []
+}

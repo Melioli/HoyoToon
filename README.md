@@ -18,7 +18,6 @@
 > [!CAUTION]
 > This is the development branch of HoyoToon focussing on the rewrite, do not use this branch to clone or download as zip. Simply use the latest Release or the Stable Branch.
 
-
 ## Wiki
 
 > [!WARNING]
