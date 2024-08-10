@@ -92,12 +92,10 @@ namespace HoyoToon
             if (GUILayout.Button("Update through VCC"))
             {
                 onInstallVCC?.Invoke();
-                Close();
             }
             if (GUILayout.Button("Update through UPM"))
             {
                 onInstallUPM?.Invoke();
-                Close();
             }
             if (GUILayout.Button("Ignore Update"))
             {
