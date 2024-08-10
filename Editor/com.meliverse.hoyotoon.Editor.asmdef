@@ -1,14 +1,17 @@
 {
-  "name": "com.meliverse.hoyotoon.Editor",
-  "references": [
-    "com.meliverse.hoyotoon"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "autoReferenced": true,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "defineConstraints": [],
-  "optionalUnityReferences": []
+    "name": "com.meliverse.hoyotoon.Editor",
+    "rootNamespace": "",
+    "references": [
+        "com.meliverse.hoyotoon",
+        "Unity.EditorCoroutines.Editor"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
