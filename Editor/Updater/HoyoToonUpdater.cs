@@ -151,6 +151,7 @@ namespace HoyoToon
                     {
                         project.UpdateVPMPackage(package);
                         AssetDatabase.Refresh();
+                        HoyoToonLogs.LogDebug("HoyoToon has been updated to version " + remoteVersion);
                         return;
                     }
                 }

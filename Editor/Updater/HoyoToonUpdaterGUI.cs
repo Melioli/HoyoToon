@@ -86,6 +86,7 @@ namespace HoyoToon
             if (GUILayout.Button("Install Update"))
             {
                 OnUpdate?.Invoke();
+                Close();
             }
             if (GUILayout.Button("Ignore Update"))
             {
