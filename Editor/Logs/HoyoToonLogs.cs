@@ -14,7 +14,7 @@ namespace HoyoToon
 
         public static bool DebugEnabled { get; private set; }
 
-        [MenuItem("HoyoToon/Toggle Debug", false, 100)]
+        [MenuItem("HoyoToon/Toggle Debug", false, 90)]
         private static void ToggleDebug()
         {
             DebugEnabled = !DebugEnabled;
