@@ -11,30 +11,24 @@ namespace HoyoToon
 {
     public class HoyoToonUpdaterGUI : EditorWindow
     {
-        private string currentVersion;
-        private string latestVersion;
+        private string localVersion;
+        private string remoteVersion;
         private string downloadSize;
         private string bodyContent;
         private Vector2 scrollPosition;
-        private Action onInstallVCC;
-        private Action onInstallUPM;
+        private Action OnUpdate;
         private Action onIgnoreUpdate;
-        private List<string> unityPackageFiles;
-        private List<string> upmVpmFiles;
         private Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
         private HashSet<string> loadingTextures = new HashSet<string>();
 
-        public static void ShowWindow(string currentVersion, string latestVersion, string downloadSize, string bodyContent, List<string> unityPackageFiles, List<string> upmVpmFiles, System.Action onInstallVCC, System.Action onInstallUPM, System.Action onIgnoreUpdate)
+        public static void ShowWindow(string localVersion, string remoteVersion, string downloadSize, string bodyContent, System.Action OnUpdate, System.Action onIgnoreUpdate)
         {
             HoyoToonUpdaterGUI window = GetWindow<HoyoToonUpdaterGUI>("HoyoToon Updater");
-            window.currentVersion = currentVersion;
-            window.latestVersion = latestVersion;
+            window.localVersion = localVersion;
+            window.remoteVersion = remoteVersion;
             window.downloadSize = downloadSize;
             window.bodyContent = bodyContent;
-            window.unityPackageFiles = unityPackageFiles;
-            window.upmVpmFiles = upmVpmFiles;
-            window.onInstallVCC = onInstallVCC;
-            window.onInstallUPM = onInstallUPM;
+            window.OnUpdate = OnUpdate;
             window.onIgnoreUpdate = onIgnoreUpdate;
             window.Show();
         }
@@ -72,8 +66,8 @@ namespace HoyoToon
             GUILayout.Label("Update Available", EditorStyles.boldLabel, GUILayout.ExpandWidth(true), GUILayout.Height(30));
             EditorGUILayout.Space();
 
-            GUILayout.Label($"Current Version: {currentVersion}");
-            GUILayout.Label($"Latest Version: {latestVersion}");
+            GUILayout.Label($"Current Version: {localVersion}");
+            GUILayout.Label($"Latest Version: {remoteVersion}");
             double downloadSizeMB = double.Parse(downloadSize) / (1024 * 1024);
             GUILayout.Label($"Download Size: {downloadSizeMB.ToString("0.00")} MB");
             EditorGUILayout.Space();
@@ -89,13 +83,9 @@ namespace HoyoToon
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Update through VCC"))
+            if (GUILayout.Button("Install Update"))
             {
-                onInstallVCC?.Invoke();
-            }
-            if (GUILayout.Button("Update through UPM"))
-            {
-                onInstallUPM?.Invoke();
+                OnUpdate?.Invoke();
             }
             if (GUILayout.Button("Ignore Update"))
             {

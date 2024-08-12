@@ -1,34 +1,33 @@
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
 using Unity.EditorCoroutines.Editor;
 using System.Collections;
 using UnityEngine.Networking;
 using System.IO;
 using System;
 using System.Linq;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Collections.Generic;
+#if VRC_SDK_VRCSDK3
+using VRC.PackageManagement.Core;
+using VRC.PackageManagement.Core.Types;
+using VRC.PackageManagement.Resolver;
+#endif
+
 
 namespace HoyoToon
 {
     [InitializeOnLoad]
     public class HoyoToonUpdater
     {
-        #region Constants
-        private const string githubApiUrl = "https://api.github.com/repos/Melioli/HoyoToon/releases";
-        private const string packageJsonApiUrl = "https://api.github.com/repos/Melioli/HoyoToon/contents/package.json";
+        private const string RemotePackageJsonUrl = "https://raw.githubusercontent.com/Melioli/HoyoToon/dev/package.json";
+        private const string ReleasesApiUrl = "https://api.github.com/repos/Melioli/HoyoToon/releases";
+        private static List<string> assetsToDelete = new List<string>();
+        private static List<string> metasToDelete = new List<string>();
 
-        private static string GetPackageJsonApiUrl()
-        {
-            return $"{packageJsonApiUrl}?t={DateTime.UtcNow.Ticks}";
-        }
-
-        private static readonly string localVersion = GetPackageVersion();
-
-        #endregion
-
-        #region Updater
         static HoyoToonUpdater()
         {
             HoyoToonPreferences.LoadPrefs();
@@ -39,226 +38,242 @@ namespace HoyoToon
             }
         }
 
-        [MenuItem("HoyoToon/Check for Updates", false, 70)]
+        [MenuItem("HoyoToon/Check for updates", false, 60)]
         public static void CheckForUpdates()
         {
-            EditorCoroutineUtility.StartCoroutineOwnerless(CheckVersionAndUpdateCoroutine());
+            EditorCoroutineUtility.StartCoroutineOwnerless(CheckVersions((localVersion, remoteVersion) => { }));
         }
 
-        private static IEnumerator CheckVersionAndUpdateCoroutine()
+
+        public static IEnumerator CheckVersions(Action<string, string> onVersionsFetched)
         {
-            HoyoToonLogs.LogDebug("Starting version check...");
-
-            // Fetch remote package.json using GitHub API with cache-busting
-            string packageJsonUrl = GetPackageJsonApiUrl();
-            UnityWebRequest packageRequest = UnityWebRequest.Get(packageJsonUrl);
-            packageRequest.SetRequestHeader("User-Agent", "request");
-            yield return packageRequest.SendWebRequest();
-
-            if (packageRequest.result != UnityWebRequest.Result.Success)
-            {
-                HoyoToonLogs.ErrorDebug($"Failed to fetch remote package.json: {packageRequest.error}");
-                yield break;
-            }
-
-            string remoteVersion;
+            // Get local version
+            string localVersion = null;
             try
             {
-                var jsonResponse = JObject.Parse(packageRequest.downloadHandler.text);
-                string base64Content = jsonResponse["content"]?.ToString().Trim();
-                string decodedContent = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64Content));
-                var packageJson = JObject.Parse(decodedContent);
-                remoteVersion = packageJson["version"]?.ToString().Trim();
+                string scriptPath = GetPackagePath("com.meliverse.hoyotoon");
+                string packageJsonPath = Path.Combine(scriptPath, "package.json");
+                string jsonContent = File.ReadAllText(Path.GetFullPath(packageJsonPath));
+                var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
+                localVersion = jsonObject != null && jsonObject.TryGetValue("version", out var version) ? version.ToString() : null;
+                HoyoToonLogs.LogDebug($"Local version: {localVersion}");
             }
             catch (Exception ex)
             {
-                HoyoToonLogs.ErrorDebug($"Error parsing remote package.json: {ex.Message}");
-                yield break;
+                HoyoToonLogs.ErrorDebug($"Error reading local package.json: {ex.Message}");
             }
 
-            HoyoToonLogs.LogDebug("Local version: " + localVersion);
-            HoyoToonLogs.LogDebug("Remote version: " + remoteVersion);
-
-            if (IsNewerVersion(remoteVersion, localVersion))
+            // Get remote version
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(RemotePackageJsonUrl))
             {
-                HoyoToonLogs.LogDebug("New version available: " + remoteVersion);
+                yield return webRequest.SendWebRequest();
 
-                // Fetch all releases information
-                UnityWebRequest releaseRequest = UnityWebRequest.Get(githubApiUrl);
-                releaseRequest.SetRequestHeader("User-Agent", "request");
-                yield return releaseRequest.SendWebRequest();
+                string remoteVersion = webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError
+                    ? null
+                    : JsonConvert.DeserializeObject<Dictionary<string, object>>(webRequest.downloadHandler.text)?.TryGetValue("version", out var version) == true ? version.ToString() : null;
 
-                if (releaseRequest.result != UnityWebRequest.Result.Success)
+                if (remoteVersion == null)
                 {
-                    HoyoToonLogs.ErrorDebug($"Failed to fetch release info: {releaseRequest.error}");
-                    yield break;
-                }
-
-                List<GitHubRelease> releases;
-                try
-                {
-                    releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(releaseRequest.downloadHandler.text);
-                }
-                catch (Exception ex)
-                {
-                    HoyoToonLogs.ErrorDebug($"Error parsing release info: {ex.Message}");
-                    yield break;
-                }
-
-                var matchingRelease = releases.FirstOrDefault(release => release.tag_name.Trim() == remoteVersion);
-
-                if (matchingRelease != null)
-                {
-                    string downloadSize = matchingRelease.assets[0].size.ToString();
-                    string bodyContent = matchingRelease.body;
-
-                    // Categorize files
-                    List<string> unityPackageFiles = new List<string>();
-                    List<string> upmVpmFiles = new List<string>();
-
-                    HoyoToonUpdaterGUI.ShowWindow(
-                        localVersion,
-                        remoteVersion,
-                        downloadSize,
-                        bodyContent,
-                        unityPackageFiles,
-                        upmVpmFiles,
-                        () => NotifyUpdateThroughVCC(),
-                        () => UpdateThroughUPM(),
-                        () => HoyoToonLogs.LogDebug("Update canceled by user.")
-                    );
+                    HoyoToonLogs.ErrorDebug($"Error fetching remote package.json: {webRequest.error}");
                 }
                 else
                 {
-                    HoyoToonLogs.ErrorDebug("No matching release found for the remote version.");
+                    HoyoToonLogs.LogDebug($"Remote version: {remoteVersion}");
                 }
-            }
-            else
-            {
-                HoyoToonLogs.LogDebug("You are using the latest version. Local version: " + localVersion + "\nRemote version: " + remoteVersion);
+
+                onVersionsFetched?.Invoke(localVersion, remoteVersion);
+
+                // Check if the remote version is newer
+                if (remoteVersion != null && localVersion != null && new Version(remoteVersion) > new Version(localVersion))
+                {
+                    EditorCoroutineUtility.StartCoroutineOwnerless(FetchUpdate(localVersion, remoteVersion));
+                }
             }
         }
 
-        private static bool IsNewerVersion(string latestVersion, string version)
+        private static IEnumerator FetchUpdate(string localVersion, string remoteVersion)
         {
-            string[] latestParts = latestVersion.Split('.');
-            string[] currentParts = version.Split('.');
+            HoyoToonLogs.LogDebug($"Updating HoyoToon to version {remoteVersion}...");
 
-            for (int i = 0; i < latestParts.Length; i++)
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(ReleasesApiUrl))
             {
-                int latest = int.Parse(latestParts[i]);
-                int current = int.Parse(currentParts[i]);
-                if (latest > current)
+                webRequest.SetRequestHeader("User-Agent", "request");
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
                 {
-                    return true;
+                    HoyoToonLogs.ErrorDebug($"Error fetching releases: {webRequest.error}");
+                    yield break;
                 }
-                else if (latest < current)
+
+                var releases = JsonConvert.DeserializeObject<List<Release>>(webRequest.downloadHandler.text);
+                var release = releases?.Find(r => r.tag_name == remoteVersion);
+
+                if (release == null)
                 {
-                    return false;
+                    HoyoToonLogs.ErrorDebug($"Release {remoteVersion} not found.");
+                    yield break;
                 }
+
+                var asset = release.assets?.Find(a => a.browser_download_url.Contains("unitypackage"));
+
+                if (asset == null)
+                {
+                    HoyoToonLogs.ErrorDebug($"No package found for release {remoteVersion}.");
+                    yield break;
+                }
+
+                // Fetch the release notes and file size
+                string bodyContent = release.body;
+                string downloadSize = asset.size.ToString();
+
+                // Open the GUI with the fetched information
+                HoyoToonUpdaterGUI.ShowWindow(localVersion, remoteVersion, downloadSize, bodyContent, () => InstallUpdate(asset.browser_download_url, localVersion, remoteVersion), () => { });
             }
-            return false;
         }
 
-        private static string GetPackageVersion()
+        private static void InstallUpdate(string downloadUrl, string currentVersion, string remoteVersion)
         {
-            string packageJsonPath = Path.Combine(Application.dataPath, "../Packages/com.meliverse.hoyotoon/package.json");
-            if (File.Exists(packageJsonPath))
+            HoyoToonLogs.LogDebug($"Installing update from {downloadUrl}...");
+
+            // VPM Installation method
+#if VRC_SDK_VRCSDK3
+
+            HoyoToonLogs.LogDebug("Installing update using VPM...");
+            if (Resolver.VPMManifestExists())
             {
                 try
                 {
-                    string jsonText = File.ReadAllText(packageJsonPath);
-                    JObject json = JObject.Parse(jsonText);
-                    string version = json["version"]?.ToString();
+                    var project = new UnityProject(Resolver.ProjectDir);
+                    var package = Repos.GetPackageWithVersionMatch("com.meliverse.hoyotoon", remoteVersion);
 
-                    return version ?? "0.0.0";
-                }
-                catch (Exception ex)
-                {
-                    HoyoToonLogs.ErrorDebug($"Error reading or parsing package.json: {ex.Message}");
-                    return "0.0.0";
-                }
-            }
-            else
-            {
-                HoyoToonLogs.WarningDebug($"package.json not found at: {packageJsonPath}");
-                return "0.0.0";
-            }
-        }
-
-        private static void NotifyUpdateThroughVCC()
-        {
-            string message = "To update the HoyoToon package using the Creator Companion, follow these steps:\n\n" +
-                     "1. Open the Creator Companion application.\n" +
-                     "2. Navigate to the 'Manage Project' section.\n" +
-                     "3. Find the HoyoToon package in the list of installed packages.\n" +
-                     "4. If an update is available, it will be highlighted in green.\n" +
-                     "5. Click the green-highlighted version to update to the specified version.\n\n" +
-                     "If you have any issues, please refer to the HoyoToon documentation or support.";
-
-            EditorUtility.DisplayDialog("Update Tutorial", message, "OK");
-        }
-
-        private static void UpdateThroughUPM()
-        {
-            EditorApplication.ExecuteMenuItem("Window/Package Manager");
-            EditorApplication.delayCall += () =>
-            {
-                var packageManagerWindowType = Type.GetType("UnityEditor.PackageManager.UI.PackageManagerWindow,Unity.PackageManager");
-                if (packageManagerWindowType != null)
-                {
-                    var packageManagerWindow = EditorWindow.GetWindow(packageManagerWindowType);
-                    if (packageManagerWindow != null)
+                    if (package != null)
                     {
-                        var packageManagerField = packageManagerWindowType.GetField("m_PackageManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                        if (packageManagerField != null)
-                        {
-                            var packageManager = packageManagerField.GetValue(packageManagerWindow);
-                            var packageListField = packageManager.GetType().GetField("m_PackageList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                            if (packageListField != null)
-                            {
-                                var packageList = packageListField.GetValue(packageManager);
-                                var packageItemsField = packageList.GetType().GetField("m_Items", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                                if (packageItemsField != null)
-                                {
-                                    var packageItems = packageItemsField.GetValue(packageList) as IEnumerable;
-                                    if (packageItems != null)
-                                    {
-                                        foreach (var item in packageItems)
-                                        {
-                                            var packageInfo = item.GetType().GetProperty("packageInfo").GetValue(item);
-                                            if (packageInfo != null)
-                                            {
-                                                var packageName = packageInfo.GetType().GetProperty("name").GetValue(packageInfo).ToString();
-                                                if (packageName == "com.meliverse.hoyotoon")
-                                                {
-                                                    // do nothing 
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        project.UpdateVPMPackage(package);
+                        AssetDatabase.Refresh();
+                        return;
                     }
+                }
+                catch (Exception e) { HoyoToonLogs.LogDebug(e.ToString()); };
+            }
+#endif
+
+            HoyoToonLogs.LogDebug("VPM not found, falling back to manual installation...");
+
+            // Move existing assets to a temporary folder
+            GetAssetsToDelete();
+
+            // Download and import the new Unity package
+            UnityWebRequest webRequest = UnityWebRequest.Get(downloadUrl);
+            webRequest.SendWebRequest().completed += (asyncOperation) =>
+            {
+                if (webRequest.result == UnityWebRequest.Result.Success)
+                {
+                    string tempFilePath = Path.Combine(Application.temporaryCachePath, "update.unitypackage");
+                    File.WriteAllBytes(tempFilePath, webRequest.downloadHandler.data);
+                    AssetDatabase.ImportPackage(tempFilePath, false);
+
+                    // Delete the old assets
+                    DeleteAssets();
+
+                    HoyoToonLogs.LogDebug("HoyoToon has been updated to version " + remoteVersion);
+                }
+                else
+                {
+                    HoyoToonLogs.ErrorDebug($"Error downloading update: {webRequest.error}");
                 }
             };
         }
 
-        [Serializable]
-        public class GitHubRelease
+        public static void GetAssetsToDelete()
         {
-            public string tag_name;
-            public string body;
-            public Asset[] assets;
+            assetsToDelete.Clear();
+            metasToDelete.Clear();
 
-            [Serializable]
-            public class Asset
+            // Find the package path dynamically
+            string packageName = "com.meliverse.hoyotoon";
+            string packagePath = GetPackagePath(packageName);
+
+            if (string.IsNullOrEmpty(packagePath))
             {
-                public string browser_download_url;
-                public long size;
+                HoyoToonLogs.ErrorDebug($"Package {packageName} not found.");
+                return;
+            }
+
+            // Convert absolute package path to relative path
+            string relativePackagePath = "Packages/" + packageName;
+
+            string[] assetGUIDs = AssetDatabase.FindAssets("", new[] { relativePackagePath }).ToArray();
+            string[] foldersToExclude = Directory.GetDirectories(packagePath).Select(x => AssetDatabase.AssetPathToGUID("Packages/" + packageName + "/" + Path.GetFileName(x))).ToArray();
+            assetGUIDs = assetGUIDs.Except(foldersToExclude).ToArray();
+
+            foreach (string guid in assetGUIDs)
+            {
+                string oldPath = AssetDatabase.GUIDToAssetPath(guid);
+                string ext = Path.GetExtension(oldPath);
+                string newPath = Path.Combine(relativePackagePath, "HoyoTemp", guid + ext);
+
+                AssetDatabase.MoveAsset(oldPath, newPath);
+
+                assetsToDelete.Add(newPath);
+                metasToDelete.Add(oldPath + ".meta");
             }
         }
-        #endregion
+
+        public static void DeleteAssets()
+        {
+            foreach (string metaPath in metasToDelete)
+            {
+                if (File.Exists(metaPath))
+                {
+                    File.Delete(metaPath);
+                }
+            }
+
+            foreach (string assetPath in assetsToDelete)
+            {
+                if (File.Exists(assetPath))
+                {
+                    AssetDatabase.DeleteAsset(assetPath);
+                }
+            }
+        }
+
+        private static string GetPackagePath(string packageName)
+        {
+            ListRequest request = Client.List(true);
+            while (!request.IsCompleted) { }
+
+            if (request.Status == StatusCode.Success)
+            {
+                foreach (var package in request.Result)
+                {
+                    if (package.name == packageName)
+                    {
+                        return package.resolvedPath;
+                    }
+                }
+            }
+            else if (request.Status >= StatusCode.Failure)
+            {
+                HoyoToonLogs.ErrorDebug(request.Error.message);
+            }
+
+            return null;
+        }
+
+        private class Release
+        {
+            public string tag_name { get; set; }
+            public List<Asset> assets { get; set; }
+            public string body { get; set; }
+        }
+
+        private class Asset
+        {
+            public string browser_download_url { get; set; }
+            public long size { get; set; }
+        }
+
     }
 }
