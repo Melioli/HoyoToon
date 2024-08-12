@@ -11,6 +11,7 @@ using UnityEngine.Networking;
 using System.IO;
 using System;
 using System.Linq;
+
 #if VRC_SDK_VRCSDK3
 using VRC.PackageManagement.Core;
 using VRC.PackageManagement.Core.Types;
@@ -138,7 +139,6 @@ namespace HoyoToon
 
             // VPM Installation method
 #if VRC_SDK_VRCSDK3
-
             HoyoToonLogs.LogDebug("Installing update using VPM...");
             if (Resolver.VPMManifestExists())
             {

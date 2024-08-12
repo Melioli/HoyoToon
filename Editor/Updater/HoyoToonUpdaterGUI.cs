@@ -20,6 +20,7 @@ namespace HoyoToon
         private Action onIgnoreUpdate;
         private Dictionary<string, Texture2D> textureCache = new Dictionary<string, Texture2D>();
         private HashSet<string> loadingTextures = new HashSet<string>();
+        private static HoyoToonUpdaterGUI window;
 
         public static void ShowWindow(string localVersion, string remoteVersion, string downloadSize, string bodyContent, System.Action OnUpdate, System.Action onIgnoreUpdate)
         {

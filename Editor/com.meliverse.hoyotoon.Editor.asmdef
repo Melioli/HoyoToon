@@ -2,7 +2,6 @@
     "name": "com.meliverse.hoyotoon.Editor",
     "rootNamespace": "",
     "references": [
-        "com.meliverse.hoyotoon",
         "Unity.EditorCoroutines.Editor",
         "com.vrchat.core.vpm-resolver.Editor"
     ],
