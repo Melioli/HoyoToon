@@ -61,7 +61,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
 
         //ifex variant_selector == 0 || variant_selector == 2
             //Face 
-            [HideInInspector] start_faceshading("Face--{condition_show:{type:OR,condition1:{type:PROPERTY_BOOL,data:variant_selector==1},condition2:{type:PROPERTY_BOOL,data:variant_selector==3}}}", Float) = 0.0
+            [HideInInspector] start_faceshading("Face--{condition_show:{type:OR,conditions:[{type:PROPERTY_BOOL,data:variant_selector==1},{type:PROPERTY_BOOL,data:variant_selector==3}]}}", Float) = 0.0
                 _FaceMapTex ("FaceMap Texture", 2D) = "grey" {}
                 _FacExpTex ("Face Expression Texture", 2D) = "black" { }
                 _ShadowFeather ("Shadow Feather", Range(0.0001, 1)) = 0.001 // for face

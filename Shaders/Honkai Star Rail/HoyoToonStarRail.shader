@@ -382,7 +382,7 @@ Shader "HoyoToon/Star Rail/Character"
                 _CausInt ("Caustic Intensity--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(0.000, 10.000)) = 1.0
                 _CausExp ("Caustic Exponent--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Range(0.000, 10.000)) = 1.0
                 [Toggle] _EnableSplit ("Enable Caustic RGB Split--{condition_show:{type:PROPERTY_BOOL,data:_CausToggle==1.0}}", Float) = 0.0
-                _CausSplit ("Caustic RGB Split--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_CausToggle==1},condition2:{type:PROPERTY_BOOL,data:_EnableSplit==1}}}", Range(0.0, 1.0)) = 0.0
+                _CausSplit ("Caustic RGB Split--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_CausToggle==1},{type:PROPERTY_BOOL,data:_EnableSplit==1}]}}", Range(0.0, 1.0)) = 0.0
             [HideInInspector] end_caustic ("", Float) = 0 
             //endex
             //ifex _DissoveONM == 0
@@ -434,7 +434,7 @@ Shader "HoyoToon/Star Rail/Character"
                 _DissolveAnimDirection ("Dissolve Distortion Direction | XY --{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 0.0, 0.0, 0.0)
                 _DissovleFadeSmoothstep ("Dissolve Fade Smoothstep | X = min | Y = max--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 1.0, 0.0, 0.0)		
                 [Toggle]_DissolveUsePosition ("Dissolve Use Position--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Float) = 0.0
-                [Toggle] _UseWorldPosDissolve ("Dissolve Use World Position--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_DissolveMode==1.0},condition2:{type:PROPERTY_BOOL,data:_DissolveUsePosition==1.0}}}", Float) = 0.0
+                [Toggle] _UseWorldPosDissolve ("Dissolve Use World Position--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_DissolveMode==1.0},{type:PROPERTY_BOOL,data:_DissolveUsePosition==1.0}]}}", Float) = 0.0
                 _DissolveFadeDirection ("Dissolve Fade Direction | XYZ --{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 0.0, 0.0, 0.0)
                 _DissovlePosFadeSmoothstep ("Dissolve Position Fade Smoothstep | X = min | Y = max--{condition_show:{type:PROPERTY_BOOL,data:_DissolveMode==1.0}}", Vector) = (0.0, 1.0, 0.0, 0.0)		
 

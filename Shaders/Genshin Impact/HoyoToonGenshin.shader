@@ -254,7 +254,7 @@ Shader "HoyoToon/Genshin/Character"
                 [Toggle] _MetalMaterial ("Enable Metallic", Float) = 1.0
                 [SmallTexture]_MTMap("Metallic Matcap--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}",2D)= "white"{ }
                 [Toggle] _MTUseSpecularRamp ("Enable Metal Specular Ramp--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 0.0
-                [SmallTexture]_MTSpecularRamp("Specular Ramp--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_MetalMaterial==1},condition2:{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1}}}",2D)= "white"{ }
+                [SmallTexture] _MTSpecularRamp("Specular Ramp--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_MetalMaterial==1},{type:PROPERTY_BOOL,data:_MTUseSpecularRamp==1}]}}", 2D) = "white" { }
                 _MTMapBrightness ("Metallic Matcap Brightness--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 3.0
                 _MTShininess ("Metallic Specular Shininess--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 90.0
                 _MTSpecularScale ("Metallic Specular Scale--{condition_show:{type:PROPERTY_BOOL,data:_MetalMaterial==1.0}}", Float) = 15.0 
@@ -277,25 +277,25 @@ Shader "HoyoToon/Genshin/Character"
                 [Toggle] _SpecularHighlights ("Enable Specular", Float) = 0.0
                 [HideInInspector] [Toggle] _UseToonSpecular ("Enable Specular", Float) = 0.0
                 _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
-                _Shininess2 ("Shininess 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial2==1}}}", Float) = 10
-                _Shininess3 ("Shininess 3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Float) = 10
-                _Shininess4 ("Shininess 4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Float) = 10
-                _Shininess5 ("Shininess 5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Float) = 10
+                _Shininess2 ("Shininess 2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Float) = 10
+                _Shininess3 ("Shininess 3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Float) = 10
+                _Shininess4 ("Shininess 4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Float) = 10
+                _Shininess5 ("Shininess 5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Float) = 10
                 _SpecMulti ("Specular Multiplier 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
-                _SpecMulti2 ("Specular Multiplier 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial2==1}}}", Float) = 0.1
-                _SpecMulti3 ("Specular Multiplier 3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Float) = 0.1
-                _SpecMulti4 ("Specular Multiplier 4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Float) = 0.1
-                _SpecMulti5 ("Specular Multiplier 5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Float) = 0.1
+                _SpecMulti2 ("Specular Multiplier 2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Float) = 0.1
+                _SpecMulti3 ("Specular Multiplier 3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Float) = 0.1
+                _SpecMulti4 ("Specular Multiplier 4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Float) = 0.1
+                _SpecMulti5 ("Specular Multiplier 5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Float) = 0.1
                 _SpecOpacity ("Specular Opacity 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 0.1
-                _SpecOpacity2 ("Specular Opacity 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial2==1}}}", Float) = 0.1
-                _SpecOpacity3 ("Specular Opacity 3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Float) = 0.1
-                _SpecOpacity4 ("Specular Opacity 4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Float) = 0.1
-                _SpecOpacity5 ("Specular Opacity 5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Float) = 0.1
+                _SpecOpacity2 ("Specular Opacity 2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Float) = 0.1
+                _SpecOpacity3 ("Specular Opacity 3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Float) = 0.1
+                _SpecOpacity4 ("Specular Opacity 4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Float) = 0.1
+                _SpecOpacity5 ("Specular Opacity 5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Float) = 0.1
                 [HDR] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor2 ("Specular Color2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial2==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor3 ("Specular Color3--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial3==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor4 ("Specular Color4--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial4==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor5 ("Specular Color5--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_SpecularHighlights==1},condition2:{type:PROPERTY_BOOL,data:_UseMaterial5==1}}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor2 ("Specular Color2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor3 ("Specular Color3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor4 ("Specular Color4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                [HDR] _SpecularColor5 ("Specular Color5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
                 // [HDR] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
             [HideInInspector] end_specular("", Int) = 0
             //endex
@@ -432,16 +432,16 @@ Shader "HoyoToon/Genshin/Character"
                 [Enum(Paimon, 0, Skirk, 1, Asmoday, 2)] _StarCockType ("Star Cloak Type Override--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
                 [Toggle] _StarCockEmis ("Star Cloak As Emission--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0
                 [Enum(UV0, 0, UV1, 1, UV2, 2)] _StarUVSource ("UV Source--{condition_show:{type:PROPERTY_BOOL,data:_StarCloakEnable==1.0}}", Float) = 0.0
-                [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0.0
-                _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Range(0.0, 2.0)) = 1.0
-                _StarTex ("Star Texture 1--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType<2}}}", 2D) = "black" { } // cock 
-                _Star02Tex ("Star Texture 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", 2D) = "black" { }
-                _Star01Speed ("Star 1 Scroll Speed--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0
-                _StarBrightness ("Star Brightness--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 60
-                _StarHeight ("Star Texture Height--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 14.89
-                _Star02Height ("Star Texture 2 Height--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0
+                [Toggle] _StarCloakOveride("Star Cloak Shading Only--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0.0
+                _StarCloakBlendRate ("Star Cloak Blend Rate--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Range(0.0, 2.0)) = 1.0
+                _StarTex ("Star Texture 1--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType<2}]}}", 2D) = "black" { } // cock 
+                _Star02Tex ("Star Texture 2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", 2D) = "black" { }
+                _Star01Speed ("Star 1 Scroll Speed--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0
+                _StarBrightness ("Star Brightness--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 60
+                _StarHeight ("Star Texture Height--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 14.89
+                _Star02Height ("Star Texture 2 Height--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0
                 // Noise
-                [HideInInspector] start_starcocknoise("Noise--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0 //starcock: the phantom cock
+                [HideInInspector] start_starcocknoise("Noise--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0 //starcock: the phantom cock
                     _NoiseTex01 ("Noise Texture 1", 2D) = "white" { }
                     _NoiseTex02 ("Noise Texture 2", 2D) = "white" { }
                     _Noise01Speed ("Noise 1 Scroll Speed", Float) = 0.1
@@ -449,36 +449,36 @@ Shader "HoyoToon/Genshin/Character"
                     _Noise03Brightness ("Noise 3 Brightness", Float) = 0.2
                 [HideInInspector] end_starcocknoise("", Float) = 0 //starcock: attack of the cocks
                 // Color Palette
-                [HideInInspector] start_starcockcolorpallete("Color Pallete--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0 //starcock: revenge of the cock
+                [HideInInspector] start_starcockcolorpallete("Color Pallete--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0 //starcock: revenge of the cock
                     _ColorPaletteTex ("Color Palette Texture", 2D) = "white" { }
                     _ColorPalletteSpeed ("Color Palette Scroll Speed", Float) = -0.1
                 [HideInInspector] end_starcockcolorpallete("", Float) = 0 //starcock: the cock awakens
                 // Constellation
-                [HideInInspector] start_starcockconstellation("Constellation--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0 //starcock: the last cock
+                [HideInInspector] start_starcockconstellation("Constellation--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0 //starcock: the last cock
                     _ConstellationTex ("Constellation Texture", 2D) = "white" { }
                     _ConstellationHeight ("Constellation Texture Height", Float) = 1.2
                     _ConstellationBrightness ("Constellation Brightness", Float) = 5
                 [HideInInspector] end_starcockconstellation("", Float) = 0 //starcock: a starcock story
                 // Cloud
-                [HideInInspector] start_starcockcloud("Cloud--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==0}}}", Float) = 0 //starcock: the rise of cock
+                [HideInInspector] start_starcockcloud("Cloud--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==0}]}}", Float) = 0 //starcock: the rise of cock
                     _CloudTex ("Cloud Texture", 2D) = "white" { }
                     _CloudBrightness ("Cloud Texture Brightness", Float) = 1
                     _CloudHeight ("Cloud Texture Height", Float) = 1
                 [HideInInspector] end_starcockcloud("", Float) = 0 //starcock: the cock strikes back
                 // Textures
-                _FlowMap ("Star Texture--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", 2D) = "white" { }
-                _FlowMap02 ("Star Texture 2--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", 2D) = "white" { }
-                _NoiseMap ("Noise Map--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", 2D) = "white" { }
-                _FlowMask ("Flow Mask--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", 2D) = "white" { }
+                _FlowMap ("Star Texture--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", 2D) = "white" { }
+                _FlowMap02 ("Star Texture 2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", 2D) = "white" { }
+                _NoiseMap ("Noise Map--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", 2D) = "white" { }
+                _FlowMask ("Flow Mask--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", 2D) = "white" { }
                 // Gradient
-                [HideInInspector] start_starcockgrad ("Gradient--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", Float) = 0
+                [HideInInspector] start_starcockgrad ("Gradient--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", Float) = 0
                     _BottomColor01 ("Top Color", Color) = (0,0,0,0)
                     _BottomColor02 ("Bottom Color", Color) = (1,0,0,0)
                     _BottomScale ("Gradient Scale", Float) = 1
                     _BottomPower ("Gradient Power", Float) = 1
                 [HideInInspector] end_starcockgrad ("", Float) = 0
                 // Flow
-                [HideInInspector] start_starcockflow ("Star Controls--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", Float) = 0
+                [HideInInspector] start_starcockflow ("Star Controls--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", Float) = 0
                     _FlowColor ("Star Color", Color) = (1,1,1,0)
                     _FlowMaskScale ("Star Texture Scale", Float) = 1 
                     _FlowMaskPower ("Star Texture Power", Float) = 1
@@ -487,21 +487,21 @@ Shader "HoyoToon/Genshin/Character"
                     _FlowMask02Speed ("Star Texture 02 Speed", Vector) = (0,0,0,0)
                 [HideInInspector] end_starcockflow ("", Float) = 0
                 // Asmoday Noise
-                [HideInInspector] start_starcockasmodaynoise ("Noise Controls--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==2}}}", Float) = 0
+                [HideInInspector] start_starcockasmodaynoise ("Noise Controls--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==2}]}}", Float) = 0
                     _NoiseScale ("Noise Scale", Range(0, 1)) = 0
                     _NoiseSpeed ("Noise Speed", Vector) = (0,0,0,0)
                 [HideInInspector] end_starcockasmodaynoise ("", Float) = 0
                 // Skirk Options
-                _StarMask ("Stars Mask--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", 2D) = "white" { }
-                [Toggle] _UseScreenUV ("Enable Screen UV--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 0
-                _StarTiling ("Star Tiling--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 1
-                _StarTexSpeed ("Star TexSpeed--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Vector) = (0,0,0,0)
-                _StarColor ("Star Color--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Color) = (1,1,1,1)
-                _StarFlickRange ("Star Flicker Range--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Range(0, 1)) = 0.2
-                _StarFlickColor ("Star Flicker Color--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Color) = (1,1,1,1)
-                _StarFlickerParameters ("Star Flicker Parameters--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Vector) = (1,20,0.5,0)
+                _StarMask ("Stars Mask--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", 2D) = "white" { }
+                [Toggle] _UseScreenUV ("Enable Screen UV--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Float) = 0
+                _StarTiling ("Star Tiling--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Float) = 1
+                _StarTexSpeed ("Star TexSpeed--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Vector) = (0,0,0,0)
+                _StarColor ("Star Color--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Color) = (1,1,1,1)
+                _StarFlickRange ("Star Flicker Range--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Range(0, 1)) = 0.2
+                _StarFlickColor ("Star Flicker Color--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Color) = (1,1,1,1)
+                _StarFlickerParameters ("Star Flicker Parameters--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Vector) = (1,20,0.5,0)
                 // Skirk Block 
-                [HideInInspector] start_skockblock ("Highlight Block Controls--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 0
+                [HideInInspector] start_skockblock ("Highlight Block Controls--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Float) = 0
                     _BlockHighlightMask ("Block Highlight Mask", 2D) = "black" { }
                     _BlockHighlightColor ("Block Highlight Color", Color) = (1,1,1,1)
                     _BlockHighlightViewWeight ("Block Highlight View Weight", Range(0, 1)) = 0.5
@@ -510,7 +510,7 @@ Shader "HoyoToon/Genshin/Character"
                     _BlockHighlightSoftness ("Block Highlight Softness", Range(0, 1)) = 0
                 [HideInInspector] end_skockblock ("", Float) = 0
                 // Skirk Bright Light Mask
-                [HideInInspector] start_skockbright ("Bright Line Controls--{condition_show:{type:AND,condition1:{type:PROPERTY_BOOL,data:_StarCloakEnable==1},condition2:{type:PROPERTY_BOOL,data:_StarCockType==1}}}", Float) = 0
+                [HideInInspector] start_skockbright ("Bright Line Controls--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_StarCloakEnable==1},{type:PROPERTY_BOOL,data:_StarCockType==1}]}}", Float) = 0
                     _BrightLineMask ("Bright Line Mask", 2D) = "white" { }
                     _BrightLineMaskContrast ("Bright Line Mask Contrast", Range(0.01, 10)) = 1
                     _BrightLineColor ("Bright Line Color", Color) = (1,1,1,1)
