@@ -63,3 +63,5 @@ crashlytics-build.properties
 Assets/PackageMakerWindowData.asset*
 .idea
 .vscode
+/Shaders/Wuthering Waves
+Shaders/Wuthering Waves.meta
