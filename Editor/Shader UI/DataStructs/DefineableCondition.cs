@@ -11,8 +11,7 @@ namespace HoyoToon
     {
         public DefineableConditionType type = DefineableConditionType.NONE;
         public string data = "";
-        public DefineableCondition condition1;
-        public DefineableCondition condition2;
+        public List<DefineableCondition> conditions = new List<DefineableCondition>();
 
         CompareType _compareType;
         string _obj;
@@ -26,6 +25,7 @@ namespace HoyoToon
         bool _constantValue;
 
         bool _isInit = false;
+
         public void Init()
         {
             if (_isInit) return;
@@ -116,14 +116,11 @@ namespace HoyoToon
                 case DefineableConditionType.PROPERTY_IS_NOT_ANIMATED:
                     return !ShaderOptimizer.IsAnimated(_materialInsteadOfEditor, _obj);
                 case DefineableConditionType.AND:
-                    if (condition1 != null && condition2 != null) return condition1.Test() && condition2.Test();
-                    break;
+                    return conditions.All(c => c.Test());
                 case DefineableConditionType.OR:
-                    if (condition1 != null && condition2 != null) return condition1.Test() || condition2.Test();
-                    break;
+                    return conditions.Any(c => c.Test());
                 case DefineableConditionType.NOT:
-                    if (condition1 != null) return !condition1.Test();
-                    break;
+                    return conditions.Count == 1 && !conditions[0].Test();
             }
 
             return true;
@@ -135,6 +132,7 @@ namespace HoyoToon
             if (_propertyObj != null) return _propertyObj.MaterialProperty;
             return null;
         }
+
         private (CompareType, string) GetComparetor()
         {
             if (data.Contains("=="))
@@ -171,14 +169,11 @@ namespace HoyoToon
                 case DefineableConditionType.PROPERTY_IS_NOT_ANIMATED:
                     return $"isNotAnimated({data})";
                 case DefineableConditionType.AND:
-                    if (condition1 != null && condition2 != null) return "(" + condition1.ToString() + "&&" + condition2.ToString() + ")";
-                    break;
+                    return "(" + string.Join("&&", conditions.Select(c => c.ToString())) + ")";
                 case DefineableConditionType.OR:
-                    if (condition1 != null && condition2 != null) return "(" + condition1.ToString() + "||" + condition2.ToString() + ")";
-                    break;
+                    return "(" + string.Join("||", conditions.Select(c => c.ToString())) + ")";
                 case DefineableConditionType.NOT:
-                    if (condition1 != null) return "!" + condition1.ToString();
-                    break;
+                    return "!" + conditions[0].ToString();
             }
             return "";
         }
@@ -193,8 +188,6 @@ namespace HoyoToon
         {
             if (end == -1) end = s.Length;
             DefineableCondition con;
-
-            // HoyoToonLogs.LogDebug("Parsing: " + s.Substring(start, end - start));
 
             int depth = 0;
             int bracketStart = -1;
@@ -226,28 +219,25 @@ namespace HoyoToon
                         con._materialInsteadOfEditor = useThisMaterialInsteadOfOpenEditor;
 
                         con.type = DefineableConditionType.AND;
-                        con.condition1 = Parse(s, useThisMaterialInsteadOfOpenEditor, start, i);
-                        con.condition2 = Parse(s, useThisMaterialInsteadOfOpenEditor, i + (s[i + 1] == '&' ? 2 : 1), end);
+                        con.conditions.Add(Parse(s, useThisMaterialInsteadOfOpenEditor, start, i));
+                        con.conditions.Add(Parse(s, useThisMaterialInsteadOfOpenEditor, i + (s[i + 1] == '&' ? 2 : 1), end));
                         return con;
                     }
                     else if (c == '|')
                     {
-
                         con = new DefineableCondition();
                         con._materialInsteadOfEditor = useThisMaterialInsteadOfOpenEditor;
 
                         con.type = DefineableConditionType.OR;
-                        con.condition1 = Parse(s, useThisMaterialInsteadOfOpenEditor, start, i);
-                        con.condition2 = Parse(s, useThisMaterialInsteadOfOpenEditor, i + (s[i + 1] == '|' ? 2 : 1), end);
+                        con.conditions.Add(Parse(s, useThisMaterialInsteadOfOpenEditor, start, i));
+                        con.conditions.Add(Parse(s, useThisMaterialInsteadOfOpenEditor, i + (s[i + 1] == '|' ? 2 : 1), end));
                         return con;
                     }
                 }
             }
 
-
             bool isInverted = IsInverted(s, ref start);
 
-            // if no AND or OR was found, check for brackets
             if (bracketStart != -1 && bracketEnd != -1)
             {
                 con = Parse(s, useThisMaterialInsteadOfOpenEditor, bracketStart + 1, bracketEnd);
@@ -262,7 +252,7 @@ namespace HoyoToon
                 DefineableCondition inverted = new DefineableCondition();
                 inverted._materialInsteadOfEditor = useThisMaterialInsteadOfOpenEditor;
                 inverted.type = DefineableConditionType.NOT;
-                inverted.condition1 = con;
+                inverted.conditions.Add(con);
                 return inverted;
             }
 
@@ -286,8 +276,6 @@ namespace HoyoToon
 
         static DefineableCondition ParseSingle(string s, Material useThisMaterialInsteadOfOpenEditor = null)
         {
-            // HoyoToonLogs.LogDebug("Parsing single: " + s);
-
             DefineableCondition con = new DefineableCondition
             {
                 _materialInsteadOfEditor = useThisMaterialInsteadOfOpenEditor
@@ -295,7 +283,6 @@ namespace HoyoToon
 
             if (s.IndexOfAny(ComparissionLiteralsToCheckFor) != -1)
             {
-                //is a comparission
                 con.data = s;
                 con.type = DefineableConditionType.PROPERTY_BOOL;
                 if (s.StartsWith("VRCSDK", StringComparison.Ordinal))
@@ -342,7 +329,6 @@ namespace HoyoToon
 
         static bool IsTextureNullComparission(string data, Material useThisMaterialInsteadOfOpenEditor = null)
         {
-            // Check if property is a texture property && is checking for null
             Material m = GetReferencedMaterial(useThisMaterialInsteadOfOpenEditor);
             if (m == null) return false;
             if (data.Length < 7) return false;
@@ -379,5 +365,4 @@ namespace HoyoToon
         OR,
         NOT
     }
-
 }
