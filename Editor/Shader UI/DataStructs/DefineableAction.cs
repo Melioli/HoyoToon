@@ -53,6 +53,21 @@ namespace HoyoToon
                         }
                     }
                     break;
+                case DefineableActionType.COPY_PROPERTY:
+                    string[] properties = Regex.Split(data, @"->");
+                    if (properties.Length > 1)
+                    {
+                        string sourceProperty = properties[0].Trim();
+                        string targetProperty = properties[1].Trim();
+                        foreach (Material m in targets)
+                        {
+                            if (m.HasProperty(sourceProperty) && m.HasProperty(targetProperty))
+                            {
+                                m.SetFloat(targetProperty, m.GetFloat(sourceProperty));
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
@@ -78,6 +93,11 @@ namespace HoyoToon
             {
                 action.type = DefineableActionType.SET_SHADER;
                 action.data = s.Replace("shader=", "");
+            }
+            else if (s.Contains("->"))
+            {
+                action.type = DefineableActionType.COPY_PROPERTY;
+                action.data = s;
             }
             else if (s.Contains("="))
             {
@@ -118,7 +138,6 @@ namespace HoyoToon
         SET_SHADER,
         SET_TAG,
         OPEN_EDITOR,
+        COPY_PROPERTY,
     }
-
-
 }
