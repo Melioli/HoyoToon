@@ -3,9 +3,7 @@ Shader "HoyoToon/Genshin/Character"
     Properties 
   { 
       [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
-        [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
-        [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
-        [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
+
         //Header
         //[HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Genshin Impact</color></i></b>✧", Float) = 0
 		[HideInInspector] ShaderBG ("UI/background", Float) = 0
@@ -16,6 +14,8 @@ Shader "HoyoToon/Genshin/Character"
         //Header End
 
         [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
+
+
         
         //Material Type
         [HoyoToonWideEnum(Base, 0, Face, 1, Weapon, 2, Glass, 3)]variant_selector("Material Type--{on_value_actions:[
@@ -25,6 +25,16 @@ Shader "HoyoToon/Genshin/Character"
             {value:3,actions:[{type:SET_PROPERTY,data:_UseFaceMapNew=0.0}, {type:SET_PROPERTY,data:_UseWeapon=1.0}]}
             ]}", Int) = 0
         //Material Type End
+
+
+        // Define a property with the HoyoToonWideEnum attribute
+        [HoyoToonWideEnum(Off, 0, On, 1)] _Linking ("Link Properties--{on_value_actions:[
+            {value:0,actions:[{type:LINK_PROPERTY,data:_MainProperty == _LinkedProperty, state:off}]},
+            {value:1,actions:[{type:LINK_PROPERTY,data:_MainProperty == _LinkedProperty, state:on}]}
+        ]}", Float) = 1.0
+
+        _MainProperty ("Main Property", Range(0.0, 1.0)) = 0.5
+        _LinkedProperty ("Linked Property", Range(0.0, 1.0)) = 0.5
 
         // Hidden Game Version Variable for switching certain logics
         [HideInInspector] [HoyoToonWideEnum(Pre Natlan, 0, Post Natlan, 1)] _gameVersion ("", Float) = 0
@@ -686,8 +696,8 @@ Shader "HoyoToon/Genshin/Character"
             [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
             [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
             [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
-            [HideInInspector][Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("Source Blend--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_SrcBlend=2}]}, {value:3,actions:[{type:SET_PROPERTY,data:_SrcBlend=3}]}, {value:4,actions:[{type:SET_PROPERTY,data:_SrcBlend=4}]}, {value:5,actions:[{type:SET_PROPERTY,data:_SrcBlend=5}]}, {value:6,actions:[{type:SET_PROPERTY,data:_SrcBlend=6}]}, {value:7,actions:[{type:SET_PROPERTY,data:_SrcBlend=7}]}, {value:8,actions:[{type:SET_PROPERTY,data:_SrcBlend=8}]}, {value:9,actions:[{type:SET_PROPERTY,data:_SrcBlend=9}]}, {value:10,actions:[{type:SET_PROPERTY,data:_SrcBlend=10}]}, {value:11,actions:[{type:SET_PROPERTY,data:_SrcBlend=11}]}]}", Int) = 1
-            [HideInInspector][Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("Destination Blend--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_DstBlend=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_DstBlend=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_DstBlend=2}]}, {value:3,actions:[{type:SET_PROPERTY,data:_DstBlend=3}]}, {value:4,actions:[{type:SET_PROPERTY,data:_DstBlend=4}]}, {value:5,actions:[{type:SET_PROPERTY,data:_DstBlend=5}]}, {value:6,actions:[{type:SET_PROPERTY,data:_DstBlend=6}]}, {value:7,actions:[{type:SET_PROPERTY,data:_DstBlend=7}]}, {value:8,actions:[{type:SET_PROPERTY,data:_DstBlend=8}]}, {value:9,actions:[{type:SET_PROPERTY,data:_DstBlend=9}]}, {value:10,actions:[{type:SET_PROPERTY,data:_DstBlend=10}]}, {value:11,actions:[{type:SET_PROPERTY,data:_DstBlend=11}]}]}", Int) = 0
+            [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("Source Blend--{on_value_actions:[{value:any,actions:[{type:LINK_PROPERTY,data:_SrcBlendMode==_SrcBlend}]}]}", Int) = 1
+            [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("Destination Blend--{on_value_actions:[{value:any,actions:[{type:LINK_PROPERTY,data:_DstBlendMode==_DstBlend}]}]}", Int) = 1
             // Debug Options
             //ifex _DebugMode == 0
             [HideInInspector] start_debugOptions("Debug--{reference_property:_DebugMode}", Float) = 0
