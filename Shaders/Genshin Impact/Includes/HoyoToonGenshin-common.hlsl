@@ -781,11 +781,11 @@ void weapon_shit(inout float3 diffuse_color, float diffuse_alpha, float2 uv, flo
         }
         weapon_uv.y = (_WeaponDissolveValue * 2.09f + weapon_uv.y) + -1.0f;
         
-        float2 weapon_tex = _WeaponDissolveTex.Sample(sampler_linear_repeat, weapon_uv).xy;
+        float2 weapon_tex = _WeaponDissolveTex.Sample(sampler_linear_clamp, weapon_uv).xy;
 
         float2 pattern_uv = _Time.yy * (float2)_Pattern_Speed + uv_wp;
 
-        float pattern_tex = _WeaponPatternTex.Sample(sampler_linear_clamp, pattern_uv).x;
+        float pattern_tex = _WeaponPatternTex.Sample(sampler_linear_repeat, pattern_uv).x;
 
         ndotv = ndotv * 1.1f + pattern_tex;
 
