@@ -15,9 +15,10 @@ namespace HoyoToon
         public bool Execute(MaterialProperty p, Material[] targets)
         {
             if (
+                value == "any" ||
                 (p.type == MaterialProperty.PropType.Float && p.floatValue.ToString() == value) ||
 #if UNITY_2022_1_OR_NEWER
-                (p.type == MaterialProperty.PropType.Int && p.intValue.ToString() == value) ||
+        (p.type == MaterialProperty.PropType.Int && p.intValue.ToString() == value) ||
 #endif
                 (p.type == MaterialProperty.PropType.Range && p.floatValue.ToString() == value) ||
                 (p.type == MaterialProperty.PropType.Color && p.colorValue.ToString() == value) ||
@@ -27,7 +28,6 @@ namespace HoyoToon
                 (p.type == MaterialProperty.PropType.Texture && (p.textureValue != null && p.textureValue.name == value))
             )
             {
-                ;
                 foreach (DefineableAction a in actions)
                     a.Perform(targets);
                 return true;
@@ -48,7 +48,7 @@ namespace HoyoToon
             if (valueAndActions.Length > 1)
             {
                 PropertyValueAction propaction = new PropertyValueAction();
-                propaction.value = valueAndActions[0];
+                propaction.value = valueAndActions[0].Trim();
                 List<DefineableAction> actions = new List<DefineableAction>();
                 string[] actionStrings = valueAndActions[1].Split(';');
                 for (int i = 0; i < actionStrings.Length; i++)
@@ -79,6 +79,13 @@ namespace HoyoToon
                 if (propertyValueAction != null)
                     propactions.Add(propertyValueAction);
             }
+
+            // Add an "any" case that acts on any change
+            PropertyValueAction anyAction = new PropertyValueAction();
+            anyAction.value = "";
+            anyAction.actions = new DefineableAction[0];
+            propactions.Add(anyAction);
+
             return propactions.ToArray();
         }
     }

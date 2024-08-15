@@ -433,7 +433,7 @@
                     </tr>
                     <tr>
                         <td>value</td>
-                        <td>string</td>
+                        <td>string/any</td>
                         <td>Yes</td>
                     </tr>
                     <tr>
@@ -484,6 +484,10 @@
                         <td>Copies the source propery to the destination property.</td>
                         <td>{type:COPY_PROPERTY,data:_SourceProperty -> _DestinationProperty}</td>
                     </tr>
+                    <tr>
+                        <td>LINK_PROPERTY</td>
+                        <td>Create a link between properties that'll keep their values synced.</td>
+                        <td>{type:LINK_PROPERTY,data:_DstBlendMode==_DstBlend}</td>
                     <tr>
                         <td>SET_SHADER</td>
                         <td>Changes the shader of the material.</td>

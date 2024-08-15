@@ -11,6 +11,7 @@ namespace HoyoToon
     {
         public DefineableActionType type = DefineableActionType.NONE;
         public string data = "";
+
         public void Perform(Material[] targets)
         {
             switch (type)
@@ -54,16 +55,51 @@ namespace HoyoToon
                     }
                     break;
                 case DefineableActionType.COPY_PROPERTY:
-                    string[] properties = Regex.Split(data, @"->");
-                    if (properties.Length > 1)
+                    string[] copyProperties = Regex.Split(data, @"->");
+                    if (copyProperties.Length > 1)
                     {
-                        string sourceProperty = properties[0].Trim();
-                        string targetProperty = properties[1].Trim();
+                        string sourceProperty = copyProperties[0].Trim();
+                        string targetProperty = copyProperties[1].Trim();
                         foreach (Material m in targets)
                         {
                             if (m.HasProperty(sourceProperty) && m.HasProperty(targetProperty))
                             {
                                 m.SetFloat(targetProperty, m.GetFloat(sourceProperty));
+                            }
+                        }
+                    }
+                    break;
+                case DefineableActionType.LINK_PROPERTY:
+                    string[] linkProperties = Regex.Split(data, @"==");
+                    if (linkProperties.Length > 1)
+                    {
+                        string mainProperty = linkProperties[0].Trim();
+                        string linkedProperty = linkProperties[1].Trim();
+                        foreach (Material m in targets)
+                        {
+                            if (m.HasProperty(mainProperty) && m.HasProperty(linkedProperty))
+                            {
+                                // Determine the type of the main property and set the linked property accordingly
+                                if (m.GetFloat(mainProperty) is float mainPropertyValue)
+                                {
+                                    m.SetFloat(linkedProperty, mainPropertyValue);
+                                }
+                                else if (m.GetInt(mainProperty) is int mainPropertyIntValue)
+                                {
+                                    m.SetInt(linkedProperty, mainPropertyIntValue);
+                                }
+                                else if (m.GetColor(mainProperty) is Color mainPropertyColorValue)
+                                {
+                                    m.SetColor(linkedProperty, mainPropertyColorValue);
+                                }
+                                else if (m.GetVector(mainProperty) is Vector4 mainPropertyVectorValue)
+                                {
+                                    m.SetVector(linkedProperty, mainPropertyVectorValue);
+                                }
+                                else if (m.GetTexture(mainProperty) is Texture mainPropertyTextureValue)
+                                {
+                                    m.SetTexture(linkedProperty, mainPropertyTextureValue);
+                                }
                             }
                         }
                     }
@@ -75,6 +111,7 @@ namespace HoyoToon
         {
             return Parse(s);
         }
+
         public static DefineableAction Parse(string s)
         {
             s = s.Trim();
@@ -99,6 +136,11 @@ namespace HoyoToon
                 action.type = DefineableActionType.COPY_PROPERTY;
                 action.data = s;
             }
+            else if (s.Contains("=="))
+            {
+                action.type = DefineableActionType.LINK_PROPERTY;
+                action.data = s;
+            }
             else if (s.Contains("="))
             {
                 action.type = DefineableActionType.SET_PROPERTY;
@@ -107,6 +149,11 @@ namespace HoyoToon
             else if (Regex.IsMatch(s, @"\w+(\.\w+)"))
             {
                 action.type = DefineableActionType.OPEN_EDITOR;
+                action.data = s;
+            }
+            else
+            {
+                action.type = DefineableActionType.NONE;
                 action.data = s;
             }
             return action;
@@ -139,5 +186,6 @@ namespace HoyoToon
         SET_TAG,
         OPEN_EDITOR,
         COPY_PROPERTY,
+        LINK_PROPERTY,
     }
 }
