@@ -102,7 +102,7 @@ vs_out vs_edge(vs_in v)
             outline_scale = outline_scale * _Scale;
             outline_scale = outline_scale * 0.414f;
             outline_scale = outline_scale * v.v_col.w;
-            #if defined(faceisshadow)
+            #if defined(faceishadow)
                 if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_linear_repeat, v.uv_0.xy, 0.0f).z;
             #endif
 
@@ -481,12 +481,16 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
                 if(_DebugLightMap == 2) return float4(lightmap.yyy, 1.0f);
                 if(_DebugLightMap == 3) return float4(lightmap.zzz, 1.0f);
                 if(_DebugLightMap == 4) return float4(lightmap.www, 1.0f);
-                if(_DebugFaceMap == 1) return float4(facemap.xxx, 1.0f);
-                if(_DebugFaceMap == 2) return float4(facemap.yyy, 1.0f);
-                if(_DebugFaceMap == 3) return float4(facemap.zzz, 1.0f);
-                if(_DebugFaceMap == 4) return float4(facemap.www, 1.0f);
-                if(_DebugNormalMap == 1) return float4(normalmap.xy, 1.0f, 1.0f);
-                if(_DebugNormalMap == 2) return float4(normalmap.zzz, 1.0f);
+                #if defined(faceishadow)
+                    if(_DebugFaceMap == 1) return float4(facemap.xxx, 1.0f);
+                    if(_DebugFaceMap == 2) return float4(facemap.yyy, 1.0f);
+                    if(_DebugFaceMap == 3) return float4(facemap.zzz, 1.0f);
+                    if(_DebugFaceMap == 4) return float4(facemap.www, 1.0f);
+                #endif
+                #if defined(use_bump)
+                    if(_DebugNormalMap == 1) return float4(normalmap.xy, 1.0f, 1.0f);
+                    if(_DebugNormalMap == 2) return float4(normalmap.zzz, 1.0f);
+                #endif
                 if(_DebugVertexColor == 1) return float4(i.v_col.xxx, 1.0f);
                 if(_DebugVertexColor == 2) return float4(i.v_col.yyy, 1.0f);
                 if(_DebugVertexColor == 3) return float4(i.v_col.zzz, 1.0f);
