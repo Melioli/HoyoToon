@@ -696,9 +696,11 @@ namespace HoyoToon
             if (GUI.Button(presetsRect, "Presets") | GUILib.Button(presetsIcon, Styles.icon_style_presets))
                 Presets.OpenPresetsMenu(barRect, this, false);
             HoyoToonWideEnumDrawer.RenderLabel = false;
+            HoyoToonWideEnumMultiDrawer.RenderLabel = false;
             if (InShaderPresetsProperty != null)
                 InShaderPresetsProperty.Draw(inShaderRect);
             HoyoToonWideEnumDrawer.RenderLabel = true;
+            HoyoToonWideEnumMultiDrawer.RenderLabel = true;
         }
 
         private void GUISearchBar()
@@ -910,6 +912,7 @@ namespace HoyoToon
             this._isFirstOnGUICall = true;
             this._doReloadNextDraw = true;
             // this.Repaint();
+            HoyoToonWideEnumMultiDrawer.Reload();
             HoyoToonWideEnumDrawer.Reload();
             HoyoToonRGBAPackerDrawer.Reload();
         }

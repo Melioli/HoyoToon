@@ -26,16 +26,6 @@ Shader "HoyoToon/Genshin/Character"
             ]}", Int) = 0
         //Material Type End
 
-
-        // Define a property with the HoyoToonWideEnum attribute
-        [HoyoToonWideEnum(Off, 0, On, 1)] _Linking ("Link Properties--{on_value_actions:[
-            {value:0,actions:[{type:LINK_PROPERTY,data:_MainProperty == _LinkedProperty, state:off}]},
-            {value:1,actions:[{type:LINK_PROPERTY,data:_MainProperty == _LinkedProperty, state:on}]}
-        ]}", Float) = 1.0
-
-        _MainProperty ("Main Property", Range(0.0, 1.0)) = 0.5
-        _LinkedProperty ("Linked Property", Range(0.0, 1.0)) = 0.5
-
         // Hidden Game Version Variable for switching certain logics
         [HideInInspector] [HoyoToonWideEnum(Pre Natlan, 0, Post Natlan, 1)] _gameVersion ("", Float) = 0
         
@@ -72,7 +62,8 @@ Shader "HoyoToon/Genshin/Character"
             [HideInInspector] end_maincolor ("", Float) = 0
             // Main Alpha
             [HideInInspector] start_mainalpha ("Alpha Options", Float) = 0
-                [Enum(Off, 0, AlphaTest, 1, Glow, 2, FaceBlush, 3, Transparency, 4)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
+                [HoyoToonWideEnumMulti(Off, 0, AlphaTest, 1, Glow, 2, FaceBlush, 3, Transparency, 4)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
+                // _TestValue ("waa", Float) = 0
                 _MainTexAlphaCutoff("Alpha Cuttoff", Range(0, 1.0)) = 0.5
                 // See-Through 
                 [HideInInspector] start_seethrough ("Ghosting", Float) = 0

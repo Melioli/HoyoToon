@@ -24,6 +24,9 @@ namespace HoyoToon
                 case TextureDisplayType.big_basic:
                     BigTexturePropertyBasic(position, prop, label, editor, hasFoldoutProperties, skip_drag_and_drop_handling);
                     break;
+                case TextureDisplayType.ramp:
+                    RampTextureProperty(position, prop, label, editor, hasFoldoutProperties);
+                    break;
             }
         }
 
@@ -337,6 +340,135 @@ namespace HoyoToon
             DrawingData.LastGuiObjectRect = position;
             DrawingData.TooltipCheckRect = tooltipCheckRect;
             DrawingData.IconsPositioningHeights[0] = iconsPositioningHeight;
+        }
+
+        public static void RampTextureProperty(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor, bool hasFoldoutProperties, Action extraFoldoutGUI = null)
+        {
+            // Border Code start
+            bool isFoldedOut = hasFoldoutProperties && DrawingData.IsEnabled && DrawingData.CurrentTextureProperty.showFoldoutProperties;
+            if (isFoldedOut)
+            {
+                Rect border = EditorGUILayout.BeginVertical();
+                GUILayoutUtility.GetRect(0, 5);
+                border = new RectOffset(EditorGUI.indentLevel * -15 - 26, 3, -3, -3).Add(border);
+                GUI.DrawTexture(border, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, Styles.COLOR_BACKGROUND_1, 3, 10);
+            }
+            // Border Code end
+
+            // Adjust the position for the texture property button and label
+            position.height = EditorGUIUtility.singleLineHeight;
+            position.width = 200; // Set the desired width here
+            editor.TexturePropertyMiniThumbnail(position, prop, label.text, label.tooltip);
+
+            // No need to resize the thumbnail itself, as TexturePropertyMiniThumbnail handles it
+            if (prop.textureValue != null)
+            {
+                TextureWrapMode wrap_mode = prop.textureValue.wrapMode;
+                prop.textureValue.wrapMode = TextureWrapMode.Clamp;
+                bool vertical = prop.textureValue.height > prop.textureValue.width;
+                Vector2 pivot = new Vector2();
+                if (vertical)
+                {
+                    pivot = new Vector2(position.x, position.y + position.height);
+                    GUIUtility.RotateAroundPivot(-90, pivot);
+                    position.y += position.height;
+                    float h = position.width;
+                    position.width = position.height;
+                    position.y += h;
+                    position.height = -h;
+                }
+                GUI.DrawTexture(position, prop.textureValue, ScaleMode.StretchToFill, true);
+                if (vertical)
+                {
+                    GUIUtility.RotateAroundPivot(90, pivot);
+                }
+                GUI.DrawTexture(position, prop.textureValue, ScaleMode.StretchToFill, false, 0, Color.grey, 1, 1);
+                prop.textureValue.wrapMode = wrap_mode;
+            }
+
+            float iconsPositioningHeight = position.y;
+            // VRAM
+            Rect vramPos = Rect.zero;
+            if (DrawingData.CurrentTextureProperty.MaterialProperty.textureValue != null)
+            {
+                GUIContent content = new GUIContent(DrawingData.CurrentTextureProperty.VRAMString);
+                vramPos = position;
+                vramPos.x += position.width - SMALL_TEXTURE_VRAM_DISPLAY_WIDTH;
+                vramPos.width = SMALL_TEXTURE_VRAM_DISPLAY_WIDTH;
+                GUI.Label(vramPos, content, Styles.label_align_right);
+            }
+            // Prop right next to texture
+            if (DrawingData.CurrentTextureProperty.DoesReferencePropertyExist)
+            {
+                ShaderProperty property = ShaderEditor.Active.PropertyDictionary[DrawingData.CurrentTextureProperty.Options.reference_property];
+                Rect r = position;
+                r.x += EditorGUIUtility.labelWidth - CurrentIndentWidth();
+                r.width -= EditorGUIUtility.labelWidth - CurrentIndentWidth();
+                r.width -= vramPos.width;
+                property.Draw(r, new GUIContent());
+                property.Tooltip.ConditionalDraw(r);
+            }
+            // Foldouts
+            if (hasFoldoutProperties && DrawingData.CurrentTextureProperty != null)
+            {
+                // Draw dropdown triangle
+                Rect trianglePos = position;
+                trianglePos.x += DrawingData.CurrentTextureProperty.XOffset * 15 - 2;
+                // This is an invisible button with zero functionality. But it needs to be here so that the triangle click reacts fast
+                if (GUI.Button(trianglePos, "", GUIStyle.none)) { }
+                if (Event.current.type == EventType.Repaint)
+                    EditorStyles.foldout.Draw(trianglePos, false, false, DrawingData.CurrentTextureProperty.showFoldoutProperties, false);
+
+                if (DrawingData.IsEnabled)
+                {
+                    // Sub properties
+                    if (DrawingData.CurrentTextureProperty.showFoldoutProperties)
+                    {
+                        EditorGUI.indentLevel += 2;
+                        extraFoldoutGUI?.Invoke();
+                        if (DrawingData.CurrentTextureProperty.hasScaleOffset)
+                        {
+                            EditorGUI.showMixedValue = ShaderEditor.Active.Materials.Select(m => m.GetTextureScale(prop.name)).Distinct().Count() > 1 || ShaderEditor.Active.Materials.Select(m => m.GetTextureOffset(prop.name)).Distinct().Count() > 1;
+                            ShaderEditor.Active.Editor.TextureScaleOffsetProperty(prop);
+                            Rect lastRect = GUILayoutUtility.GetLastRect();
+                            position.height = (lastRect.y - position.y) + lastRect.height;
+                            iconsPositioningHeight = lastRect.y;
+                        }
+                        // In case of locked material end disabled group here to allow editing of sub properties
+
+                        if (ShaderEditor.Active.IsLockedMaterial) GUI.enabled = DrawingData.IsEnabled;
+
+                        PropertyOptions options = DrawingData.CurrentTextureProperty.Options;
+                        if (options.reference_properties != null)
+                            foreach (string r_property in options.reference_properties)
+                            {
+                                ShaderProperty property = ShaderEditor.Active.PropertyDictionary[r_property];
+                                property.Draw(useEditorIndent: true);
+                            }
+
+                        EditorGUI.indentLevel -= 2;
+                    }
+                    if (ShaderEditor.Input.LeftClick_IgnoreLockedAndUnityUses && position.Contains(Event.current.mousePosition))
+                    {
+                        ShaderEditor.Input.Use();
+                        DrawingData.CurrentTextureProperty.showFoldoutProperties = !DrawingData.CurrentTextureProperty.showFoldoutProperties;
+                    }
+                }
+            }
+
+            Rect object_rect = new Rect(position);
+            object_rect.height = GUILayoutUtility.GetLastRect().y - object_rect.y + GUILayoutUtility.GetLastRect().height;
+            DrawingData.LastGuiObjectRect = object_rect;
+            DrawingData.TooltipCheckRect = position;
+            DrawingData.IconsPositioningHeights[0] = iconsPositioningHeight;
+
+            // Border Code start
+            if (isFoldedOut)
+            {
+                GUILayoutUtility.GetRect(0, 5);
+                EditorGUILayout.EndVertical();
+            }
+            // Border Code end
         }
 
         public static void OpenTexturePicker(MaterialProperty prop)

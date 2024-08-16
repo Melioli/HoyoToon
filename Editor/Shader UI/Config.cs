@@ -202,6 +202,6 @@ namespace HoyoToon
 
     public enum TextureDisplayType
     {
-        small, big, big_basic
+        small, big, big_basic, ramp
     }
 }
