@@ -11,6 +11,8 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
         [HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
         //Header End
 
+        [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
+
         [HoyoToonWideEnum(Base, 0, Face, 1, Hair, 2, Eye, 3)]variant_selector("Material Type--{on_value_actions:[
             {value:0,actions:[{type:SET_PROPERTY,data:_StencilPassA=0}, {type:SET_PROPERTY,data:_StencilPassB=0}, {type:SET_PROPERTY,data:_StencilCompA=8}]},
             {value:0,actions:[{type:SET_PROPERTY,data:_StencilCompB=8}, {type:SET_PROPERTY,data:_StencilRef=0}, {type:SET_PROPERTY,data:render_queue=2000}, {type:SET_PROPERTY,data:render_type=Opaque}]},
@@ -25,9 +27,6 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             {value:3,actions:[{type:SET_PROPERTY,data:_StencilCompB=8}, {type:SET_PROPERTY,data:_StencilRef=16}, {type:SET_PROPERTY,data:render_queue=2001}, {type:SET_PROPERTY,data:render_type=Opaque}]}]}", Int) = 0
             //Material Type End
             // face and eyes should use Base Stencil, Hair includes the stencil by default
-
-        
-        [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
 
         [HideInInspector] start_main ("Main", Float) = 0
             _MainTex ("Diffuse Texture", 2D) = "white" {}
