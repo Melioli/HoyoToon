@@ -280,14 +280,14 @@ namespace HoyoToon
 
         //==============Texture Array=================
 
-        [MenuItem("Assets/HoyoToon/Flipbooks/Images 2 TextureArray", false, 303)]
+        //[MenuItem("Assets/HoyoToon/Flipbooks/Images 2 TextureArray", false, 303)]
         static void SelectionImagesToTextureArray()
         {
             string[] paths = Selection.assetGUIDs.Select(g => AssetDatabase.GUIDToAssetPath(g)).ToArray();
             PathsToTexture2DArray(paths);
         }
 
-        [MenuItem("Assets/HoyoToon/Flipbooks/Images 2 TextureArray", true)]
+        //[MenuItem("Assets/HoyoToon/Flipbooks/Images 2 TextureArray", true)]
         static bool SelectionImagesToTextureArrayValidator()
         {
             if (Selection.assetGUIDs != null && Selection.assetGUIDs.Length > 0)
@@ -340,13 +340,13 @@ namespace HoyoToon
             }
         }
 
-        [MenuItem("Assets/HoyoToon/Flipbooks/Gif 2 TextureArray", false, 303)]
+        //[MenuItem("Assets/HoyoToon/Flipbooks/Gif 2 TextureArray", false, 303)]
         static void SelectionGifToTextureArray()
         {
             GifToTextureArray(AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]));
         }
 
-        [MenuItem("Assets/HoyoToon/Flipbooks/Gif 2 TextureArray", true)]
+        //[MenuItem("Assets/HoyoToon/Flipbooks/Gif 2 TextureArray", true)]
         static bool SelectionGifToTextureArrayValidator()
         {
             if (Selection.assetGUIDs != null && Selection.assetGUIDs.Length > 0)

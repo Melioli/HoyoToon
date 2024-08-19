@@ -1942,7 +1942,7 @@ namespace HoyoToon
         #endregion
 
         // ifex indenting
-        [MenuItem("Assets/HoyoToon/Shaders/Ifex Indenting", false, 303)]
+        //[MenuItem("Assets/HoyoToon/Shaders/Ifex Indenting", false, 303)]
         static void IfExIndenting()
         {
             Shader s = Selection.objects[0] as Shader;
@@ -1962,7 +1962,7 @@ namespace HoyoToon
             GUIUtility.systemCopyBuffer = string.Join("\n", lines);
         }
 
-        [MenuItem("Assets/HoyoToon/Shaders/Ifex Indenting", true)]
+        //[MenuItem("Assets/HoyoToon/Shaders/Ifex Indenting", true)]
         static bool IfExIndentingValidator()
         {
             return Selection.objects.Length == 1 && Selection.objects[0] is Shader;
@@ -1970,13 +1970,13 @@ namespace HoyoToon
 
         //---GameObject + Children Locking
 
-        [MenuItem("GameObject/HoyoToon/Materials/Unlock All", false, 0)]
+        [MenuItem("GameObject/HoyoToon/Materials/Optimizer/Unlock All", false, 44)]
         static void UnlockAllChildren()
         {
             SetLockForAllChildren(Selection.gameObjects, 0, true);
         }
 
-        [MenuItem("GameObject/HoyoToon/Materials/Lock All", false, 0)]
+        [MenuItem("GameObject/HoyoToon/Materials/Optimizer/Lock All", false, 42)]
         static void LockAllChildren()
         {
             SetLockForAllChildren(Selection.gameObjects, 1, true);
@@ -1984,14 +1984,14 @@ namespace HoyoToon
 
         //---Asset Unlocking
 
-        [MenuItem("Assets/HoyoToon/Materials/Unlock All", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Unlock All", false, 44)]
         static void UnlockAllMaterials()
         {
             IEnumerable<Material> mats = Selection.assetGUIDs.Select(g => AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(g)));
             SetLockedForAllMaterials(mats, 0, true);
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Unlock All", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Unlock All", true, 44)]
         static bool UnlockAllMaterialsValidator()
         {
             return SelectedObjectsAreLockableMaterials();
@@ -1999,14 +1999,14 @@ namespace HoyoToon
 
         //---Asset Locking
 
-        [MenuItem("Assets/HoyoToon/Materials/Lock All", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Lock All", false, 42)]
         static void LockAllMaterials()
         {
             IEnumerable<Material> mats = Selection.assetGUIDs.Select(g => AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(g)));
             SetLockedForAllMaterials(mats, 1, true);
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Lock All", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Lock All", true, 42)]
         static bool LockAllMaterialsValidator()
         {
             return SelectedObjectsAreLockableMaterials();
@@ -2015,7 +2015,7 @@ namespace HoyoToon
         //----Folder Lock
 
         //This does not work for folders on the left side of the project explorer, because they are not exposed to Selection
-        [MenuItem("Assets/HoyoToon/Materials/Lock Folder", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Lock Folder", false, 43)]
         static void LockFolder()
         {
             IEnumerable<string> folderPaths = Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p));
@@ -2024,7 +2024,7 @@ namespace HoyoToon
             SetLockedForAllMaterials(materials, 1, true);
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Lock Folder", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Lock Folder", true, 43)]
         static bool LockFolderValidator()
         {
             return Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p)).Count() == Selection.objects.Length;
@@ -2032,7 +2032,7 @@ namespace HoyoToon
 
         //-----Folder Unlock
 
-        [MenuItem("Assets/HoyoToon/Materials/Unlock Folder", false, 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Unlock Folder", false, 45)]
         static void UnLockFolder()
         {
             IEnumerable<string> folderPaths = Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p));
@@ -2041,7 +2041,7 @@ namespace HoyoToon
             SetLockedForAllMaterials(materials, 0, true);
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Unlock Folder", true)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Unlock Folder", true, 45)]
         static bool UnLockFolderValidator()
         {
             return Selection.objects.Select(o => AssetDatabase.GetAssetPath(o)).Where(p => Directory.Exists(p)).Count() == Selection.objects.Length;
@@ -2464,7 +2464,7 @@ namespace HoyoToon
                     {
                         if (at.GetArrayElementAtIndex(0).stringValue == "HoyoToonShaderOptimizerLockButton")
                         {
-                            //HoyoToonLogs.LogDebug(shader.name + " found to use optimizer ");
+                            // HoyoToonLogs.LogDebug(shader.name + " found to use optimizer ");
                             isShaderUsingHoyoToonOptimizer[shader] = true;
                             shaderHoyoToonOptimizerPropertyName[shader] = p.displayName;
                             return true;

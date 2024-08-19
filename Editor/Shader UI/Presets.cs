@@ -89,7 +89,7 @@ namespace HoyoToon.HoyoToonEditor
         {
             get
             {
-                InitializeDataStructures();
+                //InitializeDataStructures();
                 return s_presetCollections;
             }
         }
@@ -97,7 +97,7 @@ namespace HoyoToon.HoyoToonEditor
         {
             get
             {
-                InitializeDataStructures();
+                //InitializeDataStructures();
                 return s_presetCollections["_full_"];
             }
         }
@@ -119,7 +119,7 @@ namespace HoyoToon.HoyoToonEditor
 
                 if (lines.Length == 0 || lines[0] != PRESET_VERSION)
                 {
-                    CreatePresetCache();
+                    //CreatePresetCache();
                     return;
                 }
 
@@ -148,7 +148,7 @@ namespace HoyoToon.HoyoToonEditor
             }
             else
             {
-                CreatePresetCache();
+                //CreatePresetCache();
             }
             // Log time
             // HoyoToonLogs.LogDebug($"Presets: {p_presetNames.Length} presets found in {System.DateTime.Now - time}");
@@ -429,7 +429,7 @@ namespace HoyoToon.HoyoToonEditor
                     name = EditorGUILayout.DelayedTextField(EditorLocale.editor.Get("preset_name"), name);
                     if (EditorGUI.EndChangeCheck())
                     {
-                        InitializeDataStructures();
+                        //InitializeDataStructures();
                         string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(shaderEditor.Materials[0]));
                         shaderEditor.Materials[0].SetOverrideTag(TAG_PRESET_NAME, name);
                         FullPresets.Names[FullPresets.Guids.IndexOf(guid)] = name;
@@ -646,7 +646,7 @@ namespace HoyoToon.HoyoToonEditor
         static void CheckPresetCache()
         {
             // Check if any chached presets do not exist anymore
-            InitializeDataStructures();
+            //InitializeDataStructures();
             bool cacheInvalid = false;
             foreach (KeyValuePair<string, PresetsCollection> collection in PresetCollections)
             {
@@ -691,7 +691,7 @@ namespace HoyoToon.HoyoToonEditor
         #endregion
 
         #region Unity Menu Hooks
-        [MenuItem("HoyoToon/Presets/Rebuild Cache", priority = 100)]
+        //[MenuItem("HoyoToon/Presets/Rebuild Cache", priority = 100)]
         static void RebuildCache()
         {
             Presets.CreatePresetCache();

@@ -143,7 +143,7 @@ namespace HoyoToon
 
             float right = rect.x + rect.width;
             buttonRect.x = right - 74;
-            DrawPresetButton(buttonRect, options, e);
+            //DrawPresetButton(buttonRect, options, e);
             buttonRect.x = right - 56;
             DrawHelpButton(buttonRect, options, e);
             buttonRect.x = right - 38;

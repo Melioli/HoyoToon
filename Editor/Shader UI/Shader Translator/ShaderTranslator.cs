@@ -296,7 +296,7 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
             TranslationDefinitions[selected].Apply(userData as ShaderEditor);
         }
 
-        [MenuItem("Assets/HoyoToon/Shader Translator/New Definition", priority = 380)]
+        //[MenuItem("Assets/HoyoToon/Shader Translator/New Definition", priority = 380)]
         static void CreateNewTranslationDefinition()
         {
             // This allows you to name your asset before creating it

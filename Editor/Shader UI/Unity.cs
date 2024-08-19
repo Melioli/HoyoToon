@@ -15,7 +15,7 @@ namespace HoyoToon
 {
     public class UnityHelper
     {
-        [MenuItem("Assets/HoyoToon/Copy GUID")]
+        //[MenuItem("Assets/HoyoToon/Copy GUID")]
         public static void CopyGUID()
         {
             string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(Selection.activeObject));

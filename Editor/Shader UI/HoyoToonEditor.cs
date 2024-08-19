@@ -531,7 +531,7 @@ namespace HoyoToon
             GUILayout.Space(5);
             GUISearchBar();
             GUILockinButton();
-            GUIPresetsBar();
+            //GUIPresetsBar();
 
             Presets.PresetEditorGUI(this);
             ShaderTranslator.SuggestedTranslationButtonGUI(this);
@@ -1016,7 +1016,7 @@ namespace HoyoToon
         }
 
         /// <summary> Iterate through all materials with FixKeywords. </summary>
-        [MenuItem("HoyoToon/Shader Tools/Fix Keywords for All Materials (Slow)", priority = -20)]
+        //[MenuItem("HoyoToon/Shader Tools/Fix Keywords for All Materials (Slow)", priority = -20)]
         static void FixAllKeywords()
         {
             IEnumerable<Material> materialsToFix = AssetDatabase.FindAssets("t:material")
@@ -1029,31 +1029,27 @@ namespace HoyoToon
             FixKeywords(materialsToFix);
         }
 
-        [MenuItem("HoyoToon/Twitter", priority = -100)]
-        static void MenuHoyoToonTwitter()
-        {
-            Application.OpenURL("https://www.twitter.com/HoyoToonrallo");
-        }
 
-        [MenuItem("HoyoToon/ShaderUI/Settings", priority = -20)]
+
+        [MenuItem("HoyoToon/Settings/Shader Settings", priority = 100)]
         static void MenuShaderUISettings()
         {
             EditorWindow.GetWindow<Settings>(false, "HoyoToon Settings", true);
         }
 
-        [MenuItem("HoyoToon/Shader Optimizer/Upgraded Animated Properties", priority = -20)]
+        //[MenuItem("HoyoToon/Shader Optimizer/Upgraded Animated Properties", priority = -20)]
         static void MenuUpgradeAnimatedPropertiesToTagsOnAllMaterials()
         {
             ShaderOptimizer.UpgradeAnimatedPropertiesToTagsOnAllMaterials();
         }
 
-        [MenuItem("HoyoToon/Shader Optimizer/Materials List", priority = 0)]
+        [MenuItem("Assets/HoyoToon/Materials/Optimizer/Materials List", priority = 40)]
         static void MenuShaderOptUnlockedMaterials()
         {
             EditorWindow.GetWindow<UnlockedMaterialsList>(false, "Materials", true);
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Cleaner/List Unbound Properties", priority = 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Cleaner/List Unbound Properties", priority = 30)]
         static void AssetsCleanMaterials_ListUnboundProperties()
         {
             IEnumerable<Material> materials = Selection.objects.Where(o => o is Material).Select(o => o as Material);
@@ -1066,7 +1062,7 @@ namespace HoyoToon
             }
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Cleaner/Remove Unbound Textures", priority = 303)]
+        [MenuItem("Assets/HoyoToon/Materials/Cleaner/Remove Unbound Textures", priority = 31)]
         static void AssetsCleanMaterials_CleanUnboundTextures()
         {
             IEnumerable<Material> materials = Selection.objects.Where(o => o is Material).Select(o => o as Material);

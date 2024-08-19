@@ -37,7 +37,7 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
             }
         }
 
-        [MenuItem("GameObject/HoyoToon/Materials/Translate Avatar")]
+        //[MenuItem("GameObject/HoyoToon/Materials/Translate Avatar")]
         public static void ShowWindow()
         {
             var window = GetWindow<AvatarMaterialTranslator>();

@@ -8,20 +8,20 @@ namespace HoyoToon
     public class HoyoToonFileCreator
     {
 
-        [MenuItem("HoyoToon/ShaderUI/UI Creator Helper/Create Label Boiler", false, priority = 40)]
+        //[MenuItem("HoyoToon/ShaderUI/UI Creator Helper/Create Label Boiler", false, priority = 40)]
         public static void CreateLabel()
         {
             string[] names = GetProperties();
             string data = names.Aggregate("", (n1, n2) => n1 + n2 + ":=" + n2 + "--{tooltip:}\n");
             Save(data, "_label.txt");
         }
-        [MenuItem("HoyoToon/ShaderUI/UI Creator Helper/Create Label Boiler", true, priority = 40)]
+        //[MenuItem("HoyoToon/ShaderUI/UI Creator Helper/Create Label Boiler", true, priority = 40)]
         static bool CreateLabelVaildate()
         {
             return ValidateSelection();
         }
 
-        [MenuItem("HoyoToon/ShaderUI/UI Creator Helper/Create Label Boiler + Locale Boiler", false, priority = 40)]
+        //[MenuItem("HoyoToon/ShaderUI/UI Creator Helper/Create Label Boiler + Locale Boiler", false, priority = 40)]
         public static void CreateLabelLocale()
         {
             string[] names = GetProperties();
@@ -33,7 +33,7 @@ namespace HoyoToon
             Save(label_data, "_label.txt");
             Save(locale_data, "_locale.txt");
         }
-        [MenuItem("HoyoToon/ShaderUI Creator Helper/Create Label Boiler + Locale Boiler", true, priority = 40)]
+        //[MenuItem("HoyoToon/ShaderUI Creator Helper/Create Label Boiler + Locale Boiler", true, priority = 40)]
         static bool CreateLabelLocaleValidate()
         {
             return ValidateSelection();

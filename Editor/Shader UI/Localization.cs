@@ -180,7 +180,7 @@ namespace HoyoToon
             _localizedStrings.Clear();
         }
 
-        [MenuItem("Assets/HoyoToon/Shaders/Create Locale File", false)]
+        //[MenuItem("Assets/HoyoToon/Shaders/Create Locale File", false)]
         static void CreateLocale()
         {
             Localization locale = ScriptableObject.CreateInstance<Localization>();
@@ -192,13 +192,13 @@ namespace HoyoToon
             AssetDatabase.SaveAssets();
         }
 
-        [MenuItem("Assets/HoyoToon/Shaders/Create Locale File", true)]
+        //[MenuItem("Assets/HoyoToon/Shaders/Create Locale File", true)]
         static bool ValidateCreateLocale()
         {
             return Selection.objects.All(o => o is Shader);
         }
 
-        [MenuItem("Assets/HoyoToon/Shaders/Locale Property", false)]
+        //[MenuItem("Assets/HoyoToon/Shaders/Locale Property", false)]
         static void CreateShaderProperty()
         {
             Localization l = Selection.activeObject as Localization;
@@ -207,7 +207,7 @@ namespace HoyoToon
             EditorGUIUtility.systemCopyBuffer = outS;
         }
 
-        [MenuItem("Assets/HoyoToon/Shaders/Locale Property", true)]
+        //[MenuItem("Assets/HoyoToon/Shaders/Locale Property", true)]
         static bool ValidateCreateShaderProperty()
         {
             return Selection.activeObject is Localization;

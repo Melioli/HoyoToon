@@ -9,12 +9,13 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
+using System.Diagnostics;
 
 namespace HoyoToon
 {
     public class Helper
     {
-        //static bool s_didTryRegsiterThisSession = false;
+        private static Stopwatch stopwatch = Stopwatch.StartNew();
 
         public static bool ClassWithNamespaceExists(string classname)
         {
@@ -46,14 +47,12 @@ namespace HoyoToon
 
         public static long GetUnityStartUpTimeStamp()
         {
-            return GetCurrentUnixTimestampMillis() - (long)EditorApplication.timeSinceStartup * 1000;
+            // Returns the time in milliseconds since the Stopwatch started (when the class was loaded)
+            return GetCurrentUnixTimestampMillis() - stopwatch.ElapsedMilliseconds;
         }
-
-        //-------------------Comparetors----------------------
 
         public static int CompareVersions(string v1, string v2)
         {
-            //fix the string
             v1 = v1.Replace(",", ".");
             v2 = v2.Replace(",", ".");
             Match v1_match = Regex.Match(v1, @"(a|b)?\d+((\.|a|b)\d+)*(a|b)?");
@@ -70,7 +69,6 @@ namespace HoyoToon
             string chunk_v2;
             while (index_v1 < v1.Length || index_v2 < v2.Length)
             {
-                //get a chunk of the strings
                 if (index_v1 < v1.Length)
                 {
                     chunk_v1 = "";
@@ -109,7 +107,6 @@ namespace HoyoToon
                 else
                     chunk_v2 = "0";
 
-                //compare chunks
                 int v1P = int.Parse(chunk_v1);
                 int v2P = int.Parse(chunk_v2);
                 if (v1P > v2P) return -1;
@@ -177,9 +174,6 @@ namespace HoyoToon
             return a - b * Mathf.Floor(a / b);
         }
 
-        // This code is an implementation of the pseudocode from the Wikipedia,
-        // showing a naive implementation.
-        // You should research an algorithm with better space complexity.
         public static int LevenshteinDistance(string s, string t)
         {
             int n = s.Length;
@@ -210,9 +204,6 @@ namespace HoyoToon
             return d[n, m];
         }
 
-        // Start of Detour methods
-        // Modified from: https://github.com/apkd/UnityStaticBatchingSortingPatch/blob/e83bed8cf31fc98097586c4e47af77fa79d9bed5/StaticBatchingSortingPatch.cs
-        // Modified by Behemoth/hill
         static Dictionary<MethodInfo, byte[]> s_patchedData = new Dictionary<MethodInfo, byte[]>();
         public static unsafe void TryDetourFromTo(MethodInfo src, MethodInfo dst)
         {
@@ -221,59 +212,40 @@ namespace HoyoToon
             {
                 if (IntPtr.Size == sizeof(Int64))
                 {
-                    // 64-bit systems use 64-bit absolute address and jumps
-                    // 12 byte destructive
-
-                    // Get function pointers
                     long Source_Base = src.MethodHandle.GetFunctionPointer().ToInt64();
                     long Destination_Base = dst.MethodHandle.GetFunctionPointer().ToInt64();
 
-                    // Backup Source Data
                     IntPtr Source_IntPtr = src.MethodHandle.GetFunctionPointer();
                     var backup = new byte[0xC];
                     Marshal.Copy(Source_IntPtr, backup, 0, 0xC);
                     s_patchedData.Add(src, backup);
 
-                    // Native source address
                     byte* Pointer_Raw_Source = (byte*)Source_Base;
 
-                    // Pointer to insert jump address into native code
                     long* Pointer_Raw_Address = (long*)(Pointer_Raw_Source + 0x02);
 
-                    // Insert 64-bit absolute jump into native code (address in rax)
-                    // mov rax, immediate64
-                    // jmp [rax]
                     *(Pointer_Raw_Source + 0x00) = 0x48;
                     *(Pointer_Raw_Source + 0x01) = 0xB8;
-                    *Pointer_Raw_Address = Destination_Base; // ( Pointer_Raw_Source + 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 )
+                    *Pointer_Raw_Address = Destination_Base;
                     *(Pointer_Raw_Source + 0x0A) = 0xFF;
                     *(Pointer_Raw_Source + 0x0B) = 0xE0;
                 }
                 else
                 {
-                    // 32-bit systems use 32-bit relative offset and jump
-                    // 5 byte destructive
-
-                    // Get function pointers
                     int Source_Base = src.MethodHandle.GetFunctionPointer().ToInt32();
                     int Destination_Base = dst.MethodHandle.GetFunctionPointer().ToInt32();
 
-                    // Backup Source Data
                     IntPtr Source_IntPtr = src.MethodHandle.GetFunctionPointer();
                     var backup = new byte[0x5];
                     Marshal.Copy(Source_IntPtr, backup, 0, 0x5);
                     s_patchedData.Add(src, backup);
 
-                    // Native source address
                     byte* Pointer_Raw_Source = (byte*)Source_Base;
 
-                    // Pointer to insert jump address into native code
                     int* Pointer_Raw_Address = (int*)(Pointer_Raw_Source + 1);
 
-                    // Jump offset (less instruction size)
                     int offset = (Destination_Base - Source_Base) - 5;
 
-                    // Insert 32-bit relative jump into native code
                     *Pointer_Raw_Source = 0xE9;
                     *Pointer_Raw_Address = offset;
                 }
@@ -285,7 +257,6 @@ namespace HoyoToon
             }
 #endif
         }
-
         public static unsafe void RestoreDetour(MethodInfo src)
         {
 #if UNITY_EDITOR_WIN
@@ -296,6 +267,6 @@ namespace HoyoToon
 #endif
         }
         // End of Detour Methods
-    }
 
+    }
 }

@@ -12,7 +12,7 @@ namespace HoyoToon
         const int MIN_WIDTH = 850;
         const int MIN_HEIGHT = 790;
 
-        [MenuItem("HoyoToon/Texture Packer", priority = 100)]
+        //[MenuItem("HoyoToon/Texture Packer", priority = 100)]
         public static TexturePacker ShowWindow()
         {
             TexturePacker packer = (TexturePacker)GetWindow(typeof(TexturePacker));
@@ -23,14 +23,14 @@ namespace HoyoToon
             return packer;
         }
 
-        [MenuItem("Assets/HoyoToon/Open in Texture Packer")]
+        //[MenuItem("Assets/HoyoToon/Open in Texture Packer")]
         public static void OpenInTexturePacker()
         {
             TexturePacker packer = ShowWindow();
             packer.InitilizeWithOneTexture(Selection.activeObject as Texture2D);
         }
 
-        [MenuItem("Assets/HoyoToon/Open in Texture Packer", true)]
+        //[MenuItem("Assets/HoyoToon/Open in Texture Packer", true)]
         public static bool OpenInTexturePackerValidate()
         {
             return Selection.activeObject is Texture2D;

@@ -7,14 +7,14 @@ namespace HoyoToon
 {
     public class CrossEditor : EditorWindow
     {
-        [MenuItem("HoyoToon/Cross Shader Editor", priority = -20)]
+        //[MenuItem("HoyoToon/Cross Shader Editor", priority = -20)]
         public static void ShowWindow()
         {
             CrossEditor window = EditorWindow.GetWindow(typeof(CrossEditor)) as CrossEditor;
             window.name = "Cross Shader Editor";
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Open in Cross Shader Editor", false, 400)]
+        //[MenuItem("Assets/HoyoToon/Materials/Open in Cross Shader Editor", false, 400)]
         public static void OpenInCrossShaderEditor()
         {
             CrossEditor window = EditorWindow.GetWindow(typeof(CrossEditor)) as CrossEditor;
@@ -24,13 +24,13 @@ namespace HoyoToon
             window._shaderEditor = null;
         }
 
-        [MenuItem("Assets/HoyoToon/Materials/Open in Cross Shader Editor", true, 400)]
+        //[MenuItem("Assets/HoyoToon/Materials/Open in Cross Shader Editor", true, 400)]
         public static bool OpenInCrossShaderEditorValidation()
         {
             return Selection.objects.All(o => o is Material);
         }
 
-        [MenuItem("GameObject/HoyoToon/Materials/Open All in Cross Shader Editor", false, 10)]
+        //[MenuItem("GameObject/HoyoToon/Materials/Open All in Cross Shader Editor", false, 10)]
         public static void OpenAllInCrossShaderEditor()
         {
             CrossEditor window = EditorWindow.GetWindow(typeof(CrossEditor)) as CrossEditor;
