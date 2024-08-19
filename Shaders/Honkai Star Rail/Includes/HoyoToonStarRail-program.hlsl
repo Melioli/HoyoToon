@@ -148,6 +148,7 @@ vs_out vs_edge(vs_in v)
     o.uv = float4(v.uv_0, v.uv_1);
     o.v_col = v.v_col; 
     o.ws_pos = mul(unity_ObjectToWorld, v.vertex);
+    o.normal = mul((float3x3)unity_ObjectToWorld, v.normal);
 
     if(_DissoveONM && (_DissolveMode == 2.0))
     {
@@ -940,6 +941,15 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     float lightmap = _LightMap.Sample(sampler_linear_repeat, uv).w;
     float alpha = _MainTex.Sample(sampler_MainTex, uv).w;
 
+    // lighting
+    float3 GI_color = DecodeLightProbe(normalize(i.normal));
+    GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
+    float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
+    GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;  
+    GI_color = (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+    float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
+    float3 light_color = max(ambient_color, _LightColor0.rgb);
+
 
     int material_ID = floor(lightmap * 8.0f);
 
@@ -967,6 +977,7 @@ float4 ps_edge(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         if(!_UseHueMask) outline_mask = 1.0f;
         if(_EnableOutlineHue) out_color.xyz = hue_shift(out_color.xyz, material, _OutlineHue, _OutlineHue2, _OutlineHue3, _OutlineHue4, _OutlineHue5, _OutlineHue6, _OutlineHue7, _OutlineHue8, _GlobalOutlineHue, _AutomaticOutlineShift, _ShiftOutlineSpeed, outline_mask);
     #endif
+    out_color.xyz = out_color.xyz * light_color + GI_color;
     #if defined(can_dissolve)
         if(_DissoveONM && (_DissolveMode == 2.0)) out_color.xyzw = dissolve_color(i.ws_pos, i.dis_pos, i.dis_uv, i.uv.xy, out_color);
         if(_DissoveONM && (_DissolveMode == 1.0))
