@@ -591,6 +591,16 @@ float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
         outline_mask = _UseHueMask ? outline_mask : 1.0f;
     #endif
 
+     // lighting
+    float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
+    float3 light_color = max(ambient_color, _LightColor0.rgb);  
+    float3 GI_color = DecodeLightProbe(normalize(i.normal));
+    GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
+    float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
+    GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;
+    GI_color = (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+
+
     float4 diffuse = _MainTex.Sample(sampler_MainTex, i.uv_a.xy);
     float4 lightmap = _LightMapTex.Sample(sampler_linear_repeat, i.uv_a.xy);
 
@@ -603,6 +613,9 @@ float4 ps_edge(vs_out i, bool vface : SV_ISFRONTFACE) : SV_TARGET
     
     float3 emission;
     out_color.xyz = outline_color[material_ID - 1].w * (diffuse.xyz * (float3)0.203f + (-outline_color[material_ID - 1].xyz)) + outline_color[material_ID - 1].xyz;
+    
+    out_color.xyz = out_color.xyz * light_color + GI_color;
+
     if(_EnableOutlineGlow)
     {
         emission = outline_emission(out_color.xyz, material_ID);
