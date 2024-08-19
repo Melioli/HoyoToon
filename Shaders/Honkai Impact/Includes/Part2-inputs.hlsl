@@ -38,6 +38,7 @@ struct edge_out
     float4 vertex : SV_POSITION;
     float4 uv_a : TEXCOORD0;
     float4 color : COLOR0;
+    float3 normal : NORMAL;
 };
 
 struct shadow_in 

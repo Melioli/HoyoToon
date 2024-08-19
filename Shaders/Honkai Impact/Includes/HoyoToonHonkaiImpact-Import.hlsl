@@ -27,6 +27,7 @@ struct edge_in
     float3 tangent      : TANGENT;
     float2 uv           : TEXCOORD0;
     float4 vertexcolor  : COLOR0; 
+    float3 normal      : NORMAL;
 };
 
 
@@ -35,6 +36,7 @@ struct edge_out
     float4 pos          : POSITION;
     float4 vertex       : TEXCOORD0;
     float2 uv           : TEXCOORD1;
+    float3 normal      : NORMAL;
 };
 
 struct stencil_in

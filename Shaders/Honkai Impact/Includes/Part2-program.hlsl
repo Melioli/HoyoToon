@@ -327,7 +327,7 @@ edge_out vs_edge(edge_in v)
 
     o.vertex = mul(UNITY_MATRIX_P, wv_pos);
 
-
+    o.normal = mul((float3x3)unity_ObjectToWorld, v.normal);
     o.color = v.color;
     o.uv_a.xy = v.uv_0.xy;
     return o;
@@ -335,6 +335,13 @@ edge_out vs_edge(edge_in v)
 
 float4 ps_edge(edge_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 {
+    float3 GI_color = DecodeLightProbe(normalize(i.normal));
+    GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
+    float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
+    GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;  
+    GI_color = (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+    float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
+    float3 light_color = max(ambient_color, _LightColor0.rgb);
     // initialize output color : 
     float4 color = (float4)1.0f;   
     color.xyz = (float3)0.0f;
@@ -355,6 +362,8 @@ float4 ps_edge(edge_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
 
     region = _More_Outline_Color ? region : 0.0f;
     color = outline_color[region];
+
+    color.xyz = color.xyz * light_color.xyz + GI_color.xyz;
     // if(_IsVFX) clip(-1);
     return color; 
 }

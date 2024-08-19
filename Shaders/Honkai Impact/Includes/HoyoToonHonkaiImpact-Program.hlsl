@@ -45,6 +45,8 @@ edge_out edge_model(edge_in i)
         
         o.vertex = i.vertexcolor;
         o.uv = i.uv;
+
+        o.normal = mul((float3x3)unity_ObjectToWorld, i.normal);
     }
     else
     {
@@ -58,6 +60,14 @@ float4 ps_edge(edge_out i) : COLOR0
 {
     if(_EnableOutline)
     {
+        float3 GI_color = DecodeLightProbe(normalize(i.normal));
+        GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
+        float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
+        GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;  
+        GI_color = (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
+        float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
+        float3 light_color = max(ambient_color, _LightColor0.rgb);
+
         float4 main_tex = _MainTex.Sample(sampler_MainTex, i.uv);
 
         float4 out_col = edge_cols(_LightMapTex.Sample(sampler_linear_repeat, i.uv).w);
@@ -68,7 +78,7 @@ float4 ps_edge(edge_out i) : COLOR0
         if(_MainTex.Sample(sampler_MainTex, i.uv).w <= 0.5 && _TrasOutline) discard;
         if (i.vertex.w <= 0.001) discard;
 
-        out_col.xyz *= _LightColor0.xyz;
+        out_col.xyz = out_col.xyz * light_color + GI_color;
 
         if(_OutlineWidth == 0.0) discard;
         return out_col;
