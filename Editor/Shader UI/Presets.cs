@@ -221,63 +221,63 @@ namespace HoyoToon.HoyoToonEditor
         }
 
         // On Asset Delete remove presets from cache
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-        {
-            if (importedAssets.Length > 0)
-            {
-                // Check if any presets were imported, iterate over all imported materials
-                foreach (string asset in importedAssets.Where(a => a.EndsWith(".mat")))
-                {
-                    Material material = AssetDatabase.LoadAssetAtPath<Material>(asset);
-                    // Check if asset is preset
-                    if (IsPreset(material))
-                    {
-                        // Add preset
-                        RemovePreset(material);
-                        AddPreset(material);
-                    }
-                    HoyoToonLogs.LogDebug($"OnPostprocessAllAssets: {material.name} ({AssetDatabase.AssetPathToGUID(asset)})");
-                    KnownMaterials.Add(AssetDatabase.AssetPathToGUID(asset));
-                }
-            }
+        // static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        // {
+        //     if (importedAssets.Length > 0)
+        //     {
+        //         // Check if any presets were imported, iterate over all imported materials
+        //         foreach (string asset in importedAssets.Where(a => a.EndsWith(".mat")))
+        //         {
+        //             Material material = AssetDatabase.LoadAssetAtPath<Material>(asset);
+        //             // Check if asset is preset
+        //             if (IsPreset(material))
+        //             {
+        //                 // Add preset
+        //                 RemovePreset(material);
+        //                 AddPreset(material);
+        //             }
+        //             HoyoToonLogs.LogDebug($"OnPostprocessAllAssets: {material.name} ({AssetDatabase.AssetPathToGUID(asset)})");
+        //             KnownMaterials.Add(AssetDatabase.AssetPathToGUID(asset));
+        //         }
+        //     }
 
-            if (deletedAssets.Length > 0)
-            {
-                // go through all preset collections
-                Dictionary<string, string> presetPaths = new Dictionary<string, string>();
-                foreach (KeyValuePair<string, PresetsCollection> collection in PresetCollections)
-                {
-                    // go through all presets in collection
-                    for (int i = 0; i < collection.Value.Guids.Count; i++)
-                    {
-                        string guid = collection.Value.Guids[i];
-                        string path = AssetDatabase.GUIDToAssetPath(guid);
-                        // if path is empty, the asset was deleted somewhere between the last cache save and now
-                        if (string.IsNullOrWhiteSpace(path))
-                        {
-                            // remove from cache
-                            RemovePreset(guid);
-                        }
-                        else
-                        {
-                            presetPaths[path] = guid;
-                        }
-                    }
-                }
-                // Check if any presets were deleted, iterate over all deleted materials
-                foreach (string asset in deletedAssets.Where(a => a.EndsWith(".mat")))
-                {
-                    // Check if asset is preset
-                    if (presetPaths.ContainsKey(asset))
-                    {
-                        // Remove preset
-                        RemovePreset(presetPaths[asset]);
-                    }
-                }
-            }
+        //     if (deletedAssets.Length > 0)
+        //     {
+        //         // go through all preset collections
+        //         Dictionary<string, string> presetPaths = new Dictionary<string, string>();
+        //         foreach (KeyValuePair<string, PresetsCollection> collection in PresetCollections)
+        //         {
+        //             // go through all presets in collection
+        //             for (int i = 0; i < collection.Value.Guids.Count; i++)
+        //             {
+        //                 string guid = collection.Value.Guids[i];
+        //                 string path = AssetDatabase.GUIDToAssetPath(guid);
+        //                 // if path is empty, the asset was deleted somewhere between the last cache save and now
+        //                 if (string.IsNullOrWhiteSpace(path))
+        //                 {
+        //                     // remove from cache
+        //                     RemovePreset(guid);
+        //                 }
+        //                 else
+        //                 {
+        //                     presetPaths[path] = guid;
+        //                 }
+        //             }
+        //         }
+        //         // Check if any presets were deleted, iterate over all deleted materials
+        //         foreach (string asset in deletedAssets.Where(a => a.EndsWith(".mat")))
+        //         {
+        //             // Check if asset is preset
+        //             if (presetPaths.ContainsKey(asset))
+        //             {
+        //                 // Remove preset
+        //                 RemovePreset(presetPaths[asset]);
+        //             }
+        //         }
+        //     }
 
-            KnownMaterials.Save();
-        }
+        //     KnownMaterials.Save();
+        // }
 
         static void AddPreset(Material material)
         {
@@ -642,7 +642,7 @@ namespace HoyoToon.HoyoToonEditor
         #region Preset Validation
 
         /* This is a check for if the preset cache is invalid & should be rebuild from scratch */
-        [InitializeOnLoadMethod]
+        //[InitializeOnLoadMethod]
         static void CheckPresetCache()
         {
             // Check if any chached presets do not exist anymore
