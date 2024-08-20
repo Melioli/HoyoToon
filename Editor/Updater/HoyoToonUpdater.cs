@@ -39,7 +39,7 @@ namespace HoyoToon
             }
         }
 
-        [MenuItem("HoyoToon/Check for updates", false, 60)]
+        [MenuItem("HoyoToon/Check for updates", false, 0)]
         public static void CheckForUpdates()
         {
             EditorCoroutineUtility.StartCoroutineOwnerless(CheckVersions((localVersion, remoteVersion) => { }));
@@ -52,7 +52,7 @@ namespace HoyoToon
             string localVersion = null;
             try
             {
-                string scriptPath = GetPackagePath("com.meliverse.hoyotoon");
+                string scriptPath = HoyoToonParseManager.GetPackagePath("com.meliverse.hoyotoon");
                 string packageJsonPath = Path.Combine(scriptPath, "package.json");
                 string jsonContent = File.ReadAllText(Path.GetFullPath(packageJsonPath));
                 var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
@@ -193,7 +193,7 @@ namespace HoyoToon
 
             // Find the package path dynamically
             string packageName = "com.meliverse.hoyotoon";
-            string packagePath = GetPackagePath(packageName);
+            string packagePath = HoyoToonParseManager.GetPackagePath(packageName);
 
             if (string.IsNullOrEmpty(packagePath))
             {
@@ -238,29 +238,6 @@ namespace HoyoToon
                     AssetDatabase.DeleteAsset(assetPath);
                 }
             }
-        }
-
-        private static string GetPackagePath(string packageName)
-        {
-            ListRequest request = Client.List(true);
-            while (!request.IsCompleted) { }
-
-            if (request.Status == StatusCode.Success)
-            {
-                foreach (var package in request.Result)
-                {
-                    if (package.name == packageName)
-                    {
-                        return package.resolvedPath;
-                    }
-                }
-            }
-            else if (request.Status >= StatusCode.Failure)
-            {
-                HoyoToonLogs.ErrorDebug(request.Error.message);
-            }
-
-            return null;
         }
 
         private class Release
