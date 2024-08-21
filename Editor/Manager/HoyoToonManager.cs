@@ -10,6 +10,7 @@ namespace HoyoToon
         [MenuItem("Assets/HoyoToon/Full Setup", priority = 0)]
         private static void FullSetup()
         {
+            HoyoToonDataManager.GetHoyoToonData();
             HoyoToonMaterialManager.GenerateMaterialsFromJson();
             SetupFBX();
             GameObject selectedObject = HoyoToonSceneManager.AddSelectedObjectToScene();
@@ -29,6 +30,7 @@ namespace HoyoToon
         [MenuItem("GameObject/HoyoToon/Mesh/Generate Tangents", priority = 21)]
         private static void GenerateTangents()
         {
+            HoyoToonDataManager.GetHoyoToonData();
             GameObject selectedObject = Selection.activeGameObject;
             if (selectedObject == null)
             {

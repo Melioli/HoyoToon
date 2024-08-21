@@ -33,7 +33,7 @@ namespace HoyoToon
 
         public static HoyoToonData Data => hoyoToonData;
 
-        private static HoyoToonData GetHoyoToonData()
+        public static HoyoToonData GetHoyoToonData()
         {
             try
             {
@@ -41,6 +41,7 @@ namespace HoyoToon
                 {
                     string json = client.GetStringAsync(url).Result;
                     CacheJson(json);
+                    HoyoToonLogs.LogDebug("Successfully retrieved HoyoToon data from the server.");
                     return JsonConvert.DeserializeObject<HoyoToonData>(json);
                 }
             }
