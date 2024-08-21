@@ -1,7 +1,8 @@
 <br>
 <p align="center">
-    <a href="https://github.com/Melioli/HoyoToon"><img src="https://hoyotoon.com/images/HoyoToonBannerLite.png" alt="HoyoToon"/></a>
+    <a href="https://github.com/Melioli/HoyoToon"><img src="https://github.com/user-attachments/assets/249a06ae-784e-49cf-aaec-2d9367f07cc1" alt="HoyoToon"/></a>
 </p><br>
+
 
 <p align="center">
     <a href="https://github.com/Melioli/HoyoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/License-GPL--3.0-702963?style=for-the-badge"></a><br>
