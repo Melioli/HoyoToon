@@ -6,7 +6,7 @@ namespace HoyoToon
 {
     public class HoyoToonAssetBuilder
     {
-        [MenuItem("Assets/HoyoToon/Build AssetBundle")]
+        [MenuItem("Assets/HoyoToon/Assets/Build AssetBundle", priority = 1)]
         static void BuildAssetBundleFromSelectedPrefab()
         {
             // Get the selected prefab
