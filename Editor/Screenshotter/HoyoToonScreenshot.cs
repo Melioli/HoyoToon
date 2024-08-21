@@ -21,7 +21,7 @@ namespace HoyoToon
         private Camera sceneCamera;
 
 
-        [MenuItem("HoyoToon/Editor Screenshot", false, 50)]
+        [MenuItem("HoyoToon/Editor Screenshot", false, 30)]
         public static void ShowWindow()
         {
             GetWindow<ScreenshotEditorWindow>("Screenshot");
