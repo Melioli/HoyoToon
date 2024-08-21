@@ -52,11 +52,11 @@ namespace HoyoToon
             Application.OpenURL("https://discord.gg/meliverse");
         }
 
-        [MenuItem("HoyoToon/Resources/Documentation", priority = 10)]
-        private static void OpenDocumentation()
-        {
-            Application.OpenURL("https://docs.hoyotoon.com");
-        }
+        // [MenuItem("HoyoToon/Resources/Documentation", priority = 10)]
+        // private static void OpenDocumentation()
+        // {
+        //     Application.OpenURL("https://docs.hoyotoon.com");
+        // }
 
         [MenuItem("HoyoToon/Resources/Asset Repo", priority = 11)]
         private static void OpenAssetRepo()
