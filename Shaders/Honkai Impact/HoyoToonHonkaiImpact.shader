@@ -2,7 +2,6 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
 {
     Properties 
   { 
-      [HideInInspector] shader_is_using_HoyoToon_editor("", Float)=0 
         //Header
         //[HideInInspector] shader_master_label ("✧<b><i><color=#C69ECE>HoyoToon Honkai Impact</color></i></b>✧", Float) = 0
         [HideInInspector] ShaderBG ("UI/background", Float) = 0
@@ -166,63 +165,63 @@ Shader "HoyoToon/Honkai Impact/Character Part 1"
 
         //Special Effects
         [HideInInspector] start_specialeffects("Special Effects", Float) = 0
-        //ifex _EnableEmission == 0
-            [HideInInspector] start_emission("Emission--{reference_property:_EnableEmission}", Float) = 0
-            [Toggle] _EnableEmission ("Enable Emission", Float) = 1
-                _EmissionStr ("Emission Strength", Float) = 0
-                [Toggle] _EmissionColorToggle ("Emission Colors", Float) = 0
-                [Toggle] _usepulse ("Emission Pulsing", Float) = 0
+            //ifex _EnableEmission == 0
+                [HideInInspector] start_emission("Emission--{reference_property:_EnableEmission}", Float) = 0
+                [Toggle] _EnableEmission ("Enable Emission", Float) = 1
+                    _EmissionStr ("Emission Strength", Float) = 0
+                    [Toggle] _EmissionColorToggle ("Emission Colors", Float) = 0
+                    [Toggle] _usepulse ("Emission Pulsing", Float) = 0
 
-                [HideInInspector] start_emissionColor("Emission Colors", Float) = 0
-                    _EmissionColor ("Emission Color 1", Color) = (1,1,1,1)
-                    _EmissionColor2 ("Emission Color 2", Color) = (1,1,1,1)
-                    _EmissionColor3 ("Emission Color 3", Color) = (1,1,1,1)
-                    _EmissionColor4 ("Emission Color 4", Color) = (1,1,1,1)
-                    _EmissionColor5 ("Emission Color 5", Color) = (1,1,1,1)
-                [HideInInspector] end_emissionColor(" ", Float) = 0
-                [HideInInspector] start_Pulse("Emission Pulsing--{condition_show:{type:PROPERTY_BOOL,data:_usepulse==1.0}}", Float) = 0
-                    _PulseRate ("Pulse Speed", Range(0, 30)) = 0
-                    _MinPulse ("Min Pulse Strength", Range(0, 1)) = 0
-                    _MaxPulse ("Max Pulse Strength", Range(0, 1)) = 1
-                [HideInInspector] end_Pulse(" ", Float) = 0
-            [HideInInspector] end_emission(" ", Float) = 0
-        //endex
-        //ifex _EnableStencil == 0
-            [HideInInspector] start_stencil("Stencil--{reference_property:_EnableStencil}", Float) = 0
-                [Toggle] _EnableStencil ("Enable Stencil", Float) = 1
-                [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
-                [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
-                [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
-                [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
-                [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
-            [HideInInspector] end_stencil("", Float) = 0
-        //endex 
-        //ifex _LengthWaysDis == 0 
-            [HideInInspector] start_dissolve("Dissolve--{reference_property:_LengthWaysDis}", Float) = 0
-                [Toggle(LENGTHWAYSDIS)] _LengthWaysDis ("Enable", Float) = 0
-                _MaskDisTex ("Dissolve Mask", 2D) = "White" {}
-                _NoiseTex ("Noise Texture", 2D) = "black" { }
-                _MainTex2 ("Secondary Diffuse", 2D) = "white" { }
-                _AlphaPosition ("AlphaPosition", Float) = 0
-                _DisAngle ("DisAngle", Range(0, 360)) = 0
-                _DisColor ("DisColor", Color) = (1,1,1,1)
-                _DisColorScale ("DisColorScale", Float) = 1
-                _Edge ("DisEdge", Range(0, 1)) = 0.2
-                _TintColorEdge ("TintColorEdge", Range(0, 1)) = 0
-                _AddLightColor ("Dissolve Add Color", Color) = (1, 1, 1, 1)
-                _Soft ("SoftEdge", Range(0, 1)) = 0
-                _TintColorPower ("TintColorPower", Range(0, 3)) = 1
-                _MaskTillingOffset ("MaskDisTexture Tilling(XY) Offset(ZW)", Vector) = (1,1,0,0)
-                _MaskOffsetSpeed ("MaskDisTexture Offset Speed", Float) = 0
-                _MaskDisTexScale ("Dissolve Mask Scale", Float) = 1
-                        
-                _NoiseIntensity ("Noise Intensity", Range(0, 10)) = 5
-                _NoiseTillingOffset ("NoiseTexture Tilling(XY) Offset(ZW)", Vector) = (1,1,0,0)
-                [Toggle] _LengthWaysDisBlend ("UseMainTex2 Blend", Float) = 0
-                [Toggle] _DissolveUseUV2 ("Dissolve Use UV2 ", Float) = 1
-                [Toggle] _OnlyUseMaskDis ("Only Use MaskDisTexture", Float) = 0
-            [HideInInspector] end_dissolve ("", Float) = 0
-        //endex
+                    [HideInInspector] start_emissionColor("Emission Colors", Float) = 0
+                        _EmissionColor ("Emission Color 1", Color) = (1,1,1,1)
+                        _EmissionColor2 ("Emission Color 2", Color) = (1,1,1,1)
+                        _EmissionColor3 ("Emission Color 3", Color) = (1,1,1,1)
+                        _EmissionColor4 ("Emission Color 4", Color) = (1,1,1,1)
+                        _EmissionColor5 ("Emission Color 5", Color) = (1,1,1,1)
+                    [HideInInspector] end_emissionColor(" ", Float) = 0
+                    [HideInInspector] start_Pulse("Emission Pulsing--{condition_show:{type:PROPERTY_BOOL,data:_usepulse==1.0}}", Float) = 0
+                        _PulseRate ("Pulse Speed", Range(0, 30)) = 0
+                        _MinPulse ("Min Pulse Strength", Range(0, 1)) = 0
+                        _MaxPulse ("Max Pulse Strength", Range(0, 1)) = 1
+                    [HideInInspector] end_Pulse(" ", Float) = 0
+                [HideInInspector] end_emission(" ", Float) = 0
+            //endex
+            //ifex _EnableStencil == 0
+                [HideInInspector] start_stencil("Stencil--{reference_property:_EnableStencil}", Float) = 0
+                    [Toggle] _EnableStencil ("Enable Stencil", Float) = 1
+                    [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
+                    [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
+                    [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompA ("Stencil Compare Function A", Float) = 8
+                    [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompB ("Stencil Compare Function B", Float) = 8
+                    [IntRange] _StencilRef ("Stencil Reference Value", Range(0, 255)) = 0
+                [HideInInspector] end_stencil("", Float) = 0
+            //endex 
+            //ifex _LengthWaysDis == 0 
+                [HideInInspector] start_dissolve("Dissolve--{reference_property:_LengthWaysDis}", Float) = 0
+                    [Toggle(LENGTHWAYSDIS)] _LengthWaysDis ("Enable", Float) = 0
+                    _MaskDisTex ("Dissolve Mask", 2D) = "White" {}
+                    _NoiseTex ("Noise Texture", 2D) = "black" { }
+                    _MainTex2 ("Secondary Diffuse", 2D) = "white" { }
+                    _AlphaPosition ("AlphaPosition", Float) = 0
+                    _DisAngle ("DisAngle", Range(0, 360)) = 0
+                    _DisColor ("DisColor", Color) = (1,1,1,1)
+                    _DisColorScale ("DisColorScale", Float) = 1
+                    _Edge ("DisEdge", Range(0, 1)) = 0.2
+                    _TintColorEdge ("TintColorEdge", Range(0, 1)) = 0
+                    _AddLightColor ("Dissolve Add Color", Color) = (1, 1, 1, 1)
+                    _Soft ("SoftEdge", Range(0, 1)) = 0
+                    _TintColorPower ("TintColorPower", Range(0, 3)) = 1
+                    _MaskTillingOffset ("MaskDisTexture Tilling(XY) Offset(ZW)", Vector) = (1,1,0,0)
+                    _MaskOffsetSpeed ("MaskDisTexture Offset Speed", Float) = 0
+                    _MaskDisTexScale ("Dissolve Mask Scale", Float) = 1
+                            
+                    _NoiseIntensity ("Noise Intensity", Range(0, 10)) = 5
+                    _NoiseTillingOffset ("NoiseTexture Tilling(XY) Offset(ZW)", Vector) = (1,1,0,0)
+                    [Toggle] _LengthWaysDisBlend ("UseMainTex2 Blend", Float) = 0
+                    [Toggle] _DissolveUseUV2 ("Dissolve Use UV2 ", Float) = 1
+                    [Toggle] _OnlyUseMaskDis ("Only Use MaskDisTexture", Float) = 0
+                [HideInInspector] end_dissolve ("", Float) = 0
+            //endex
         [HideInInspector] end_specialeffects(" ", Float) = 0
 
         //Rendering Options

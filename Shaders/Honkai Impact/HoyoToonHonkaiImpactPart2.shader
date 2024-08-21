@@ -136,7 +136,7 @@ Shader "HoyoToon/Honkai Impact/Character Part 2"
             //endex
             //ifex _EnableSpecular == 0
             [HideInInspector] start_specular("Specular Reflections--{reference_property:_EnableSpecular}", Int) = 0
-                [Toggle] _EnableSpecular ("Enable Specular", Float) = 0
+                [Toggle] _EnableSpecular ("Enable Specular", Float) = 1
                 [Toggle] _UseSoftSpecular ("Use Soft Specular--{condition_show:{type:PROPERTY_BOOL,data:variant_selector<2.0}}", Float) = 0
                 _Shininess ("Specular Shininess--{condition_show:{type:PROPERTY_BOOL,data:variant_selector<2.0}}", Range(0.1, 100)) = 10
                 _SpecSoftRange ("Specular Soft--{condition_show:{type:PROPERTY_BOOL,data:variant_selector<2.0}}", Range(0, 0.5)) = 0
