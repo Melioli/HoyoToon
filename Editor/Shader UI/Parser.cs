@@ -257,12 +257,19 @@ namespace HoyoToon
 
         private static object ConvertToDictionary(object parsed, Type objtype)
         {
-            var returnObject = (dynamic)Activator.CreateInstance(objtype);
+            var method = typeof(Parser).GetMethod(nameof(ConvertToDictionary), BindingFlags.NonPublic | BindingFlags.Static);
+            var genericMethod = method.MakeGenericMethod(objtype.GetGenericArguments());
+            return genericMethod.Invoke(null, new object[] { parsed });
+        }
+
+        private static object ConvertToDictionary<TK, TV>(object parsed)
+        {
+            var returnObject = new Dictionary<TK, TV>();
             Dictionary<object, object> dict = (Dictionary<object, object>)parsed;
             foreach (KeyValuePair<object, object> keyvalue in dict)
             {
-                dynamic key = ParsedToObject(keyvalue.Key, objtype.GetGenericArguments()[0]);
-                dynamic value = ParsedToObject(keyvalue.Value, objtype.GetGenericArguments()[1]);
+                TK key = (TK)ParsedToObject(keyvalue.Key, typeof(TK));
+                TV value = (TV)ParsedToObject(keyvalue.Value, typeof(TV));
                 returnObject.Add(key, value);
             }
             return returnObject;
@@ -355,8 +362,18 @@ namespace HoyoToon
 
         private static string SerializeDictionary(object obj)
         {
+            var method = typeof(Parser).GetMethod(nameof(SerializeDictionary), BindingFlags.NonPublic | BindingFlags.Static);
+            var dictType = obj.GetType();
+            var keyType = dictType.GetGenericArguments()[0];
+            var valueType = dictType.GetGenericArguments()[1];
+            var genericMethod = method.MakeGenericMethod(keyType, valueType);
+            return (string)genericMethod.Invoke(null, new object[] { obj });
+        }
+
+        private static string SerializeDictionary<TKey, TValue>(Dictionary<TKey, TValue> dict)
+        {
             string ret = "{";
-            foreach (var item in (dynamic)obj)
+            foreach (var item in dict)
             {
                 object key = item.Key;
                 object val = item.Value;
