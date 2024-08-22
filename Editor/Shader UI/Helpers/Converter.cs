@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -370,29 +371,28 @@ namespace HoyoToon
         public static List<Texture2D> GetGifFrames(string path)
         {
             List<Texture2D> gifFrames = new List<Texture2D>();
-#if SYSTEM_DRAWING
-            var gifImage = System.Drawing.Image.FromFile(path);
-            var dimension = new System.Drawing.Imaging.FrameDimension(gifImage.FrameDimensionsList[0]);
 
-            int width = Mathf.ClosestPowerOfTwo(gifImage.Width - 1);
-            int height = Mathf.ClosestPowerOfTwo(gifImage.Height - 1);
+            byte[] fileData = File.ReadAllBytes(path);
+            Texture2D gifImage = new Texture2D(2, 2);
+            gifImage.LoadImage(fileData);
+
+            int width = Mathf.ClosestPowerOfTwo(gifImage.width - 1);
+            int height = Mathf.ClosestPowerOfTwo(gifImage.height - 1);
 
             bool hasAlpha = false;
 
-            int frameCount = gifImage.GetFrameCount(dimension);
+            // Assuming the GIF is split into frames in a vertical strip
+            int frameCount = gifImage.height / height;
 
             float totalProgress = frameCount * width;
             for (int i = 0; i < frameCount; i++)
             {
-                gifImage.SelectActiveFrame(dimension, i);
-                var ogframe = new System.Drawing.Bitmap(gifImage.Width, gifImage.Height);
-                System.Drawing.Graphics.FromImage(ogframe).DrawImage(gifImage, System.Drawing.Point.Empty);
-                var frame = ResizeBitmap(ogframe, width, height);
-
-                Texture2D frameTexture = new Texture2D(frame.Width, frame.Height);
+                Texture2D frameTexture = new Texture2D(width, height);
+                frameTexture.SetPixels(gifImage.GetPixels(0, i * height, width, height));
+                frameTexture.Apply();
 
                 float doneProgress = i * width;
-                for (int x = 0; x < frame.Width; x++)
+                for (int x = 0; x < frameTexture.width; x++)
                 {
                     if (x % 20 == 0)
                         if (EditorUtility.DisplayCancelableProgressBar("From GIF", "Frame " + i + ": " + (int)((float)x / width * 100) + "%", (doneProgress + x + 1) / totalProgress))
@@ -401,57 +401,46 @@ namespace HoyoToon
                             return null;
                         }
 
-                    for (int y = 0; y < frame.Height; y++)
+                    for (int y = 0; y < frameTexture.height; y++)
                     {
-                        System.Drawing.Color sourceColor = frame.GetPixel(x, y);
-                        frameTexture.SetPixel(x, frame.Height - 1 - y, new UnityEngine.Color32(sourceColor.R, sourceColor.G, sourceColor.B, sourceColor.A));
-                        if (sourceColor.A < 255.0f)
+                        Color sourceColor = frameTexture.GetPixel(x, y);
+                        if (sourceColor.a < 1.0f)
                         {
                             hasAlpha = true;
                         }
                     }
                 }
 
-                frameTexture.Apply();
                 gifFrames.Add(frameTexture);
             }
             EditorUtility.ClearProgressBar();
-            //HoyoToonLogs.LogDebug("has alpha? " + hasAlpha);
+
             for (int i = 0; i < frameCount; i++)
             {
                 EditorUtility.CompressTexture(gifFrames[i], hasAlpha ? TextureFormat.DXT5 : TextureFormat.DXT1, UnityEditor.TextureCompressionQuality.Normal);
                 gifFrames[i].Apply(true, false);
             }
-#endif
+
             return gifFrames;
         }
 
-#if SYSTEM_DRAWING
-        public static System.Drawing.Bitmap ResizeBitmap(System.Drawing.Image image, int width, int height)
+        public static Texture2D ResizeTexture(Texture2D source, int width, int height)
         {
-            var destRect = new System.Drawing.Rectangle(0, 0, width, height);
-            var destImage = new System.Drawing.Bitmap(width, height);
+            RenderTexture rt = RenderTexture.GetTemporary(width, height);
+            rt.filterMode = FilterMode.Bilinear;
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            RenderTexture.active = rt;
+            Graphics.Blit(source, rt);
 
-            using (var graphics = System.Drawing.Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            Texture2D result = new Texture2D(width, height, source.format, false);
+            result.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            result.Apply();
 
-                using (var wrapMode = new System.Drawing.Imaging.ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, System.Drawing.GraphicsUnit.Pixel, wrapMode);
-                }
-            }
+            RenderTexture.active = null;
+            RenderTexture.ReleaseTemporary(rt);
 
-            return destImage;
+            return result;
         }
-#endif
 
         private static Texture2DArray Textre2DArrayToAsset(Texture2D[] array)
         {
