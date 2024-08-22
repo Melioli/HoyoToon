@@ -194,10 +194,6 @@ namespace HoyoToon
             return Mathf.Abs(col.r) + Mathf.Abs(col.g) + Mathf.Abs(col.b);
         }
 
-        private static Color ColorAdd(Color col1, Color col2)
-        {
-            return new Color(col1.r + col2.r, col1.g + col2.g, col1.b + col2.b);
-        }
         private static Color ColorSubtract(Color col1, Color col2)
         {
             return new Color(col1.r - col2.r, col1.g - col2.g, col1.b - col2.b);

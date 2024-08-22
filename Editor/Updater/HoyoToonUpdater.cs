@@ -20,6 +20,7 @@ using VRC.PackageManagement.Resolver;
 #endif
 
 
+
 namespace HoyoToon
 {
     [InitializeOnLoad]
