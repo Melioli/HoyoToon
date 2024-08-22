@@ -1,18 +1,14 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace HoyoToon
 {
-    public class FileHelper
+    public class FileHelper : Editor
     {
         public static string FindFile(string name, string type = null)
         {
@@ -139,3 +135,4 @@ namespace HoyoToon
     }
 
 }
+#endif

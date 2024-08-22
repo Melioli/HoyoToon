@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 
 namespace HoyoToon
 {
@@ -158,3 +158,4 @@ namespace HoyoToon
         }
     }
 }
+#endif

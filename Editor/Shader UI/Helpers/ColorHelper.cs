@@ -1,14 +1,6 @@
+#if UNITY_EDITOR
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace HoyoToon
 {
@@ -29,5 +21,5 @@ namespace HoyoToon
             return Math.Abs(col1.r - col2.r) + Math.Abs(col1.g - col2.g) + Math.Abs(col1.b - col2.b) + Math.Abs(col1.a - col2.a);
         }
     }
-
 }
+#endif

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace HoyoToon.HoyoToonEditor.ShaderTranslations
 {
@@ -12,3 +11,4 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
         public List<PropertyTranslation> PropertyTranslations = new List<PropertyTranslation>();
     }
 }
+#endif

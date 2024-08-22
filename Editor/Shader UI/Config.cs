@@ -1,6 +1,6 @@
 ﻿// Material/Shader Inspector for Unity 2017/2018
 // CopyRight (C) 2024 Thryrallo + HoyoToon
-
+#if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -205,3 +205,4 @@ namespace HoyoToon
         small, big, big_basic, ramp
     }
 }
+#endif

@@ -1,7 +1,6 @@
 ﻿// Material/Shader Inspector for Unity 2017/2018
 // CopyRight (C) 2024 Thryrallo + HoyoToon
-
-using JetBrains.Annotations;
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -187,7 +186,7 @@ namespace HoyoToon
                 prop.intValue = (int)value;
             else
 #endif
-            prop.floatValue = value;
+                prop.floatValue = value;
         }
 
         public static float GetNumber(this MaterialProperty prop)
@@ -197,7 +196,7 @@ namespace HoyoToon
                 return prop.intValue;
             else
 #endif
-            return prop.floatValue;
+                return prop.floatValue;
         }
 
         public static void SetNumber(this Material mat, string name, float value)
@@ -208,7 +207,7 @@ namespace HoyoToon
                 mat.SetInteger(name, (int)value);
             else
 #endif
-            mat.SetFloat(name, value);
+                mat.SetFloat(name, value);
         }
 
         public static float GetNumber(this Material mat, MaterialProperty prop)
@@ -218,7 +217,7 @@ namespace HoyoToon
                 return mat.GetInt(prop.name);
             else
 #endif
-            return mat.GetFloat(prop.name);
+                return mat.GetFloat(prop.name);
         }
     }
 
@@ -351,3 +350,4 @@ namespace HoyoToon
         }
     }
 }
+#endif

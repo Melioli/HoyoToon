@@ -1,9 +1,9 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using UnityEngine;
 
 namespace HoyoToon
 {
@@ -289,3 +289,4 @@ namespace HoyoToon
         }
     }
 }
+#endif

@@ -1,12 +1,9 @@
 ﻿// Material/Shader Inspector for Unity 2017/2018
 // CopyRight (C) 2024 Thryrallo + HoyoToon
-
+#if UNITY_EDITOR
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -401,3 +398,4 @@ namespace HoyoToon
         }
     }
 }
+#endif

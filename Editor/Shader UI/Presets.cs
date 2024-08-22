@@ -1,10 +1,9 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -892,3 +891,4 @@ namespace HoyoToon.HoyoToonEditor
         }
     }
 }
+#endif

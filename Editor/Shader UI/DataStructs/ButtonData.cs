@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using UnityEditor;
-using UnityEngine;
-
+#if UNITY_EDITOR
 namespace HoyoToon
 {
     public class ButtonData
@@ -16,5 +10,5 @@ namespace HoyoToon
         public bool center_position = false;
         public DefineableCondition condition_show = new DefineableCondition();
     }
-
 }
+#endif

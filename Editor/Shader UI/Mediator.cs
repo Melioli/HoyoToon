@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿#if UNITY_EDITOR
 using UnityEngine;
 
 namespace HoyoToon
@@ -23,3 +22,4 @@ namespace HoyoToon
         public static ShaderPart transfer_group;
     }
 }
+#endif

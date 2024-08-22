@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Linq;
 using HoyoToon;
@@ -108,3 +109,4 @@ namespace Pumkin.UploadCallbacks
         }
     }
 }
+#endif

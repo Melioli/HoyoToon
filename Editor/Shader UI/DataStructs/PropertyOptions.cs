@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using UnityEditor;
-using UnityEngine;
-
+#if UNITY_EDITOR
 namespace HoyoToon
 {
     public class PropertyOptions
@@ -56,3 +50,4 @@ namespace HoyoToon
     }
 
 }
+#endif

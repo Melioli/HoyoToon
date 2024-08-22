@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace HoyoToon.HoyoToonEditor.ShaderTranslations
@@ -15,3 +16,4 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
         }
     }
 }
+#endif

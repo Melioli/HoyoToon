@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 
 namespace HoyoToon.HoyoToonEditor.ShaderTranslations
 {
@@ -15,3 +16,4 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
         public string MathExpression;
     }
 }
+#endif

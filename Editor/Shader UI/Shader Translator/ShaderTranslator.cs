@@ -1,12 +1,12 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.ProjectWindowCallback;
-using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace HoyoToon.HoyoToonEditor.ShaderTranslations
@@ -321,3 +321,4 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
         }
     }
 }
+#endif

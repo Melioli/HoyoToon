@@ -1,19 +1,18 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Profiling;
 using System.Diagnostics;
 
 namespace HoyoToon
 {
-    public class Helper
+    public class Helper : Editor
     {
         private static Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -270,3 +269,4 @@ namespace HoyoToon
 
     }
 }
+#endif

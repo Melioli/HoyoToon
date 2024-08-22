@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if UNITY_2022_1_OR_NEWER
 using System;
 using System.Collections;
@@ -66,4 +67,5 @@ namespace HoyoToon.HoyoToonEditor.ShaderTranslations
         }
     }
 }
+#endif
 #endif

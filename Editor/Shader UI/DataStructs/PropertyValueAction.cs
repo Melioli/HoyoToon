@@ -1,4 +1,4 @@
-using System;
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -89,5 +89,5 @@ namespace HoyoToon
             return propactions.ToArray();
         }
     }
-
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using System;
@@ -11,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace HoyoToon
 {
-    public class HoyoToonMaterialManager
+    public class HoyoToonMaterialManager : Editor
     {
         #region Constants
         public static readonly string HSRShader = HoyoToonDataManager.HSRShader;
@@ -723,3 +724,4 @@ namespace HoyoToon
         #endregion
     }
 }
+#endif

@@ -1,15 +1,8 @@
-﻿using System;
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Profiling;
-
 namespace HoyoToon
 {
     //Adapted from https://github.com/lukis101/VRCUnityStuffs/blob/master/Scripts/Editor/MaterialCleaner.cs
@@ -34,7 +27,7 @@ namespace HoyoToon
     //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     //SOFTWARE.
-    public class MaterialCleaner
+    public class MaterialCleaner : Editor
     {
         public enum CleanPropertyType { Texture, Float, Color }
 
@@ -148,3 +141,4 @@ namespace HoyoToon
     }
 
 }
+#endif

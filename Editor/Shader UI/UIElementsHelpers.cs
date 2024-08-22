@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#if UNITY_EDITOR
 using UnityEngine.UIElements;
 
 namespace HoyoToon.HoyoToonEditor
@@ -16,3 +12,4 @@ namespace HoyoToon.HoyoToonEditor
         }
     }
 }
+#endif

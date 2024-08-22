@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +23,7 @@ using VRC.PackageManagement.Resolver;
 namespace HoyoToon
 {
     [InitializeOnLoad]
-    public class HoyoToonUpdater
+    public class HoyoToonUpdater : Editor
     {
         private const string RemotePackageJsonUrl = "https://raw.githubusercontent.com/Melioli/HoyoToon/dev/package.json";
         private const string ReleasesApiUrl = "https://api.github.com/repos/Melioli/HoyoToon/releases";
@@ -255,3 +256,4 @@ namespace HoyoToon
 
     }
 }
+#endif

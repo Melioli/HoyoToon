@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using static HoyoToon.TexturePacker;
 
 namespace HoyoToon
@@ -24,3 +25,4 @@ namespace HoyoToon
         public bool[] KernelChannels;
     }
 }
+#endif

@@ -1,9 +1,10 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
 namespace HoyoToon
 {
-    public class HoyoToonManager
+    public class HoyoToonManager : Editor
     {
         #region Quick Access Buttons
 
@@ -69,3 +70,4 @@ namespace HoyoToon
         #endregion
     }
 }
+#endif

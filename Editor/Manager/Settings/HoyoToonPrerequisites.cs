@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using System.IO;
+#if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 namespace HoyoToon
@@ -61,3 +58,4 @@ namespace HoyoToon
         }
     }
 }
+#endif

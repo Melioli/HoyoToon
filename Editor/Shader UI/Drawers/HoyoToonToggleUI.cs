@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEditor;
-using UnityEngine;
-using static HoyoToon.GradientEditor;
-using static HoyoToon.TexturePacker;
-
+#if UNITY_EDITOR
 namespace HoyoToon
 {
     public class HoyoToonToggleUIDrawer : HoyoToonToggleDrawer
@@ -31,3 +23,4 @@ namespace HoyoToon
     }
 
 }
+#endif

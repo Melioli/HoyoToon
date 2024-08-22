@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using UnityEditor;
-using UnityEngine;
-
+#if UNITY_EDITOR
 namespace HoyoToon
 {
     public class PATH
@@ -39,3 +33,4 @@ namespace HoyoToon
         public const string ICON_HOYOTOON = "693aa4c2cdc578346a196469a06ddbba";
     }
 }
+#endif

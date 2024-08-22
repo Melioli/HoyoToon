@@ -1,7 +1,6 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -114,5 +113,5 @@ namespace HoyoToon
             return name.StartsWith("http") && (name.EndsWith(".jpg") || name.EndsWith(".png"));
         }
     }
-
 }
+#endif

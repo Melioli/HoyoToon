@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace HoyoToon
 {
-    public class HoyoToonMeshManager
+    public class HoyoToonMeshManager : Editor
     {
         private static readonly List<string> SkipTangentMeshes = new List<string>(HoyoToonDataManager.Data.SkipMeshes);
 
@@ -327,3 +328,4 @@ namespace HoyoToon
         #endregion
     }
 }
+#endif

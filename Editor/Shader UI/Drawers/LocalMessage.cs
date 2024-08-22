@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
-using static HoyoToon.GradientEditor;
-using static HoyoToon.TexturePacker;
 
 namespace HoyoToon
 {
@@ -49,3 +44,4 @@ namespace HoyoToon
     }
 
 }
+#endif

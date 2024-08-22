@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -5,9 +6,6 @@ using UnityEditor.PackageManager.Requests;
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-
-
 
 
 namespace HoyoToon
@@ -167,3 +165,4 @@ namespace HoyoToon
         #endregion
     }
 }
+#endif

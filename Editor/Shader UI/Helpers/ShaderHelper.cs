@@ -1,18 +1,13 @@
-using System;
+#if UNITY_EDITOR
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace HoyoToon
 {
-    public class ShaderHelper
+    public class ShaderHelper : Editor
     {
 
         private static Dictionary<Shader, Dictionary<string, string[]>> shader_property_drawers = new Dictionary<Shader, Dictionary<string, string[]>>();
@@ -203,5 +198,5 @@ namespace HoyoToon
         /// <summary> Gets a formatted Keyword name from a shader property name and a keyword name. </summary>
         private static string GetUnityKeywordName(string propertyName, string keywordName) => $"{propertyName}_{keywordName}".Replace(' ', '_').ToUpperInvariant();
     }
-
 }
+#endif
