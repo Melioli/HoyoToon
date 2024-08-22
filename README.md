@@ -21,7 +21,7 @@ You can install HoyoToon through 3 methods.
 - **VRChat Creator Companion**
 - **Unity Package**
 - **Unity Package Manager**
-- 
+
 ### VRChat Creator Companion
 - Open the VPM package listing [website](https://melioli.github.io/vpm/)
 - Press Add to VCC
