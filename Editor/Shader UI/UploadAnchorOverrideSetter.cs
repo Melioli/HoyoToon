@@ -1,12 +1,11 @@
 #if UNITY_EDITOR
 using System;
 using System.Linq;
-using HoyoToon;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Pumkin.UploadCallbacks
+namespace HoyoToon.UploadCallbacks
 {
     public static class UploadAnchorOverrideSetter
     {
