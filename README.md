@@ -16,9 +16,6 @@
 
 ---
 
-> [!CAUTION]
-> This is the development branch of HoyoToon focussing on the rewrite, do not use this branch to clone or download as zip. Simply use the latest Release or the Stable Branch.
-
 ## Wiki
 
 > [!WARNING]
@@ -26,7 +23,7 @@
 
 ## Features
 
-- A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games.
+- A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games and now Wuthering waves too. 
 - The shader is based on the latest version of each game. (no beta or old code)
 - Supports Genshin Impact
 - Supports Honkai Impact (Part 1 and 2)
