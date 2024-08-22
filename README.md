@@ -16,10 +16,31 @@
 
 ---
 
-## Wiki
-
-> [!WARNING]
-> For detailed instructions on how to use the shader and the accompanying scripts, please refer to our [Wiki](https://docs.hoyotoon.com).
+## How to Install
+You can install HoyoToon through 3 methods.
+- **VRChat Creator Companion**
+- **Unity Package**
+- **Unity Package Manager**
+- 
+### VRChat Creator Companion
+- Open the VPM package listing [website](https://melioli.github.io/vpm/)
+- Press Add to VCC
+- Open your creator companion, and go to your project you'll wish to install HoyoToon in. 
+- Press on Manage Project. 
+- On the bottom you'll be able to see the option to install HoyoToon, click the + button. 
+- Open your unity project to a freshly installed HoyoToon
+ 
+### Unity Package 
+- Go to the github [releases page](https://github.com/Melioli/HoyoToon/releases) of hoyotoon  
+- Download the Unity Package 
+- Drag the Unity Package inside of your open Unity and import. 
+- you've successfully installed HoyoToon
+ 
+### Unity Package Manager 
+- Open your Unity project 
+- Inside of Unity at the top bar, press on Window then Package Manager. 
+- Add the package by clicking on the +, and adding the `https://github.com/Melioli/HoyoToon.git`
+- Unity will now install HoyoToon for you
 
 ## Features
 
