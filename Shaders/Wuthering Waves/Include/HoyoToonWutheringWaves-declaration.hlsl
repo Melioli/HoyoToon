@@ -197,6 +197,7 @@ float _XHMax;
 
 // stencil
 float _EnabelStencil;
+float _AlphaStencil;
 float _StencilTrans;
 
 // rim 

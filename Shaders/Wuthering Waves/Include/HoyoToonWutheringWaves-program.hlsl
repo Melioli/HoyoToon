@@ -281,7 +281,14 @@ fixed4 ps_model (vertex_out i) : SV_Target
                 }
                 else if (_MaterialType == 3)
                 {
-                    output.w = saturate((diffuse.w) );
+                    if(_AlphaStencil)
+                    {
+                        output.w = stencil_mask;
+                    }
+                    else
+                    {
+                        clip((stencil_mask) - 0.8f);
+                    }    
                 }
                 else 
                 {

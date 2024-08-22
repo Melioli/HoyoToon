@@ -214,7 +214,8 @@ Shader "HoyoToon/Wuthering Waves/Character"
             [HideInInspector] end_emission ("", Float) = 0
             //ifex _EnabelStencil == 0
             [HideInInspector] start_stencil ("Stencil", Float) = 0
-            [Toggle] _EnabelStencil ("Enable Stencil", Float) = 1 
+                [Toggle] _EnabelStencil ("Enable Stencil", Float) = 1 
+                [Toggle] _AlphaStencil ("Use Transparency in Stencil", Float) = 1
                 _Mask ("Stencil Mask", 2D) = "white" {}
                 [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassA ("Stencil Pass Op A", Float) = 0
                 [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassB ("Stencil Pass Op B", Float) = 0
@@ -374,6 +375,7 @@ Shader "HoyoToon/Wuthering Waves/Character"
         Pass
         {
             Name "Stencil"
+            Tags{ "LightMode" = "ForwardBase" }
             Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
             Stencil
             {
@@ -418,9 +420,9 @@ Shader "HoyoToon/Wuthering Waves/Character"
         Pass
         {
             Name "Outline"
+            Tags{ "LightMode" = "ForwardBase" }
+            Blend SrcAlpha OneMinusSrcAlpha
             Cull Front
-            Blend SrcAlpha OneMinusSrcAlpha, SrcAlpha OneMinusSrcAlpha
-            ZClip False
             Stencil
             {
 				ref [_StencilRef]  
