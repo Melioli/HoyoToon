@@ -16,7 +16,22 @@
 
 ---
 
-## How to Install
+## Features
+
+- A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games and now Wuthering waves too. 
+- The shader is based on the latest version of each game. (no beta or old code)
+- Supports Genshin Impact
+- Supports Honkai Impact (Part 1 and 2)
+- Supports Honkai Star Rail
+- Supports both Real-time and Baked Lighting
+- Provides support for stencils in Honkai Star Rail and Honkai Impact (Part 1 and 2), specifically for hair transparency features.
+- Includes a weapon shader compatible with all the aforementioned games
+- Includes Visual Effects (VFX) Shaders like those used for Paimon, Dainlief, Asmoday, and Skirk.
+- Includes scripts for automated setup.
+- Comprehensive documentation of the shader, including its logic and features
+- Auto updater for seamless updates of the shader and accompanying scripts.
+
+- ## How to Install
 You can install HoyoToon through 3 methods.
 - **VRChat Creator Companion**
 - **Unity Package**
@@ -41,21 +56,6 @@ You can install HoyoToon through 3 methods.
 - Inside of Unity at the top bar, press on Window then Package Manager. 
 - Add the package by clicking on the +, and adding the `https://github.com/Melioli/HoyoToon.git`
 - Unity will now install HoyoToon for you
-
-## Features
-
-- A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games and now Wuthering waves too. 
-- The shader is based on the latest version of each game. (no beta or old code)
-- Supports Genshin Impact
-- Supports Honkai Impact (Part 1 and 2)
-- Supports Honkai Star Rail
-- Supports both Real-time and Baked Lighting
-- Provides support for stencils in Honkai Star Rail and Honkai Impact (Part 1 and 2), specifically for hair transparency features.
-- Includes a weapon shader compatible with all the aforementioned games
-- Includes Visual Effects (VFX) Shaders like those used for Paimon, Dainlief, Asmoday, and Skirk.
-- Includes scripts for automated setup.
-- Comprehensive documentation of the shader, including its logic and features
-- Auto updater for seamless updates of the shader and accompanying scripts.
 
 ## Contact
 
