@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _ALPHASTENCIL_ON
   - _ENABELSTENCIL_ON
   - _ENABLERIMLIGHT_ON
   - _FILTERLIGHT_ON
@@ -84,6 +85,7 @@ Material:
     m_Floats:
     - ShaderBG: 0
     - ShaderLogo: 0
+    - _AlphaStencil: 1
     - _AnistropyInt: 1
     - _AnistropyNormalInt: 1
     - _BackShadowProcessOffset: -0.1
@@ -265,7 +267,7 @@ Material:
     - start_scolor: 0
     - start_shadow: 0
     - start_solidshadow: 0
-    - start_soundwave: 0
+    - start_soundwave: 1
     - start_spec: 0
     - start_special: 1
     - start_stencil: 0
