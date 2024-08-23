@@ -71,8 +71,8 @@ You can install HoyoToon through 3 methods.
 ## Rules
 
 - The [GPL-3.0 License](https://github.com/Melioli/HoyoToon/blob/main/LICENSE) applies.
-- If you decide to use this shader in its original form for VRChat avatars, renders, animations, or any other medium that does not involve modifying the shader, please give credit to the original creator.
-- If you use this shader as a basis for creating your own shader, please be sure to give credit to the us.
+- If you decide to use this shader in its original form for VRChat avatars, renders, animations, or any other medium that does not involve modifying the shader, please give credit to us.
+- If you use this shader as a basis for creating your own shader, please be sure to give credit to us. This does also include shaders in other forms, nodes, Blender, or ports to different pipelines, or engines. 
 - In compliance with the license, you are free to redistribute the files as long as you attach a link to the source repository.
 
 ## Contributing
