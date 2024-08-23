@@ -31,7 +31,7 @@
 - Comprehensive documentation of the shader, including its logic and features
 - Auto updater for seamless updates of the shader and accompanying scripts.
 
-- ## How to Install
+## How to Install
 You can install HoyoToon through 3 methods.
 - **VRChat Creator Companion**
 - **Unity Package**
