@@ -38,14 +38,16 @@ namespace HoyoToon
         [MenuItem("GameObject/HoyoToon/Scene/Add Post Processing", priority = 1)]
         private static void AddPostProcessing()
         {
+            Camera mainCamera = Camera.main;
             Camera[] cameras = UnityEngine.Object.FindObjectsOfType<Camera>();
-            if (cameras.Length > 1)
+
+            if (mainCamera != null)
             {
-                EditorUtility.DisplayDialog("Multiple Cameras Detected", "Multiple cameras detected in the scene. Post-processing will be added to the first camera: " + cameras[0].name, "OK");
-                AttachPostProcessing(cameras[0]);
+                AttachPostProcessing(mainCamera);
             }
-            else if (cameras.Length == 1)
+            else if (cameras.Length > 0)
             {
+                EditorUtility.DisplayDialog("Main Camera Not Found", "No camera with the 'MainCamera' tag was found. Post-processing will be added to the first camera: " + cameras[0].name, "OK");
                 AttachPostProcessing(cameras[0]);
             }
             else
