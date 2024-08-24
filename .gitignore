@@ -12,6 +12,8 @@
 [Ee]ditor/[Dd]eployment/
 /[Dd]ev/
 /[Hh]oyo2VRC/
+[Ss]ripts/[Ee]ditor/[Dd]eployment/
+
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
@@ -67,3 +69,5 @@ Assets/PackageMakerWindowData.asset*
 .vscode
 Dev.meta
 Hoyo2VRC.meta
+Deployment.meta
+Editor/Deployment.meta
