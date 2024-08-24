@@ -10,6 +10,8 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 [Ee]ditor/[Dd]eployment/
+/[Dd]ev/
+/[Hh]oyo2VRC/
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
@@ -63,3 +65,5 @@ crashlytics-build.properties
 Assets/PackageMakerWindowData.asset*
 .idea
 .vscode
+Dev.meta
+Hoyo2VRC.meta
