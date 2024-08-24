@@ -1,6 +1,4 @@
-#if UNITY_EDITOR
 using UnityEngine;
-
 
 namespace HoyoToon
 {
@@ -125,5 +123,3 @@ namespace HoyoToon
         }
     }
 }
-
-#endif

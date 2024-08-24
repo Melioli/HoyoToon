@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Unity.EditorCoroutines.Editor",
-        "com.vrchat.core.vpm-resolver.Editor"
+        "com.vrchat.core.vpm-resolver.Editor",
+        "com.meliverse.hoyotoon.Scripts"
     ],
     "includePlatforms": [
         "Editor"

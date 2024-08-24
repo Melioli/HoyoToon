@@ -50,25 +50,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 5494333245513755591}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b70f4f5ad401fc41bbe237f6bbd755d, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ca1c731efffcb14d91641a2375d745a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   postShader: {fileID: 4800000, guid: 672d373d22309d5459bff32ee858a1de, type: 3}
   postMaterial: {fileID: 0}
+  gameMode: 0
   bloomMode: 1
   bloomThreshold: 0.7
-  bloomIntensity: 1
+  bloomIntensity: 0.5
   bloomWeights: {x: 0.1, y: 0.2, z: 0.3, w: 0.4}
-  bloomColor: {r: 1, g: 1, b: 1, a: 0}
+  bloomColor: {r: 1, g: 1, b: 1, a: 1}
   blurSamples: 10
-  blurWeight: 1
+  blurWeight: 3
   downsampleValue: 0.5
-  toneMode: 1
-  exposure: 1
+  toneMode: 2
+  exposure: 1.05
   contrast: 1
   saturation: 1
   ACESParamA: 2.8
-  ACESParamB: 0.04
+  ACESParamB: 0.4
   ACESParamC: 2.1
   ACESParamD: 0.5
   ACESParamE: 1.5
