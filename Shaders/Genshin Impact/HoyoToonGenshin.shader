@@ -636,8 +636,8 @@ Shader "HoyoToon/Genshin/Character"
             [HideInInspector] end_hueshift ("", float) = 0
             //endex
             // Nyx State
-            [HideInInspector] start_nyx("Nyx State--{reference_property:_EnableNyxState}", Float) = 0
-                [Toggle] _EnableNyxState ("Enable Nyx State--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_EnableNyxBody=0},{type:SET_PROPERTY,data:_EnableNyxOutline=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_EnableNyxBody=1},{type:SET_PROPERTY,data:_EnableNyxOutline=1}]}]}", Float) = 0
+            [HideInInspector] start_nyx("NightSoul--{reference_property:_EnableNyxState}", Float) = 0
+                [Toggle] _EnableNyxState ("Enable NightSoul--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_EnableNyxBody=0},{type:SET_PROPERTY,data:_EnableNyxOutline=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_EnableNyxBody=1},{type:SET_PROPERTY,data:_EnableNyxOutline=1}]}]}", Float) = 0
                 [NoScaleOffset] _NyxStateOutlineColorRamp ("Color Ramp", 2D) = "gray" { }
                 [NoScaleOffset] _NyxStateOutlineNoise ("Noise(RG)", 2D) = "gray" { }
                 [Vector2] _NyxStateOutlineColorNoiseScale ("Noise Scale", Vector) = (2,2,0,0)
@@ -672,7 +672,7 @@ Shader "HoyoToon/Genshin/Character"
                     [HideInInspector] end_nyxvert ("", Float) = 0
                 [HideInInspector] end_nyxoutline ("", Float) = 0
 
-            [HideInInspector] end_nyx("Nyx State", Float) = 0
+            [HideInInspector] end_nyx("NightSoul", Float) = 0
         [HideInInspector] end_specialeffects ("", Float) = 0
         //Special Effects End
 
