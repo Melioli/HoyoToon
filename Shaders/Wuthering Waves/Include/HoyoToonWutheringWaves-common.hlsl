@@ -4,6 +4,11 @@ float3 sRGBToLinear(float3 rgb)
     return lerp(pow((rgb + 0.055) * (1.0 / 1.055), (float3)2.4),rgb * (1.0/12.92),rgb <= ((float3)0.04045));
 }
 
+float remap(float value, float low1, float high1, float low2, float high2)
+{
+    return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+}
+
 float channel_picker(float4 input, float channel)
 {
     float output = input.x;
@@ -329,24 +334,25 @@ float base_shadow(float ndotl, float ao_map)
     area = area + _FrontShadowProcessOffset;
     area = smoothstep(_ShadowProcess, _ShadowProcess + saturate(_ShadowWidth + 0.25f), area);
     area = min(area, 1.f);
-    area = saturate(((area * ao_map))) * 2 + 0.5f;
+    area = saturate(((area * ao_map)));
     return area;
 }
 
 float hair_shadow(float ndotl, float4 mask)
 {
-    float shadow_area = pow(smoothstep(_SolidShadowProcess, 1.0, mask.y) * _SolidShadowStrength, _ShadowOffsetPower) * _MaskShadowOffsetStrength;
-    float shadow_check = 0.000001 >= shadow_area;
+    float shadow_area = smoothstep(_SolidShadowProcess, 1.0, mask.y) * _SolidShadowStrength;
+    float shadow_check = 2.98023295e-008 >= shadow_area;
+    shadow_area = pow(shadow_area, _ShadowOffsetPower) * _MaskShadowOffsetStrength;
     shadow_area = shadow_check ? 0.f : shadow_area;
-
 
     shadow_area = ndotl * 0.5 + shadow_area;
     shadow_area = 0.5 +  shadow_area;
-
-    shadow_area = (mask.y > 0.1) * shadow_area;
+    shadow_area = shadow_area;
     
     return shadow_area;
 }
+
+
 //--------------------------------------------------------------------------------------
 // RAMP SAMPLING
 float ramp_shadow_base(float ndotl, float ao_map)
@@ -356,14 +362,15 @@ float ramp_shadow_base(float ndotl, float ao_map)
     area = area;
     area = smoothstep(_RampProcess, _RampProcess + _RampWidth, area);
     area = min(area, 1.f);
-    area = saturate(((area + 0.4))) ;
+    area = saturate(((area))) ;
     return area;
 }
 
 float ramp_shadow_hair(float shadow_area, float4 mask)
 {
     float frontshadow = max(0, shadow_area);
-    frontshadow = min(_FrontShadowProcessOffset, frontshadow);
+    // frontshadow = min(_FrontShadowProcessOffset, frontshadow);
+    frontshadow = min(0.2f, frontshadow); // the property i previosly used works for some characters but not all
     float backshadow = min(_SolidShadowProcess, mask.y);
     backshadow = backshadow/_RampProcess;
     float ramp_area = lerp(frontshadow, shadow_area, backshadow);
@@ -371,19 +378,19 @@ float ramp_shadow_hair(float shadow_area, float4 mask)
     ramp_area = saturate(-_ShadowProcess + ramp_area);
     return ramp_area;
 }
+
 //--------------------------------------------------------------------------------------
 // SHADOW COLOR
 float4 shadow_color_base(float3 normal, float3 light, float2 uv, float shadow_mask, float skin_id, float ramp_mask, in float shadow_area)
 {
     // first shadow terms : 
-    float shadow = (_UseSDFShadow || (_MaterialType == 1)) ? ((1.0 -  face_shadow(uv, light)) + 0.5f):  base_shadow(dot(normal, light), shadow_mask);
+    float shadow = (_UseSDFShadow || (_MaterialType == 1)) ? ((1.0 -  face_shadow(uv, light)) + 0.5f):  saturate(base_shadow(dot(normal, light), shadow_mask));
     float2 ramp_uv = (_UseSDFShadow || (_MaterialType == 1)) ? 1.0 - face_shadow(uv, light) : ramp_shadow_base(dot(normal, light), 1.0);
-    shadow = saturate(shadow);
-    ramp_uv = saturate(ramp_uv);
 
     float4 subsurface = lerp(_SubsurfaceColor, _SkinSubsurfaceColor, saturate(skin_id.x + (_MaterialType == 1)));
 
     // calculate ramp y position 
+     ramp_uv.x = max(0.1f, ramp_uv.x - 0.75f);
     ramp_uv.y = (1.0f - lerp(_RampPosition, 0.1f, saturate(skin_id.x + (_MaterialType == 1))));
 
     // sample ramp 
@@ -393,54 +400,45 @@ float4 shadow_color_base(float3 normal, float3 light, float2 uv, float shadow_ma
     ramp_mask = (_UseRampMask) ? ramp_mask : 0;
 
     // blend between the ramp and subsurface colors
-    float3 shadow_color = lerp(subsurface, ramp, ramp_mask * _RampInt);
+    float3 shadow_color = saturate(lerp(subsurface, ramp, _RampInt));
+
+    if(!((_UseSDFShadow || (_MaterialType == 1)))) shadow = saturate(shadow * 4.99999905 + 0.5) ;
 
     // return the shadow color 
-    return float4(lerp(shadow_color, 1.0, shadow), shadow); 
+    return float4(shadow_color, saturate(shadow)); 
 }
 
 float4 shadow_color_hair(float3 normal, float3 light, float4 mask, float skin_id, in float shadow_area)
 {
     // first shadow terms : 
     float shadow = hair_shadow(dot(normal, light), mask);
-    float2 ramp_uv = ramp_shadow_hair(shadow, mask);
+    float2 ramp_uv = saturate(ramp_shadow_hair(shadow, mask)+0.1f);
     shadow = (shadow);
-    ramp_uv = (ramp_uv);
+    ramp_uv = (ramp_uv) ;
     
     // calculate ramp y position 
     ramp_uv.y = (1.0f - lerp(_RampPosition, 0.1f, skin_id.x));
-    #ifdef _is_shadow
-    ramp_uv.x = 0.1f;
-    ramp_uv.y = 1.0 - 0.1;
-    #endif
+
     // sample ramp 
     float3 ramp = _Ramp.Sample(sampler_linear_clamp, ramp_uv); 
     
-    float4 subsurface = lerp(saturate(_SubsurfaceColor + 0.5f), _SkinSubsurfaceColor, skin_id.x);
-    #ifdef _is_shadow
-    subsurface = _HairShadowColor;
-    #endif
+    float4 subsurface = lerp(saturate(_SubsurfaceColor + float4(0.090033f, 0.168722f, 0.193576f, 0.0f)), _SkinSubsurfaceColor, skin_id.x);
+    subsurface = saturate(sqrt(subsurface));
     subsurface = saturate(sqrt(subsurface));
     // blend between the ramp and subsurface colors
     float ramp_color = _UseRampColor;
     float3 shadow_color = lerp(subsurface, ramp, ramp_color * _RampInt);
     
     // shadow = smoothstep(_ShadowProcess - _ShadowWidth, _ShadowProcess + _ShadowWidth, shadow);
-    shadow = smoothstep(_ShadowProcess - _ShadowWidth, _ShadowProcess + _ShadowWidth, (shadow + 0.1));
+    shadow = smoothstep(_ShadowProcess - _ShadowWidth, _ShadowProcess + _ShadowWidth, (shadow + 0.1f));
     
-    float shadow_dark = (mask.y > 0.1);
-    shadow_dark = max(0.89f, shadow_dark);
-    shadow_dark = min(1.00f, shadow_dark);
-    shadow_dark = -0.899999976 + shadow_dark;
-    shadow = shadow_dark * shadow;
-    shadow = shadow * 4.99999905 + 0.5;
-    shadow = shadow * (mask.y > 0.1);
+    float shadow_dark = (mask.y >= 0.05);
     
-    shadow_area = shadow;
+    shadow = shadow * shadow_dark;
     
     // shadow_color = saturate(sqrt(shadow_color));
     // return the shadow color 
-    return float4(lerp(shadow_color, 1.0, shadow), shadow); 
+    return float4(shadow_color, shadow); 
     // return shadow; 
 }
 
@@ -487,8 +485,6 @@ float3 rim_lighting(float3 normal, float3 light, float3 ss_pos, float3 ws_pos)
 // EMISSION
 void emission_coloring(inout float3 color, in float emission_mask, inout float emissive)
 {
-
-
     float emission_area = emission_mask >= _EmissionBreathThreshold;
         
     emissive = saturate(emission_area * _UseBreathLight);
@@ -607,7 +603,7 @@ float3 matcap_coloring(float3 diffuse, float4 matcap, float spec)
 }
 //--------------------------------------------------------------------------------------
 // material funtions 
-void material_basic(inout float3 color, inout float4 shadow, inout float3 specular, in float3 normal, in float3 light, in float3 half_vector, in float3 spec, in float2 uv, in float shadow_mask, in float3 skin_id, in float2 typemask, inout float shadow_area, inout float4 matcap)
+void material_basic(inout float3 color, inout float4 shadow, inout float3 specular, in float3 normal, in float3 light, in float3 half_vector, in float3 spec, in float2 uv, in float shadow_mask, in float3 skin_id, in float3 typemask, inout float shadow_area, inout float4 matcap)
 {
 
 
@@ -626,7 +622,7 @@ void material_basic(inout float3 color, inout float4 shadow, inout float3 specul
     specular = saturate(specular) * pow(color, lerp(0.5f, 2.0f, spec.x));
 
     // get shadow color
-    float4 container = shadow_color_base(normal, light, uv, shadow_mask, skin_id.x, typemask.y, shadow_area);
+    float4 container = shadow_color_base(normal, light, uv, shadow_mask, skin_id.x, typemask.z, shadow_area);
     shadow = container.xyzw;
     shadow_area = container.w;
 
@@ -636,7 +632,7 @@ void material_basic(inout float3 color, inout float4 shadow, inout float3 specul
     
 }
 
-void material_tight(inout float3 color, inout float4 shadow, inout float3 specular, in float3 half_vector, in float3 light, in float3 normal, in float3 tangent, in float3 bitangent, in float3 ws_pos, in float2 uv, float2 bump, in float3 view, in float shadow_mask, in float2 skin_id, in float2 typemask, inout float shadow_area, inout float3 shift, inout float4 matcap, in float3 spec)
+void material_tight(inout float3 color, inout float4 shadow, inout float3 specular, in float3 half_vector, in float3 light, in float3 normal, in float3 tangent, in float3 bitangent, in float3 ws_pos, in float2 uv, float2 bump, in float3 view, in float shadow_mask, in float2 skin_id, in float3 typemask, inout float shadow_area, inout float3 shift, inout float4 matcap, in float3 spec)
 {
     float3 aniso = specular_tight(normal, tangent, bitangent, half_vector, dot(normal, view), ws_pos.xyz, uv, bump);
     
@@ -653,7 +649,7 @@ void material_tight(inout float3 color, inout float4 shadow, inout float3 specul
 
     float3 stocking = stocking_light.x + shift;
 
-    float4 container = shadow_color_base(normal, light, uv, shadow_mask, skin_id.x, typemask.y, shadow_area);
+    float4 container = shadow_color_base(normal, light, uv, shadow_mask, skin_id.x, typemask.z, shadow_area);
     shadow = container.xyzw;
     shadow_area = container.w;
     
@@ -773,7 +769,6 @@ void material_glass(inout float4 color, in float3 normal, in float3 ss_pos, in f
     color.xyz = highlight;
     color.w = 0.1f;
 }
-
 
 void material_tacet(inout float3 color, in float2 uv)
 {

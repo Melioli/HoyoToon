@@ -154,12 +154,12 @@ fixed4 ps_model (vertex_out i) : SV_Target
         #if defined(use_stocking)
             if(_UseStocking && (skin_id.y > 0.5))
             {
-                material_tight(color.xyz, shadow_color, specular, half_vector, light, normal, tangent, bitangent, i.ws_pos, uv, normalmap.xy, view, shadow_mask.x, skin_id.xy, typemask.xy, shadow_area, shift, matcap, spec);
+                material_tight(color.xyz, shadow_color, specular, half_vector, light, normal, tangent, bitangent, i.ws_pos, uv, normalmap.xy, view, shadow_mask.x, skin_id.xy, typemask.xyz, shadow_area, shift, matcap, spec);
             }
             else 
             {
         #endif
-            material_basic(color.xyz, shadow_color, specular, normal, light, half_vector, spec, uv, shadow_mask.x, skin_id.xyz, typemask.xy, shadow_area, matcap);
+            material_basic(color.xyz, shadow_color, specular, normal, light, half_vector, spec, uv, shadow_mask.x, skin_id.xyz, typemask.xyz, shadow_area, matcap);
             specular *= 1.0  - normalmap.w;
         #if defined(use_stocking)
             }
@@ -208,8 +208,10 @@ fixed4 ps_model (vertex_out i) : SV_Target
     
     #if defined(_IS_PASS_BASE)
         output.xyz = color.xyz + rim_light;
-        output.xyz = shadow_color.xyz * output.xyz + specular.xyz;
+        output.xyz = lerp(output.xyz * shadow_color, output.xyz, shadow_area);
+        output.xyz = output.xyz + specular.xyz;
         output.xyz = output.xyz + emission;
+
 
         float emissive = 0.0f;
 
