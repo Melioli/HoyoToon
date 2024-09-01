@@ -10,7 +10,7 @@ namespace HoyoToon
     public static class HoyoToonDataManager
     {
         static string packageName = "com.meliverse.hoyotoon";
-        static string packagePath = Path.Combine(HoyoToonParseManager.GetPackagePath(packageName), "Editor/Manager");
+        static string packagePath = Path.Combine(HoyoToonParseManager.GetPackagePath(packageName), "Scripts/Editor/Manager");
         private static readonly string cacheFilePath = Path.Combine(packagePath, "HoyoToonManager.json");
         private static readonly string url = "https://api.hoyotoon.com/HoyoToonManager.json";
         private static HoyoToonData hoyoToonData;
