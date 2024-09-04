@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3113995390418817931}
   - component: {fileID: 3243659202921157059}
   m_Layer: 0
-  m_Name: AvatarLight
+  m_Name: AvatarLight VRC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

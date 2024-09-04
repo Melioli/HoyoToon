@@ -17,13 +17,23 @@ namespace HoyoToon
                 return;
             }
 
-            var avatarLightPrefab = Resources.Load<GameObject>("Prefabs/AvatarLight");
+#if VRC_SDK_VRCSDK3
+            var avatarLightPrefab = Resources.Load<GameObject>("Prefabs/AvatarLight VRC");
             if (avatarLightPrefab == null)
             {
-                EditorUtility.DisplayDialog("Error", "AvatarLight prefab not found in Resources/Prefabs.", "OK");
-                HoyoToonLogs.WarningDebug("AvatarLight prefab not found in Resources/Prefabs.");
+                EditorUtility.DisplayDialog("Error", "AvatarLight VRC prefab not found in Resources/Prefabs.", "OK");
+                HoyoToonLogs.WarningDebug("AvatarLight VRC prefab not found in Resources/Prefabs.");
                 return;
             }
+#else
+            var avatarLightPrefab = Resources.Load<GameObject>("Prefabs/AvatarLight Default");
+            if (avatarLightPrefab == null)
+            {
+                EditorUtility.DisplayDialog("Error", "AvatarLight Default prefab not found in Resources/Prefabs.", "OK");
+                HoyoToonLogs.WarningDebug("AvatarLight Default prefab not found in Resources/Prefabs.");
+                return;
+            }
+#endif
 
             var avatarLight = UnityEngine.Object.Instantiate(avatarLightPrefab, selectedObject.transform);
             avatarLight.name = "AvatarLight";
