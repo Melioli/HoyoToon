@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace HoyoToon
 {
     [ExecuteInEditMode]
-    [ImageEffectAllowedInSceneView]
+    [DisallowMultipleComponent, ImageEffectAllowedInSceneView]
     public class HoyoToonPostProcess : MonoBehaviour
     {
         [SerializeField]
@@ -33,6 +34,7 @@ namespace HoyoToon
         public BloomMode bloomMode = BloomMode.Color;
 
         public float bloomThreshold = 0.7f;
+        public float bloomScalar = 0.7f;
         public float bloomIntensity = 0.5f;
         public Vector4 bloomWeights = new(0.1f, 0.2f, 0.3f, 0.4f);
         public Color bloomColor = Color.white;
@@ -58,15 +60,43 @@ namespace HoyoToon
         public float ACESParamD = 0.5f;
         public float ACESParamE = 1.5f;
 
+
+        private CommandBuffer commandBuffer;
+
         void OnEnable()
         {
             if (postShader == null) postShader = Shader.Find("Hidden/HoyoToon/Post Processing");
             if (postMaterial == null) postMaterial = new Material(postShader);
             postMaterial.hideFlags = HideFlags.HideAndDontSave;
+
+            commandBuffer = new CommandBuffer { name = "HoyoToon Post Processing" };
+
+            var camera = Camera.main;
+            if (camera != null)
+            {
+                camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, commandBuffer);
+            }
         }
 
         void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
+            commandBuffer.Clear();
+
+            if (bloomMode == BloomMode.Color)
+            {
+                // Add commands to the command buffer here
+                commandBuffer.Blit(source, destination, postMaterial);
+            }
+            else if (bloomMode == BloomMode.Brightness)
+            {
+                // Add commands to the command buffer here
+                commandBuffer.Blit(source, destination, postMaterial);
+            }
+            else
+            {
+                // Add commands to the command buffer here
+                commandBuffer.Blit(source, destination, postMaterial);
+            }
             if (bloomMode == BloomMode.Color)
             {
                 postMaterial.SetFloat("_BloomMode", 1);
@@ -86,6 +116,7 @@ namespace HoyoToon
             if (toneMode == ToneMode.Off) postMaterial.SetFloat("_UseTonemap", 0);
             postMaterial.SetFloat("_BloomThreshold", bloomThreshold);
             postMaterial.SetFloat("_BloomIntensity", bloomIntensity);
+            postMaterial.SetFloat("_BloomScalar", bloomScalar);
             postMaterial.SetVector("_BloomWeights", bloomWeights);
             postMaterial.SetColor("_BloomColor", bloomColor);
             postMaterial.SetFloat("_BlurSamples", blurSamples);
@@ -100,14 +131,19 @@ namespace HoyoToon
             postMaterial.SetFloat("_ACESParamD", ACESParamD);
             postMaterial.SetFloat("_ACESParamE", ACESParamE);
 
-            postMaterial.SetTexture("_RenderTarget", source);
+            // var originalTex = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32);
+            // RenderTexture.ReleaseTemporary(originalTex);
+
+            var renderTextureMain = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.RGB111110Float);
+            Graphics.Blit(source, renderTextureMain);
+            postMaterial.SetTexture("_RenderTarget", renderTextureMain);
+            RenderTexture.ReleaseTemporary(renderTextureMain);
 
             int width = Mathf.RoundToInt(source.width * downsampleValue);
             int height = Mathf.RoundToInt(source.height * downsampleValue);
-            var bloomPre = RenderTexture.GetTemporary(width, height, 0, source.format);
+            var bloomPre = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
 
-            Graphics.Blit(source, bloomPre);
-            Graphics.Blit(null, bloomPre);
+            // Graphics.Blit(renderTextureMain, bloomPre);
 
             Graphics.Blit(source, bloomPre, postMaterial, 0); // prefilter
             postMaterial.SetTexture("_BloomTexturePre", bloomPre);
@@ -119,6 +155,13 @@ namespace HoyoToon
 
         void OnDisable()
         {
+            var camera = Camera.main;
+            if (camera != null && commandBuffer != null)
+            {
+                camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, commandBuffer);
+                commandBuffer.Release();
+                commandBuffer = null;
+            }
             postMaterial = null;
         }
     }

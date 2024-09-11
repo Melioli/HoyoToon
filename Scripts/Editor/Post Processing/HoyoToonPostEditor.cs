@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace HoyoToon
@@ -47,6 +48,7 @@ namespace HoyoToon
                     GUI.DrawTexture(logoRect, logo, ScaleMode.ScaleToFit);
                 }
             }
+
 
             // Preset settings
             ShowPresets = EditorGUILayout.BeginFoldoutHeaderGroup(ShowPresets, "Preset Settings");
@@ -101,7 +103,8 @@ namespace HoyoToon
                 script.bloomMode = (HoyoToonPostProcess.BloomMode)EditorGUILayout.EnumPopup("Bloom Mode", script.bloomMode);
                 script.bloomThreshold = EditorGUILayout.FloatField("Bloom Threshold", script.bloomThreshold);
                 script.bloomIntensity = EditorGUILayout.FloatField("Bloom Intensity", script.bloomIntensity);
-                script.bloomWeights = EditorGUILayout.Vector4Field("Bloom Weights", script.bloomWeights);
+                script.bloomScalar = EditorGUILayout.FloatField("Bloom Scalar", script.bloomScalar);
+                // script.bloomWeights = EditorGUILayout.Vector4Field("Bloom Weights", script.bloomWeights);
                 script.bloomColor = EditorGUILayout.ColorField("Bloom Color", script.bloomColor);
                 script.blurSamples = EditorGUILayout.FloatField("Blur Samples", script.blurSamples);
                 script.blurWeight = EditorGUILayout.FloatField("Blur Weight", script.blurWeight);
@@ -135,6 +138,12 @@ namespace HoyoToon
                     script.ACESParamE = EditorGUILayout.FloatField("ACES Param E", script.ACESParamE);
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
+            }
+
+            // Apply changes
+            if (GUI.changed)
+            {
+                EditorUtility.SetDirty(script);
             }
         }
     }
