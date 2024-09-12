@@ -75,16 +75,15 @@ Shader "HoyoToon/Genshin/Character"
             [HideInInspector] end_maincolor ("", Float) = 0
             // Main Alpha
             [HideInInspector] start_mainalpha ("Alpha Options", Float) = 0
-                [HoyoToonWideEnum(Off, 0, AlphaTest, 1, Glow, 2, FaceBlush, 3, Transparency, 4)] _MainTexAlphaUse("Diffuse Alpha Channel", Int) = 0
-                // _TestValue ("waa", Float) = 0
-                _MainTexAlphaCutoff("Alpha Cuttoff", Range(0, 1.0)) = 0.5
-                // See-Through 
-                [HideInInspector] start_seethrough ("Ghosting", Float) = 0
-                    [Helpbox]ghostmodehelpbox("Enabling Ghost Mode will require you to tweak the Alpha values of the Color Tint inside of Color Options to fade specific parts of the body.",Float)= 0
-                    [Enum(Off, 0, On, 1)] _AlphaSpecial("Enable Ghost Mode--{on_value_actions:[
+                    [Helpbox] _MainTexAlphaUseHelp("Be careful: Changing these values will reset your render queue value as well both the Source and Destination Blend values.", float) = 0
+                    [HoyoToonWideEnum(Off, 0, AlphaTest, 1, Glow, 2, FaceBlush, 3, Transparency, 4)] _MainTexAlphaUse("Diffuse Alpha Channel--{on_value_actions:[
                     {value:0,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
-                    {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=5},{type:SET_PROPERTY,data:_DstBlend=10},{type:SET_PROPERTY,data:render_queue=2225}]}]}", Int) = 0
-                [HideInInspector] end_seethrough ("", Float) = 0   
+                    {value:1,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
+                    {value:2,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
+                    {value:3,actions:[{type:SET_PROPERTY,data:_SrcBlend=1},{type:SET_PROPERTY,data:_DstBlend=0},{type:SET_PROPERTY,data:render_queue=2000}]},
+                    {value:4,actions:[{type:SET_PROPERTY,data:_SrcBlend=5},{type:SET_PROPERTY,data:_DstBlend=10},{type:SET_PROPERTY,data:render_queue=2225}]}]}", Int) = 0
+                // _TestValue ("waa", Float) = 0
+                _MainTexAlphaCutoff("Alpha Cuttoff--{condition_show:{type:PROPERTY_BOOL,data:_MainTexAlphaUse==1.0}}", Range(0, 1.0)) = 0.5
             [HideInInspector] end_mainalpha ("", Float) = 0
             // Detail Line
             //ifex _TextureLineUse == 0
@@ -700,8 +699,8 @@ Shader "HoyoToon/Genshin/Character"
             [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Float) = 4
             [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Source Blend", Int) = 1
             [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Destination Blend", Int) = 0
-            [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("Source Blend--{on_value_actions:[{value:any,actions:[{type:LINK_PROPERTY,data:_SrcBlendMode==_SrcBlend}]}]}", Int) = 1
-            [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("Destination Blend--{on_value_actions:[{value:any,actions:[{type:LINK_PROPERTY,data:_DstBlendMode==_DstBlend}]}]}", Int) = 1
+            [HideInInspector] [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("Source Blend--{on_value_actions:[{value:any,actions:[{type:LINK_PROPERTY,data:_SrcBlendMode==_SrcBlend}]}]}", Int) = 1
+            [HideInInspector] [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("Destination Blend--{on_value_actions:[{value:any,actions:[{type:LINK_PROPERTY,data:_DstBlendMode==_DstBlend}]}]}", Int) = 1
             // Debug Options
             //ifex _DebugMode == 0
             [HideInInspector] start_debugOptions("Debug--{reference_property:_DebugMode}", Float) = 0
