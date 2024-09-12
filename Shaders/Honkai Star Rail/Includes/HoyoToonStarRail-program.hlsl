@@ -741,17 +741,18 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         ndotl = dot(normal, light);
 
         float3 shadow_area = (float3)1.0f;
-        shadow_area = shadow_rate(ndotl, lightmap.y, i.v_col.x, 2.0f);
+        shadow_area = shadow_rate(ndotl, lightmap.y, i.v_col.x, 1.0f);
         // metalshadow = shadow_area_transition(lightmapao, vertexao, ndotl, material_id);
         #if defined(faceishadow)
-            if(_FaceMaterial) shadow_area = dot((float3)0.5f, light);
+            ndotl = dot(float3(0.5f, 0.5f, 1.0f), light);
+            if(_FaceMaterial) shadow_area = ndotl;
         #endif
 
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
-        float3 light_pass_color = ((diffuse.xyz * 1.0f) * _LightColor0.xyz) * atten * shadow_area * 0.5f;
+        float3 light_pass_color = ((diffuse.xyz * 1.0f) * _LightColor0.xyz) * atten * shadow_area;
         float3 light_color = lerp(light_pass_color.xyz, lerp(0.0f, min(light_pass_color, light_pass_color / light_intesnity), _WorldSpaceLightPos0.w), _FilterLight); // prevents lights from becoming too intense
         #if defined(POINT) || defined(SPOT)
-        out_color.xyz = (light_color) * 0.5f;
+        out_color.xyz = (light_color);
         #elif defined(DIRECTIONAL)
         out_color.xyz = 0.0f; // dont let extra directional lights add onto the model, this will fuck a lot of shit up
         #endif

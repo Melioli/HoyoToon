@@ -42,6 +42,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     float3 light = _WorldSpaceLightPos0;
     #if defined(POINT) || defined(SPOT) 
         light = normalize(_WorldSpaceLightPos0.xyz - i.ws_pos.xyz);
+        
     #endif
 
     // half vector 
@@ -246,6 +247,10 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     #endif
         
     #ifdef _IS_PASS_LIGHT
+        if(variant_selector == 1 && _EnableFaceMap)
+        {
+            shaded_area.x = dot(float3(0.5f, 0.5f, 1.0f), light);
+        }
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
         shaded_area.x = smoothstep(0.0f, 0.5f, shaded_area.x) * 0.8f + 0.1f;
         float3 light_pass_color = ((diffuse.xyz * 5.0f) * _LightColor0.xyz) * atten * shaded_area.x * 0.5f;

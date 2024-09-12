@@ -158,19 +158,21 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
     float4 lightmap = _LightMapTex.Sample(sampler_linear_repeat, uv); 
     
     float s = 1.0f;
-    
+    float light_shadow = 0.0f;
     #if defined(use_shadow)
         #if defined(faceishadow)
             // shadow stuff
             float shadow_right = (_FaceMapTex.Sample(sampler_linear_repeat, float2(      uv.x, uv.y)).a);
             float shadow_left  = (_FaceMapTex.Sample(sampler_linear_repeat, float2(1.0 - uv.x, uv.y)).a);
-        #endif
+        #endif  
 
-
+        light_shadow = hi3_shadow(lightmap.y, ndotl, vertex.x);
+        
         float4 shadow_col = shadow_cols(lightmap.a);
         if(variant_selector == 1 || variant_selector == 3) shadow_col = _ShadowColor;
         if(variant_selector == 1)
         {   
+            light_shadow = saturate(dot(float3(0.5f, 0.5f, 1.0f), light_dir));
             #if defined(faceishadow)
                 s = shadow_rate_face(shadow_right, shadow_left, lightmap.y, i.ws_pos);
             #endif
@@ -178,6 +180,7 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
         else
         {
             s = hi3_shadow(lightmap.y, ndotl, vertex.x);
+            // light_shadow = s;
         }
         float4 _shadow = min(s + (shadow_col), 1.0);
     #else
@@ -322,7 +325,7 @@ float4 ps_model (vs_out i, bool vface : SV_ISFRONTFACE) : SV_Target
     #endif
     #ifdef _IS_PASS_LIGHT
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
-        float3 light_pass_color = ((diffuse.xyz * 5.0f) * _LightColor0.xyz) * atten * s * 0.5f;
+        float3 light_pass_color = ((diffuse.xyz * 5.0f) * _LightColor0.xyz) * atten * light_shadow * 0.5f;
         float3 light_color = lerp(light_pass_color.xyz, lerp(0.0f, min(light_pass_color, light_pass_color / light_intesnity), _WorldSpaceLightPos0.w), _FilterLight); // prevents lights from becoming too intense
         #if defined(POINT) || defined(SPOT)
         out_col.xyz = (light_color) * 0.5f;
