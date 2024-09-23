@@ -564,7 +564,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float3 shadow_area = (float3)1.0f;
         shadow_area = shadow_area_transition(lightmap.y, i.v_col.x, ndotl, material_id);
         // metalshadow = shadow_area_transition(lightmapao, vertexao, ndotl, material_id);
-        if(_UseFaceMapNew) shadow_area = ndotl;
+        if(_UseFaceMapNew) shadow_area = saturate(ndotl);
         // shadow = outshadow;
 
         float bright = lightmap.y > 0.9f && !_UseFaceMapNew;

@@ -749,7 +749,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         #endif
 
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
-        float3 light_pass_color = ((diffuse.xyz * 1.0f) * _LightColor0.xyz) * atten * shadow_area;
+        float3 light_pass_color = ((diffuse.xyz * 1.0f) * _LightColor0.xyz) * atten * saturate(shadow_area);
         float3 light_color = lerp(light_pass_color.xyz, lerp(0.0f, min(light_pass_color, light_pass_color / light_intesnity), _WorldSpaceLightPos0.w), _FilterLight); // prevents lights from becoming too intense
         #if defined(POINT) || defined(SPOT)
         out_color.xyz = (light_color);

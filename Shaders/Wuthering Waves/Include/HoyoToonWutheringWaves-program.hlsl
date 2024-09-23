@@ -324,7 +324,7 @@ fixed4 ps_model (vertex_out i) : SV_Target
         shadow_area =  saturate(pow(shadow_area, 5.0f));
         if(_MaterialType == 1) shadow_area = smoothstep(0.0, 0.5, saturate(dot(normal, light)));
         float light_intesnity = max(0.001f, (0.299f * _LightColor0.r + 0.587f * _LightColor0.g + 0.114f * _LightColor0.b));
-        float3 light_pass_color = ((diffuse.xyz * 5.0f) * _LightColor0.xyz) * atten * shadow_area * 0.5f;
+        float3 light_pass_color = ((diffuse.xyz * 5.0f) * _LightColor0.xyz) * atten * saturate(shadow_area) * 0.5f;
         float3 light_pass_a_color = lerp(light_pass_color.xyz, lerp(0.0f, min(light_pass_color, light_pass_color / light_intesnity), _WorldSpaceLightPos0.w), _FilterLight); // prevents lights from becoming too intense
         if(_MaterialType == 6) light_pass_a_color = float3(0.0f, 0.0f, 0.0f);
         #if defined(POINT) || defined(SPOT)
