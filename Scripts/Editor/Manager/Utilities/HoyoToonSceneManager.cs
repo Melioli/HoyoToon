@@ -69,10 +69,10 @@ namespace HoyoToon
 
         private static void AttachPostProcessing(Camera camera)
         {
-            HoyoToonPostProcess postProcessing = camera.gameObject.GetComponent<HoyoToonPostProcess>();
+            HoyoToonPostProcessing postProcessing = camera.gameObject.GetComponent<HoyoToonPostProcessing>();
             if (postProcessing == null)
             {
-                postProcessing = camera.gameObject.AddComponent<HoyoToonPostProcess>();
+                postProcessing = camera.gameObject.AddComponent<HoyoToonPostProcessing>();
                 Undo.RegisterCreatedObjectUndo(postProcessing, "Add PostProcessing");
                 Selection.activeGameObject = postProcessing.gameObject;
                 EditorGUIUtility.PingObject(postProcessing);
