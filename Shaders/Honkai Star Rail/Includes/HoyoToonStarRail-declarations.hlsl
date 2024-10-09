@@ -129,6 +129,15 @@ float _SelfShadowDepthOffset;
 float _SelfShadowSampleOffset;
 float _ShadowBoostVal;
 
+float _ES_LEVEL_ADJUST_ON;
+float4 _ES_LevelSkinLightColor;
+float4 _ES_LevelSkinShadowColor;
+float4 _ES_LevelHighLightColor;
+float4 _ES_LevelShadowColor;
+float _ES_LevelShadow;
+float _ES_LevelMid;
+float _ES_LevelHighLight;
+
 float _EnvironmentLightingStrength;
 
 float _UseMaterialValuesLUT;

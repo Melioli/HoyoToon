@@ -121,18 +121,18 @@ Shader "HoyoToon/Star Rail/Character"
                 [Toggle] _EnableShadow ("Enable Shadow", Float) = 1
                 [SmallTexture]_DiffuseRampMultiTex     ("Warm Shadow Ramp | 8 ramps", 2D) = "white" {} 
                 [SmallTexture]_DiffuseCoolRampMultiTex ("Cool Shadow Ramp | 8 ramps", 2D) = "white" {}
-                //[Toggle]_ShadowBoost ("Shadow Boost Enable", Float) = 0
+                [Toggle] _ES_LEVEL_ADJUST_ON ("Enable Level Adjust", Float) = 0
                 _ShadowRamp ("Shadow Ramp", Range(0.01, 1)) = 1
-                //_ShadowBoostVal ("Shadow Boost Value", Range(0, 1)) = 0
                 _ShadowColor ("Shadow Color", Color) = (0.5, 0.5, 0.5, 1)
-                //_DarkColor   ("Dark Color", Color) = (0.85, 0.85, 0.85, 1)
-                //_EyeShadowColor ("Eye Shadow Color", Color) = (1, 1, 1, 1)
-                //_EyeBaseShadowColor ("EyeBase Shadow Color", Vector) = (1, 1, 1, 1)
-                //_EyeShadowAngleMin ("EyeBase Shadow Min Angle", Range(0.36, 1.36)) = 0.85
-                //_EyeShadowMaxAngle ("EyeBase Shadow Max Angle", Range(0, 1)) = 1
-                //_ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
-                //_ShadowFeather ("Shadow Feather", Range(0.0001, 0.05)) = 0.0001
-                //_BackShadowRange ("Back Shadow Range", Range(0, 1)) = 0
+                [HideInInspector] start_shadowcontrol ("Shadow Levels--{condition_show:{type:PROPERTY_BOOL,data:_ES_LEVEL_ADJUST_ON==1.0}}", Float) = 0
+                    _ES_LevelSkinLightColor ("Skin Light", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelSkinShadowColor ("Skin Shadow", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelHighLightColor ("Base Light Color", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelShadowColor ("Base Shadow Color", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelShadow ("Shadow Level", Range(0, 1)) = 0.0
+                    _ES_LevelMid ("Mid Level", Range(0, 1)) = 0.55
+                    _ES_LevelHighLight ("High Light Level", Range(0, 1)) = 1.0
+                [HideInInspector] end_shadowcontrol ("", Float) = 0
                 //ifex _UseSelfShadow == 0
                 [HideInInspector] start_selfshadow ("Self Shadow", Float) = 0
                     [Toggle] _UseSelfShadow ("Use Self Shadow", Float) = 0

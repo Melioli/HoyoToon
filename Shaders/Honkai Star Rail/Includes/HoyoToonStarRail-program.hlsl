@@ -20,7 +20,7 @@ vs_out vs_base(vs_in v)
     o.tangent.w = v.tangent.w * unity_WorldTransformParams.w; 
     // in case the data stored in the tangent slot is actually proper tangents and not a 2nd set of normals
     o.view = _WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz;
-    // its more efficient to do this in the vertex shader instead of trying to calculate the view vector for every pixel 
+    // its more efficient to do this in the vertex shader instead of trying to calculate the view Vector for every pixel 
     o.v_col = v.v_col;    
 
     // o.uv_2 = float4(v.uv_2.xy, v.uv_3.xy);
@@ -235,10 +235,12 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
     color.a = 1.0f; // this prevents issues with the alpha value of the material being less than 1
     // might remove later
 
+    
+
     // INITIALIZE OUTPUT COLOR : 
     float4 out_color = color;
 
-    // COMPUTE HALF VECTOR : 
+    // COMPUTE HALF floatTOR : 
     float3 half_vector = normalize(view + _WorldSpaceLightPos0);
 
     // DOT PRODUCTS : 
@@ -298,7 +300,14 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         
 
     #if defined (_IS_PASS_BASE)
-
+        // lighting
+        float3 GI_color = DecodeLightProbe(normal);
+        GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
+        float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
+        GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;
+        
+        float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
+        float3 light_color = max(ambient_color, _LightColor0.rgb);
         // ================================================================================================ //
         #if defined(use_rimlight)
             // rim light : 
@@ -467,6 +476,61 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
                         shadow_color = lerp(_ShadowColor, 1.0f, shadow_area);
                     }
                 #endif
+                // using the ES Level adjuster 
+                if (_ES_LEVEL_ADJUST_ON)
+                {
+                    // Determine if the material is skin, face, or hair
+                    float isSkin = (material_ID < 1) ? 0.0 : 1.0;
+                    isSkin = (_FaceMaterial) ? 0.0 : isSkin;
+                    isSkin = (_HairMaterial) ? 1.0 : isSkin;
+
+                    // Initialize color adjustment variables
+                    float3 skinLightColorAdjustment = (float3)0.0;
+                    float3 highlightColorAdjustment = (float3)0.0;
+                    float3 skinShadowColorAdjustment = (float3)0.0;
+                    float3 shadowColorAdjustment = (float3)0.0;
+                    float3 isSkinVector = (float3)isSkin;
+                    float3 tempAdjustment = (float3)0.0;
+
+                    // Calculate skin light color adjustment
+                    skinLightColorAdjustment = _ES_LevelSkinLightColor.www * _ES_LevelSkinLightColor.xyz;
+                    skinLightColorAdjustment *= 2.0;
+
+                    // Calculate highlight color adjustment
+                    highlightColorAdjustment = _ES_LevelHighLightColor.www * _ES_LevelHighLightColor.xyz;
+                    highlightColorAdjustment = (highlightColorAdjustment * 2.0) - skinLightColorAdjustment;
+                    skinLightColorAdjustment = (isSkinVector * highlightColorAdjustment) + skinLightColorAdjustment;
+                    skinLightColorAdjustment = max(skinLightColorAdjustment, 0.01f);
+
+                    // Calculate skin shadow color adjustment
+                    skinShadowColorAdjustment = _ES_LevelSkinShadowColor.www * _ES_LevelSkinShadowColor.xyz;
+                    skinShadowColorAdjustment *= 2.0;
+
+                    // Calculate shadow color adjustment
+                    shadowColorAdjustment = _ES_LevelShadowColor.www * _ES_LevelShadowColor.xyz;
+                    shadowColorAdjustment = (shadowColorAdjustment * 2.0) - skinShadowColorAdjustment;
+                    skinShadowColorAdjustment = (isSkinVector * shadowColorAdjustment) + skinShadowColorAdjustment;
+                    skinShadowColorAdjustment = max(skinShadowColorAdjustment, 0.01f);
+
+                    // Adjust shadow color based on mid-level
+                    shadowColorAdjustment = shadow_color.xyz - (float3(_ES_LevelMid, _ES_LevelMid, _ES_LevelMid));
+                    tempAdjustment.xz = float2(_ES_LevelHighLight, _ES_LevelMid) - float2(_ES_LevelMid, _ES_LevelShadow);
+                    shadowColorAdjustment /= tempAdjustment.xxx;
+                    shadowColorAdjustment = (shadowColorAdjustment * 0.5) + 0.5;
+                    shadowColorAdjustment = clamp(shadowColorAdjustment, 0.0, 1.0);
+                    skinLightColorAdjustment *= shadowColorAdjustment;
+
+                    // Further adjust shadow color
+                    shadowColorAdjustment = -shadow_color.xyz + float3(_ES_LevelMid, _ES_LevelMid, _ES_LevelMid);
+                    shadowColorAdjustment /= tempAdjustment.zzz;
+                    shadowColorAdjustment = (-shadowColorAdjustment * 0.5) + 0.5;
+                    shadowColorAdjustment = clamp(shadowColorAdjustment, 0.0, 1.0);
+                    skinShadowColorAdjustment *= shadowColorAdjustment;
+
+                    // Apply final shadow color based on shadow area
+                    shadow_color.xyz = (shadow_area < 0.9f) ? skinLightColorAdjustment : skinShadowColorAdjustment;
+                }
+
             }
         #endif
 
@@ -628,14 +692,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         #endif
         // ================================================================================================ //
         
-        // lighting
-        float3 GI_color = DecodeLightProbe(normal);
-        GI_color = GI_color < float3(1,1,1) ? GI_color : float3(1,1,1);
-        float GI_intensity = 0.299f * GI_color.r + 0.587f * GI_color.g + 0.114f * GI_color.b;
-        GI_intensity = GI_intensity < 1 ? GI_intensity : 1.0f;
-
-        float3 ambient_color = max(half3(0.05f, 0.05f, 0.05f), max(ShadeSH9(half4(0.0, 0.0, 0.0, 1.0)),ShadeSH9(half4(0.0, -1.0, 0.0, 1.0)).rgb));
-        float3 light_color = max(ambient_color, _LightColor0.rgb);
+        
         
         // ================================================================================================ //
         #if defined(use_stocking)
@@ -661,8 +718,8 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
         if(!_IsTransparent && !_EnableAlphaCutoff) out_color.w = 1.0f;
         if(_EyeShadowMat) out_color = _Color;
         
-
-        // intialize direction vectors
+ 
+        // intialize direction Vectors
         float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
         float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
         float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
@@ -777,7 +834,7 @@ float4 ps_base(vs_out i, bool vface : SV_IsFrontFace) : SV_Target
             } 
             else if(_HairMaterial)
             {
-                // intialize direction vectors
+                // intialize direction Vectors
                 float3 up      = UnityObjectToWorldDir(_headUpVector.xyz);
                 float3 forward = UnityObjectToWorldDir(_headForwardVector.xyz);
                 float3 right   = UnityObjectToWorldDir(_headRightVector.xyz);
