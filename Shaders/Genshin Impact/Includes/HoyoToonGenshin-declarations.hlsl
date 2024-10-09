@@ -70,6 +70,9 @@ Texture2D _ClipAlphaTex;
     Texture2D _WeaponPatternTex;
     Texture2D _ScanPatternTex;
 #endif
+#if defined(use_outline)
+    Texture2D _OutlineTex;
+#endif
 float4 _MainTex_ST; // scale and translation offsets for main texture
 float4 _Star02Tex_ST;
 float4 _NoiseTex01_ST;
@@ -352,6 +355,9 @@ float4 _NyxStateOutlineVertAnimScaleLerpHeightRange;
 
 // outline properties 
 float  _OutlineType;
+float _UseOutlineTex;
+float _OutlineWidthChannel;
+float _OutlineWidthSource;
 float _FallbackOutlines;
 float _OutlineWidth;
 float _OutlineCorrectionWidth;

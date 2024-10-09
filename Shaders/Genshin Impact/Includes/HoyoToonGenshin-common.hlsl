@@ -86,7 +86,7 @@ float4 material_mask_coloring(float4 mask)
 
 float packed_channel_picker(SamplerState texture_sampler, Texture2D texture_2D, float2 uv, float channel)
 {
-    float4 packed = texture_2D.Sample(texture_sampler, uv);
+    float4 packed = texture_2D.SampleLevel(texture_sampler, uv, 0);
 
     float choice;
     if(channel == 0) {choice = packed.x;}
@@ -96,6 +96,7 @@ float packed_channel_picker(SamplerState texture_sampler, Texture2D texture_2D, 
 
     return choice;
 }
+
 
 float3 hue_shift(float3 in_color, float material_id, float shift1, float shift2, float shift3, float shift4, float shift5, float shiftglobal, float autobool, float autospeed, float mask)
 {   

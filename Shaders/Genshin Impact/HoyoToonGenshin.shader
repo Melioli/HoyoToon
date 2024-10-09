@@ -352,10 +352,16 @@ Shader "HoyoToon/Genshin/Character"
         [HideInInspector] start_outlines("Outlines--{reference_property:_OutlineEnabled}", Float) = 0
             [HideInInspector] [Toggle] _OutlineEnabled ("Hidden Outline Bool--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_OutlineType=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_OutlineType=2}]}]}", Float) = 1
             [Enum(None, 0, Normal, 1,  Tangent, 2)] _OutlineType ("Outline Type--{on_value_actions:[{value:0,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=0},{type:SET_PROPERTY,data:_saveoutlinevalue=0}]}, {value:1,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=1},{type:SET_PROPERTY,data:_saveoutlinevalue=1}]}, {value:2,actions:[{type:SET_PROPERTY,data:_OutlineEnabled=1},{type:SET_PROPERTY,data:_saveoutlinevalue=2}]}]}", Float) = 1.0
+            [Toggle] _UseOutlineTex ("Use Outline Width Texture", Float) = 0
             [Toggle] _FallbackOutlines ("Enable Static Outlines", Float) = 0
             _OutlineWidth ("Outline Width", Float) = 0.03
             _Scale ("Outline Scale", Float) = 0.01
             [Toggle] [HideInInspector] _UseClipPlane ("Use Clip Plane?", Float) = 0.0
+            [HideInInspector] start_outlinestex("Outline Texture--{condition_show:{type:PROPERTY_BOOL,data:_UseOutlineTex==1.0}}", Float) = 0
+                [SmallTexture] _OutlineTex ("Outline Width Texture", 2D) = "black"{}
+                [Enum(From Red, 0, From Green, 1, From Blue, 2, From Alpha, 3)] _OutlineWidthChannel ("Outline Width Channel", Float) = 0
+                [Enum(From Texture, 0, From Vertex Color, 1, Combination, 2)] _OutlineWidthSource ("Outline Width Source", Float) = 0
+            [HideInInspector] end_outlinestex ("", Float) = 0
             [HideInInspector] _ClipPlane ("Clip Plane", Vector) = (0.0, 0.0, 0.0, 0.0)
             // Outline Color
             [HideInInspector] start_outlinescolor("Outline Colors", Float) = 0

@@ -66,7 +66,23 @@ vs_out vs_edge(vs_in v)
         vs_out o = (vs_out)0.0f;
     }
     else
-    {
+    {   
+        float outlineWidth = v.v_col.w;
+        float outline_tex = packed_channel_picker(sampler_linear_repeat, _OutlineTex, v.uv_0.xy, _OutlineWidthChannel) * _UseOutlineTex;
+        
+        switch(_OutlineWidthSource * _UseOutlineTex)
+        {
+            case 0:
+                outlineWidth = v.v_col.w;
+                break;
+            case 1:
+                outlineWidth = outline_tex;
+                break;
+            case 2:
+                outlineWidth = outline_tex * v.v_col.w;
+                break;
+        }
+
         float3 outline_normal = (_OutlineType == 1.0) ? v.normal : v.tangent.xyz;
         float4 wv_pos = mul(UNITY_MATRIX_MV, v.vertex);
         float3 view = _WorldSpaceCameraPos.xyz - (float3)mul(v.vertex.xyz, unity_ObjectToWorld);
@@ -101,7 +117,7 @@ vs_out vs_edge(vs_in v)
             outline_scale = outline_scale * 100.0f;
             outline_scale = outline_scale * _Scale;
             outline_scale = outline_scale * 0.414f;
-            outline_scale = outline_scale * v.v_col.w;
+            outline_scale = outline_scale * outlineWidth;
             #if defined(faceishadow)
                 if(_UseFaceMapNew) outline_scale = outline_scale * _FaceMapTex.SampleLevel(sampler_linear_repeat, v.uv_0.xy, 0.0f).z;
             #endif
@@ -122,7 +138,7 @@ vs_out vs_edge(vs_in v)
         else
         {
             o.pos = wv_pos;
-            o.pos.xyz = o.pos.xyz + (outline_normal.xyz * (_OutlineWidth * 100.0f * _Scale * 0.414f * v.v_col.w));
+            o.pos.xyz = o.pos.xyz + (outline_normal.xyz * (_OutlineWidth * 100.0f * _Scale * 0.414f * outlineWidth));
         }
 
         o.ws_pos = o.pos;
