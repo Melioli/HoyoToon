@@ -294,7 +294,7 @@ namespace HoyoToon
             UpdateRenderTexture(_camera);
 
             _layerBuffer.SetRenderTarget(targetTexture);
-            _layerBuffer.ClearRenderTarget(true, true, Color.black);
+            _layerBuffer.ClearRenderTarget(true, true, Color.red);
 
             _layerBuffer.SetGlobalFloat("_LayerIndex", 1.0f);
             _layerBuffer.SetViewProjectionMatrices(_camera.worldToCameraMatrix, _camera.projectionMatrix);
