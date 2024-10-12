@@ -5,12 +5,16 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace HoyoToon
 {
     public class HoyoToonMeshManager : Editor
     {
         private static readonly List<string> SkipTangentMeshes = new List<string>(HoyoToonDataManager.Data.SkipMeshes);
+        private static Dictionary<string, Dictionary<string, (string guid, string meshName)>> originalMeshPaths = new Dictionary<string, Dictionary<string, (string guid, string meshName)>>();
+        private static readonly string HoyoToonFolder = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "HoyoToon");
+        private static readonly string OriginalMeshPathsFile = Path.Combine(HoyoToonFolder, "OriginalMeshPaths.json");
 
         #region FBX Setup
 
@@ -113,55 +117,88 @@ namespace HoyoToon
         {
             HoyoToonParseManager.DetermineBodyType();
 
-            MeshFilter[] meshFilters = selectedObject.GetComponentsInChildren<MeshFilter>();
-            foreach (var meshFilter in meshFilters)
+            GameObject rootObject = GetRootParent(selectedObject);
+            StoreOriginalMeshes(rootObject);
+
+            bool processAllChildren = selectedObject == rootObject;
+
+            ProcessMeshComponents<MeshFilter>(selectedObject, processAllChildren, (meshFilter) =>
             {
-                Mesh mesh = meshFilter.sharedMesh;
-                if (HoyoToonParseManager.currentBodyType == HoyoToonParseManager.BodyType.Hi3P2)
+                if (meshFilter.sharedMesh != null)
                 {
-                    MoveColors(mesh);
-                    meshFilter.sharedMesh = mesh;
+                    meshFilter.sharedMesh = ProcessAndSaveMesh(meshFilter.sharedMesh, meshFilter.name);
+                }
+            });
+
+            ProcessMeshComponents<SkinnedMeshRenderer>(selectedObject, processAllChildren, (skinMeshRender) =>
+            {
+                if (skinMeshRender.sharedMesh != null)
+                {
+                    skinMeshRender.sharedMesh = ProcessAndSaveMesh(skinMeshRender.sharedMesh, skinMeshRender.name);
+                }
+            });
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void ProcessMeshComponents<T>(GameObject obj, bool processAllChildren, System.Action<T> processComponent) where T : Component
+        {
+            if (processAllChildren)
+            {
+                T[] components = obj.GetComponentsInChildren<T>();
+                foreach (var component in components)
+                {
+                    processComponent(component);
+                }
+            }
+            else
+            {
+                T component = obj.GetComponent<T>();
+                if (component != null)
+                {
+                    processComponent(component);
+                }
+            }
+        }
+
+        private static Mesh ProcessAndSaveMesh(Mesh mesh, string componentName)
+        {
+            if (mesh == null) return null;
+
+            Mesh newMesh;
+            if (HoyoToonParseManager.currentBodyType == HoyoToonParseManager.BodyType.Hi3P2)
+            {
+                newMesh = MoveColors(mesh);
+            }
+            else
+            {
+                if (SkipTangentMeshes.Contains(componentName))
+                {
+                    return mesh;
                 }
                 else
                 {
-                    if (SkipTangentMeshes.Contains(meshFilter.name))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-
-                        ModifyMeshTangents(mesh);
-                        meshFilter.sharedMesh = mesh;
-                    }
+                    newMesh = ModifyMeshTangents(mesh);
                 }
-
             }
+            newMesh.name = mesh.name;
 
-            SkinnedMeshRenderer[] skinMeshRenders = selectedObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-            foreach (var skinMeshRender in skinMeshRenders)
+            string path = AssetDatabase.GetAssetPath(mesh);
+            string folderPath = Path.GetDirectoryName(path) + "/Meshes";
+            if (!Directory.Exists(folderPath))
             {
-                Mesh mesh = skinMeshRender.sharedMesh;
-                if (HoyoToonParseManager.currentBodyType == HoyoToonParseManager.BodyType.Hi3P2)
-                {
-                    MoveColors(mesh);
-                    skinMeshRender.sharedMesh = mesh;
-                }
-                else
-                {
-                    if (SkipTangentMeshes.Contains(skinMeshRender.name))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        ModifyMeshTangents(mesh);
-                        skinMeshRender.sharedMesh = mesh;
-                    }
-                }
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Meshes");
+            }
+            path = folderPath + "/" + newMesh.name + ".asset";
+
+            if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
+            {
+                AssetDatabase.DeleteAsset(path);
             }
 
-            SaveMeshAssets(selectedObject, HoyoToonParseManager.currentBodyType);
+            AssetDatabase.CreateAsset(newMesh, path);
+            return newMesh;
         }
 
         private static Mesh ModifyMeshTangents(Mesh mesh)
@@ -243,89 +280,145 @@ namespace HoyoToon
             return newMesh;
         }
 
-        private static void SaveMeshAssets(GameObject gameObject, HoyoToonParseManager.BodyType currentBodyType)
+        private static void StoreOriginalMeshes(GameObject rootObject)
         {
-            MeshFilter[] meshFilters = gameObject.GetComponentsInChildren<MeshFilter>();
-            SkinnedMeshRenderer[] skinMeshRenderers = gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+            LoadOriginalMeshPaths(); // Load existing data
 
+            string modelName = rootObject.name;
+            if (!originalMeshPaths.ContainsKey(modelName))
+            {
+                originalMeshPaths[modelName] = new Dictionary<string, (string guid, string meshName)>();
+            }
+
+            MeshFilter[] meshFilters = rootObject.GetComponentsInChildren<MeshFilter>();
             foreach (var meshFilter in meshFilters)
             {
-                Mesh mesh = meshFilter.sharedMesh;
-                Mesh newMesh;
-                if (currentBodyType == HoyoToonParseManager.BodyType.Hi3P2)
+                if (meshFilter.sharedMesh != null)
                 {
-                    newMesh = MoveColors(mesh);
+                    StoreMeshGUID(modelName, meshFilter.sharedMesh);
                 }
-                else
-                {
-                    if (SkipTangentMeshes.Contains(meshFilter.name))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newMesh = ModifyMeshTangents(mesh);
-                    }
-                }
-                newMesh.name = mesh.name;
-                meshFilter.sharedMesh = newMesh;
-
-                string path = AssetDatabase.GetAssetPath(mesh);
-                string folderPath = Path.GetDirectoryName(path) + "/Meshes";
-                if (!Directory.Exists(folderPath))
-                {
-                    AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Meshes");
-                }
-                path = folderPath + "/" + newMesh.name + ".asset";
-
-                if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
-                {
-                    AssetDatabase.DeleteAsset(path);
-                }
-
-                AssetDatabase.CreateAsset(newMesh, path);
             }
 
+            SkinnedMeshRenderer[] skinMeshRenderers = rootObject.GetComponentsInChildren<SkinnedMeshRenderer>();
             foreach (var skinMeshRenderer in skinMeshRenderers)
             {
-                Mesh mesh = skinMeshRenderer.sharedMesh;
-                Mesh newMesh;
-                if (currentBodyType == HoyoToonParseManager.BodyType.Hi3P2)
+                if (skinMeshRenderer.sharedMesh != null)
                 {
-                    newMesh = MoveColors(mesh);
+                    StoreMeshGUID(modelName, skinMeshRenderer.sharedMesh);
                 }
-                else
-                {
-                    if (SkipTangentMeshes.Contains(skinMeshRenderer.name))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newMesh = ModifyMeshTangents(mesh);
-                    }
-                }
-                newMesh.name = mesh.name;
-                skinMeshRenderer.sharedMesh = newMesh;
-
-                string path = AssetDatabase.GetAssetPath(mesh);
-                string folderPath = Path.GetDirectoryName(path) + "/Meshes";
-                if (!Directory.Exists(folderPath))
-                {
-                    AssetDatabase.CreateFolder(Path.GetDirectoryName(path), "Meshes");
-                }
-                path = folderPath + "/" + newMesh.name + ".asset";
-
-                if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
-                {
-                    AssetDatabase.DeleteAsset(path);
-                }
-
-                AssetDatabase.CreateAsset(newMesh, path);
             }
+
+            SaveOriginalMeshPaths(); // Save the updated data
+        }
+
+        private static void StoreMeshGUID(string modelName, Mesh mesh)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(mesh);
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            originalMeshPaths[modelName][mesh.name] = (guid, mesh.name);
+        }
+
+        public static void ResetTangents(GameObject selectedObject)
+        {
+            HoyoToonParseManager.DetermineBodyType();
+
+            GameObject rootObject = GetRootParent(selectedObject);
+            LoadOriginalMeshPaths();
+
+            string modelName = rootObject.name;
+            if (!originalMeshPaths.ContainsKey(modelName))
+            {
+                Debug.LogError($"No stored mesh paths found for model: {modelName}");
+                return;
+            }
+
+            bool processAllChildren = selectedObject == rootObject;
+
+            ProcessMeshComponents<MeshFilter>(selectedObject, processAllChildren, (meshFilter) =>
+            {
+                if (meshFilter.sharedMesh != null)
+                {
+                    meshFilter.sharedMesh = RestoreOriginalMesh(modelName, meshFilter.sharedMesh.name);
+                }
+            });
+
+            ProcessMeshComponents<SkinnedMeshRenderer>(selectedObject, processAllChildren, (skinMeshRender) =>
+            {
+                if (skinMeshRender.sharedMesh != null)
+                {
+                    skinMeshRender.sharedMesh = RestoreOriginalMesh(modelName, skinMeshRender.sharedMesh.name);
+                }
+            });
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static Mesh RestoreOriginalMesh(string modelName, string meshName)
+        {
+            if (originalMeshPaths[modelName].TryGetValue(meshName, out var meshInfo))
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(meshInfo.guid);
+                Object[] assets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+                foreach (Object asset in assets)
+                {
+                    if (asset is Mesh originalMesh && originalMesh.name == meshInfo.meshName)
+                    {
+                        return originalMesh;
+                    }
+                }
+            }
+
+            Debug.LogWarning($"Original mesh not found for {meshName}. Unable to reset.");
+            return null;
         }
 
         #endregion
+
+        private static GameObject GetRootParent(GameObject obj)
+        {
+            while (obj.transform.parent != null)
+            {
+                obj = obj.transform.parent.gameObject;
+            }
+            return obj;
+        }
+
+        private static void LoadOriginalMeshPaths()
+        {
+            if (File.Exists(OriginalMeshPathsFile))
+            {
+                string json = File.ReadAllText(OriginalMeshPathsFile);
+                var deserializedDictionary = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string[]>>>(json);
+
+                originalMeshPaths = deserializedDictionary.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToDictionary(
+                        innerKvp => innerKvp.Key,
+                        innerKvp => (innerKvp.Value[0], innerKvp.Value[1])
+                    )
+                );
+            }
+        }
+
+        private static void SaveOriginalMeshPaths()
+        {
+            if (!Directory.Exists(HoyoToonFolder))
+            {
+                Directory.CreateDirectory(HoyoToonFolder);
+            }
+
+            var serializableDictionary = originalMeshPaths.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ToDictionary(
+                    innerKvp => innerKvp.Key,
+                    innerKvp => new[] { innerKvp.Value.guid, innerKvp.Value.meshName }
+                )
+            );
+
+            string json = JsonConvert.SerializeObject(serializableDictionary, Formatting.Indented);
+            File.WriteAllText(OriginalMeshPathsFile, json);
+        }
     }
 }
 #endif

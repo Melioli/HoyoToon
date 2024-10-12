@@ -42,6 +42,26 @@ namespace HoyoToon
 
             HoyoToonMeshManager.GenTangents(selectedObject);
         }
+        
+        [MenuItem("GameObject/HoyoToon/Mesh/Reset Tangents", priority = 22)]
+        private static void ResetTangents()
+        {
+            GameObject selectedObject = Selection.activeGameObject;
+            if (selectedObject == null)
+            {
+                EditorUtility.DisplayDialog("Error", "No GameObject selected. Please select a GameObject to reset tangents.", "OK");
+                HoyoToonLogs.WarningDebug("No GameObject selected. Please select a GameObject to reset tangents.");
+                return;
+            }
+
+            HoyoToonMeshManager.ResetTangents(selectedObject);
+        }
+
+        [MenuItem("Assets/HoyoToon/Tools/Copy GUID", priority = 50)]
+        private static void CopyGUIDToClipboard()
+        {
+            HoyoToonToolsManager.CopyGUIDToClipboard();
+        }
 
         [MenuItem("HoyoToon/Socials/Twitter", priority = 21)]
         static void MenuHoyoToonTwitter()
