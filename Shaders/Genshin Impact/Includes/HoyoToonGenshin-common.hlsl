@@ -76,12 +76,8 @@ float4 coloring(float region)
 float4 material_mask_coloring(float4 mask)
 {
 
-    mask = mask * float4(_UseMaterial3, _UseMaterial4, _UseMaterial5, _UseMaterial2);
-    float3 color = lerp(_Color, _Color2, mask.w);
-    color = lerp(color, _Color3, mask.x);
-    color = lerp(color, _Color4, mask.y);
-    color = lerp(color, _Color5, mask.z);
-    return float4(color, 1.0f);
+    return 1;
+
 }
 
 float packed_channel_picker(SamplerState texture_sampler, Texture2D texture_2D, float2 uv, float channel)

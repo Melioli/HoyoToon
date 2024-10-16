@@ -382,11 +382,17 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
             if(_DebugMode && (_DebugMetal == 1)) return float4(diffuse.xyz, 1.0f);
             // moving these after the metal so the metal can also be recolored
         #endif
-        #if !defined(disable_color)
-        if(!_DisableColors) diffuse = diffuse * coloring(material_id);
-            #if defined(has_mask)
-                if(_UseMaterialMasksTex && !_DisableColors) diffuse = diffuse * material_mask_coloring(material_mask);
-            #endif
+        if(!_DisableColors && !_UseMaterialMasksTex) diffuse = diffuse * coloring(material_id);
+        #if defined(has_mask)
+            if(_UseMaterialMasksTex)
+            {
+                material_mask = material_mask * float4(_UseMaterial3, _UseMaterial4, _UseMaterial5, _UseMaterial5);
+                float3 color = lerp(_Color, _Color2, material_mask.w);
+                color = lerp(color, _Color3, material_mask.x);
+                color = lerp(color, _Color4, material_mask.y);
+                color = lerp(color, _Color5, material_mask.z);
+                diffuse.xyz = diffuse.xyz * color;
+            }
         #endif
         #if defined(can_shift)
             if(_EnableColorHue) diffuse.xyz = hue_shift(diffuse.xyz, material_id, _ColorHue, _ColorHue2, _ColorHue3, _ColorHue4, _ColorHue5, _GlobalColorHue, _AutomaticColorShift, _ShiftColorSpeed, diffuse_mask);
