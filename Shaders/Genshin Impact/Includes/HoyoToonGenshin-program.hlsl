@@ -251,7 +251,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
     
     // stupid legacy specular support, please mihoyo dont change value names again
     float specular_enabled = 0;
-    if(((_SpecularHighlights == 1) && (_UseToonSpecular == 1)) || ((_SpecularHighlights == 1) && (_UseToonSpecular == 0)) || ((_SpecularHighlights == 0) && (_UseToonSpecular == 1)))
+    if((_SpecularHighlights == 1) || (_UseToonSpecular == 1))
     { // cringe ass code
         specular_enabled = 1;
     }
@@ -373,7 +373,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         float3 specular = (float3)0.0f;
         float3 holographic = (float3)1.0f;
         #if defined(use_specular)
-            if(_SpecularHighlights) specular_color(ndoth, shadow, lightmap.x, lightmap.z, material_id, specular);
+            if(specular_enabled) specular_color(ndoth, shadow, lightmap.x, lightmap.z, material_id, specular);
             if(lightmap.x > 0.90f) specular = 0.0f; // making sure the specular doesnt bleed into the metal area
         #endif
         // METALIC :
@@ -467,7 +467,7 @@ float4 ps_model(vs_out i,  bool vface : SV_ISFRONTFACE) : SV_TARGET
         out_color.xyz = out_color.xyz * light_color;
         
         // 
-        if(_UseFaceMapNew) normal = float3(0.5f, 0.5f, 1.0f);
+        // if(_UseFaceMapNew) normal = float3(0.5f, 0.5f, 1.0f);
        
         out_color.xyz = out_color.xyz + (GI_color * GI_intensity * _GI_Intensity * smoothstep(1.0f ,0.0f, GI_intensity / 2.0f));
 

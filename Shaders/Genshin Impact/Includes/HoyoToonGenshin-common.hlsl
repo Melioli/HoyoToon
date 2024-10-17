@@ -540,7 +540,7 @@ void glass_color(inout float4 color, in float4 uv, in float3 view, in float3 nor
         color.xyz = (main * _MainColor) * _MainColorScaler + specular;
         color.w = main.w;
     #endif
-    }
+}
 
 float pulsate(float rate, float max_value, float min_value, float time_offset)
 {
@@ -552,11 +552,11 @@ float4 emission_color(in float3 color, in float material_id)
 {
     float3 e_color[5] =
     {
-        float3((_EmissionColor1_MHY * max(_EmissionScaler1, 1.0f)).xyz),
-        float3((_EmissionColor2_MHY * max(_EmissionScaler2, 1.0f)).xyz),
-        float3((_EmissionColor3_MHY * max(_EmissionScaler3, 1.0f)).xyz),
-        float3((_EmissionColor4_MHY * max(_EmissionScaler4, 1.0f)).xyz),
-        float3((_EmissionColor5_MHY * max(_EmissionScaler5, 1.0f)).xyz),
+        float3((_EmissionColor1_MHY * max(_EmissionScaler1 / 2, 1.0f)).xyz),
+        float3((_EmissionColor2_MHY * max(_EmissionScaler2 / 2, 1.0f)).xyz),
+        float3((_EmissionColor3_MHY * max(_EmissionScaler3 / 2, 1.0f)).xyz),
+        float3((_EmissionColor4_MHY * max(_EmissionScaler4 / 2, 1.0f)).xyz),
+        float3((_EmissionColor5_MHY * max(_EmissionScaler5 / 2, 1.0f)).xyz),
     };
 
     float e_scaler[5] =
@@ -569,7 +569,7 @@ float4 emission_color(in float3 color, in float material_id)
     };
     float array_index = max(get_index(material_id), 0);
 
-    float3 emission = e_color[get_index(material_id)].xyz * (_EmissionColor_MHY * max(_EmissionScaler, 1.0f)) * color; 
+    float3 emission = e_color[get_index(material_id)].xyz * (_EmissionColor_MHY * max(_EmissionScaler / 2, 1.0f)) * color; 
     return max(float4(emission.xyz, e_scaler[get_index(material_id)] * _EmissionScaler), 0.0f);
 }
 
@@ -684,81 +684,144 @@ float3 camera_position()
 
 float3 rimlighting(float4 sspos, float3 normal, float4 wspos, float3 light, float material_id, float3 color, float3 view)
 {
+    float3 rim_light = (float3)0.0f;
     #if defined(use_rimlight)
-        // // // instead of relying entirely on the camera depth texture, calculate a camera depth vector like this
-        float4 camera_pos =  mul(unity_WorldToCamera, wspos);
-        float camera_depth = saturate(1.0f - ((camera_pos.z / camera_pos.w) / 5.0f)); // tuned for vrchat
-
-        float fov = extract_fov();
-        fov = clamp(fov, 0, 150);
-        float range = fov_range(0, 180, fov);
-        float width_depth = camera_depth / range;
-        float rim_width = lerp(_RimLightThickness * 0.5f, _RimLightThickness * 0.45f, range) * width_depth;
-
-        if(isVR())
+        if(_RimLightType == 2) // new type rimlight, based on games implementation as of 4.0+
         {
-            rim_width = rim_width * 0.66f;
+            float2 screen_pos = sspos.xy / sspos.w;
+
+            float fov = extract_fov();
+            fov = clamp(fov, 0, 150);
+            float range = fov_range(0, 180, fov);
+
+            float4 camera_pos =  mul(unity_WorldToCamera, wspos);
+            float camera_depth = saturate(1.0f - ((camera_pos.z / camera_pos.w) / 5.0f));
+
+            float3 offset = (_UseFaceMapNew) ?  mul(unity_WorldToCamera, wspos).xyz :  mul((float3x3)unity_WorldToCamera, normal);
+            offset.z = (_UseFaceMapNew) ? -0.01 : 0.001f;
+            offset = normalize(offset);
+            float depth_og = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos), screen_pos);
+
+            float something = camera_depth / range;
+
+            float rim_width = _ES_AvatarRimWidthScale * _ES_AvatarRimWidth;
+            float2 offset_uv = screen_pos;
+            offset_uv.x = offset_uv.x  + (offset.x * ((rim_width * 0.00044f) * something )).x;
+
+            float depth_off = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, offset_uv), offset_uv);
+
+            float depth_diff = (-depth_og) + depth_off; 
+
+            depth_diff = max(depth_diff, 0.000001f);
+            depth_diff = pow(depth_diff, 0.05f);
+            depth_diff = (depth_diff - 0.81f) * 12.5f;
+            depth_diff = saturate(depth_diff);
+            
+            float rim_depth = depth_diff * -2.0f + 3.0f;
+            depth_diff = depth_diff * depth_diff;
+            depth_diff = depth_diff * rim_depth;
+            // rim_depth = (-depth_og) + 2.0f;
+            // rim_depth = rim_depth * 0.3f + depth_og;
+            // rim_light = depth_diff;
+            depth_diff = saturate(depth_diff);
+
+            
+            float3 rim_vector = normalize(view + _WorldSpaceLightPos0.xyz);
+
+            float3 front_rim = 1.0f -  dot(normal, rim_vector);
+            rim_vector = normalize(view + float3(-_WorldSpaceLightPos0.xy, _WorldSpaceLightPos0.z));
+            float3 back_rim = 1.0f - dot(normal, rim_vector);
+            back_rim = pow(back_rim, 3.0f);
+            front_rim = pow(front_rim, 3.0f);
+            front_rim = saturate(front_rim);
+            back_rim = saturate(back_rim);
+            
+            back_rim = back_rim * (_ES_AvatarBackRimIntensity * _ES_AvatarBackRimColor);
+            front_rim = (_ES_AvatarFrontRimIntensity * _ES_AvatarFrontRimColor) * front_rim + back_rim;
+                        
+            float3 rim_color = color * 5.0f + 0.3f;
+            rim_color = saturate(rim_color);
+            
+            rim_light = front_rim * rim_color;
+            rim_light = rim_light * depth_diff;
         }
-        // screen space uvs
-        float2 screen_pos = sspos.xy / sspos.w;
-
-        // camera space normals : 
-        float3 vs_normal = mul((float3x3)unity_WorldToCamera, normal);
-        vs_normal.z = 0.001f;
-        vs_normal = normalize(vs_normal);
-
-        // screen normals reconstructed using screen position
-        float cs_ndotv = -dot(-view.xyz, vs_normal) + 1.0f;
-        cs_ndotv = saturate(cs_ndotv);
-        cs_ndotv = max(cs_ndotv, 0.0099f);
-        float cs_ndotv_pow = pow(cs_ndotv, 5.0f);
-
-        // sample original camera depth texture
-        float4 depth_og = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos), screen_pos);
-
-        float3 normal_cs = mul((float3x3)unity_WorldToCamera, normal);
-        normal_cs.z = 0.001f;
-        normal_cs.xy = normalize(normal_cs.xyz).xy;
-        normal_cs.xyz = normal_cs.xyz * (rim_width);
-        float2 pos_offset = normal_cs * 0.001f + screen_pos;
-        // sample offset depth texture 
-        float depth_off = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, pos_offset), pos_offset);
-
-        float depth_diff = (-depth_og) + depth_off;
-
-        depth_diff = max(depth_diff, 0.001f);
-        depth_diff = pow(depth_diff, 0.04f);
-        depth_diff = (depth_diff - 0.8f) * 10.0f;
-        depth_diff = saturate(depth_diff);
-        
-        float rim_depth = depth_diff * -2.0f + 3.0f;
-        depth_diff = depth_diff * depth_diff;
-        depth_diff = depth_diff * rim_depth;
-        rim_depth = (-depth_og) + 2.0f;
-        rim_depth = rim_depth * 0.3f + depth_og;
-        rim_depth = min(rim_depth, 1.0f);
-        depth_diff = depth_diff * rim_depth;
-
-        depth_diff = lerp(depth_diff, 0.0f, saturate(step(depth_diff, _RimThreshold)));
-
-        float4 rim_colors[5] = 
+        else // legacy rim light mode, based on implementation as of 1.5
         {
-            _RimColor1, _RimColor2, _RimColor3, _RimColor4, _RimColor5
-        };
+            // // instead of relying entirely on the camera depth texture, calculate a camera depth vector like this
+            float4 camera_pos =  mul(unity_WorldToCamera, wspos);
+            float camera_depth = saturate(1.0f - ((camera_pos.z / camera_pos.w) / 5.0f)); // tuned for vrchat
 
-        // get rim light color 
-        float3 rim_color = rim_colors[get_index(material_id)] * _RimColor;
-        rim_color = rim_color * cs_ndotv;
+            float fov = extract_fov();
+            fov = clamp(fov, 0, 150);
+            float range = fov_range(0, 180, fov);
+            float width_depth = camera_depth / range;
+            float rim_width = lerp(_RimLightThickness * 0.5f, _RimLightThickness * 0.45f, range) * width_depth;
 
-        depth_diff = depth_diff * _RimLightIntensity;
-        depth_diff *= camera_depth;
+            if(isVR())
+            {
+                rim_width = rim_width * 0.66f;
+            }
+            // screen space uvs
+            float2 screen_pos = sspos.xy / sspos.w;
 
-        float3 rim_light = depth_diff * cs_ndotv_pow;
-        rim_light = saturate(rim_light);
+            // camera space normals : 
+            float3 vs_normal = mul((float3x3)unity_WorldToCamera, normal);
+            vs_normal.z = 0.001f;
+            vs_normal = normalize(vs_normal);
 
-        rim_light = saturate(rim_light * (color.xyz * (float3)5.0f));
+            // screen normals reconstructed using screen position
+            float cs_ndotv = -dot(-view.xyz, vs_normal) + 1.0f;
+            cs_ndotv = saturate(cs_ndotv);
+            cs_ndotv = max(cs_ndotv, 0.0099f);
+            float cs_ndotv_pow = pow(cs_ndotv, 5.0f);
+
+            // sample original camera depth texture
+            float4 depth_og = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_pos), screen_pos);
+
+            float3 normal_cs = mul((float3x3)unity_WorldToCamera, normal);
+            normal_cs.z = 0.001f;
+            normal_cs.xy = normalize(normal_cs.xyz).xy;
+            normal_cs.xyz = normal_cs.xyz * (rim_width);
+            float2 pos_offset = normal_cs * 0.001f + screen_pos;
+            // sample offset depth texture 
+            float depth_off = GetLinearZFromZDepth_WorksWithMirrors(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, pos_offset), pos_offset);
+
+            float depth_diff = (-depth_og) + depth_off;
+
+            depth_diff = max(depth_diff, 0.001f);
+            depth_diff = pow(depth_diff, 0.04f);
+            depth_diff = (depth_diff - 0.8f) * 10.0f;
+            depth_diff = saturate(depth_diff);
+            
+            float rim_depth = depth_diff * -2.0f + 3.0f;
+            depth_diff = depth_diff * depth_diff;
+            depth_diff = depth_diff * rim_depth;
+            rim_depth = (-depth_og) + 2.0f;
+            rim_depth = rim_depth * 0.3f + depth_og;
+            rim_depth = min(rim_depth, 1.0f);
+            depth_diff = depth_diff * rim_depth;
+
+            depth_diff = lerp(depth_diff, 0.0f, saturate(step(depth_diff, _RimThreshold)));
+
+            float4 rim_colors[5] = 
+            {
+                _RimColor1, _RimColor2, _RimColor3, _RimColor4, _RimColor5
+            };
+
+            // get rim light color 
+            float3 rim_color = rim_colors[get_index(material_id)] * _RimColor;
+            rim_color = rim_color * cs_ndotv;
+
+            depth_diff = depth_diff * _RimLightIntensity;
+            depth_diff *= camera_depth;
+
+            rim_light = depth_diff * cs_ndotv_pow;
+            rim_light = saturate(rim_light);
+
+            rim_light = saturate(rim_light * (color.xyz * (float3)5.0f));
+        }
     #else
-        float3 rim_light = (float3)0.0f;
+        rim_light = (float3)0.0f;
     #endif
 
     

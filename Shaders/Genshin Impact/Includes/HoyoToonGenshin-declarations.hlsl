@@ -285,10 +285,17 @@ float _LeatherSpecularDetailScale;
 float _LeatherSpecularDetailSharpe;
 
 // rim light properties :
+float _RimLightType;
 float _UseRimLight; 
 float _RimLightThickness;
 float _RimLightIntensity;
 float _RimThreshold;
+float _ES_AvatarRimWidth;
+float _ES_AvatarRimWidthScale;
+float4 _ES_AvatarFrontRimColor;
+float4 _ES_AvatarBackRimColor; 
+float _ES_AvatarFrontRimIntensity;
+float _ES_AvatarBackRimIntensity;
 float4 _RimColor;
 float4 _RimColor1;
 float4 _RimColor2;

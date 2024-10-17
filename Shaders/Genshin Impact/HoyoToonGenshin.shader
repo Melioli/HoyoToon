@@ -25,6 +25,7 @@ Shader "HoyoToon/Genshin/Character"
 
         // Hidden Game Version Variable for switching certain logics
         [HideInInspector] [HoyoToonWideEnum(Pre Natlan, 0, Post Natlan, 1)] _gameVersion ("", Float) = 0
+        [HideInInspector] [Toggle] _IsDevMode ("Dev Mode", Float) = 0
         
         //Main
         [HideInInspector] start_main ("Main", Float) = 0
@@ -226,11 +227,30 @@ Shader "HoyoToon/Genshin/Character"
             //ifex _UseRimLight == 0
             // Rim Light 
             [HideInInspector] start_rimlight("Rim Light--{reference_property:_UseRimLight}", Float) = 0
-                [Toggle] _UseRimLight ("Enable Rim Light", Float) = 1
-                _RimThreshold ("Rim Threshold--{condition_show:{type:PROPERTY_BOOL,data:_UseRimLight==1.0}}", Range(0.0, 1.0)) = 0.5
-                _RimLightIntensity ("Rim Light Intensity--{condition_show:{type:PROPERTY_BOOL,data:_UseRimLight==1.0}}", Float) = 0.25
-                _RimLightThickness ("Rim Light Thickness--{condition_show:{type:PROPERTY_BOOL,data:_UseRimLight==1.0}}", Range(0.0, 10.0)) = 1.0
-                [HideInInspector] start_lightingrimcolor("Rimlight Color--{condition_show:{type:PROPERTY_BOOL,data:_UseRimLight==1.0}}", Float) = 0
+                [Enum(Off, 0, Legacy, 1, New, 2)] _RimLightType ("Rim Light Type--{on_value_actions:[
+                    {value:0,actions:[{type:SET_PROPERTY,data:_UseRimLight=0}]},
+                    {value:1,actions:[{type:SET_PROPERTY,data:_UseRimLight=1}]},
+                    {value:2,actions:[{type:SET_PROPERTY,data:_UseRimLight=1}]}
+                    ]}", Int) = 2
+                [HideInInspector][Toggle] _UseRimLight ("Enable Rim Light--{on_value_actions:[
+                    {value:0,actions:[{type:SET_PROPERTY,data:_RimLightType=0}]},
+                    {value:1,actions:[{type:SET_PROPERTY,data:_RimLightType=2}]}
+                    ]}", Float) = 1
+                _ES_AvatarRimWidth  ("Rim Light Width--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Range(0.0, 10.0)) = 3.0
+                _ES_AvatarRimWidthScale ("Rim Light Width Scale--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Range(0.0, 10.0)) = 1.0
+                _RimThreshold ("Rim Threshold--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==1.0}}", Range(0.0, 1.0)) = 0.5
+                _RimLightIntensity ("Rim Light Intensity--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==1.0}}", Float) = 0.25
+                _RimLightThickness ("Rim Light Thickness--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==1.0}}", Range(0.0, 10.0)) = 1.0
+                [HideInInspector] start_rimfront ("Front Parameters--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Float) = 0
+                    _ES_AvatarFrontRimColor ("Front Rim Light Color--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Color) = (1, 1, 1, 1)
+                    _ES_AvatarFrontRimIntensity ("Front Rim Light Intensity--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Float) = 1.0
+                [HideInInspector] end_rimfront ("", Float) = 0
+                // rim back
+                [HideInInspector] start_rimback ("Back Parameters--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Float) = 0
+                    _ES_AvatarBackRimColor ("Back Rim Light Color--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Color) = (1, 1, 1, 1)
+                    _ES_AvatarBackRimIntensity ("Back Rim Light Intensity--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType==2.0}}", Float) = 1.0
+                [HideInInspector] end_rimback ("", Float) = 0
+                [HideInInspector] start_lightingrimcolor("Rimlight Color--{condition_show:{type:PROPERTY_BOOL,data:_RimLightType>=1.0}}", Float) = 0
                     _RimColor (" Rim Light Color", Color)   = (1, 1, 1, 1)
                     _RimColor0 (" Rim Light Color 1 | (RGB ID = 0)", Color)   = (1, 1, 1, 1)
                     _RimColor1 (" Rim Light Color 2 | (RGB ID = 31)--{condition_show:{type:PROPERTY_BOOL,data:_UseMaterial2==1.0}}", Color)  = (1, 1, 1, 1)
@@ -271,8 +291,11 @@ Shader "HoyoToon/Genshin/Character"
             //ifex _SpecularHighlights == 0
             // Metal 
             [HideInInspector] start_specular("Specular Reflections--{reference_property:_SpecularHighlights}", Int) = 0
-                [Toggle] _SpecularHighlights ("Enable Specular", Float) = 0.0
-                [HideInInspector] [Toggle] _UseToonSpecular ("Enable Specular", Float) = 0.0
+                [Toggle] _SpecularHighlights ("Enable Specular--{on_value_actions:[
+                    {value:0,actions:[{type:SET_PROPERTY,data:_UseToonSpecular=0}]},
+                    {value:1,actions:[{type:SET_PROPERTY,data:_UseToonSpecular=1}]}
+                    ]}", Float) = 0.0
+                [Toggle] _UseToonSpecular ("Enable Specular--{condition_show:{type:PROPERTY_BOOL,data:_IsDevMode==1.0}}", Float) = 0.0
                 _Shininess ("Shininess 1--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Float) = 10
                 _Shininess2 ("Shininess 2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Float) = 10
                 _Shininess3 ("Shininess 3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Float) = 10
@@ -288,11 +311,11 @@ Shader "HoyoToon/Genshin/Character"
                 _SpecOpacity3 ("Specular Opacity 3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Float) = 0.1
                 _SpecOpacity4 ("Specular Opacity 4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Float) = 0.1
                 _SpecOpacity5 ("Specular Opacity 5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Float) = 0.1
-                [HDR] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor2 ("Specular Color2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor3 ("Specular Color3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor4 ("Specular Color4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
-                [HDR] _SpecularColor5 ("Specular Color5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                _SpecularColor2 ("Specular Color2--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial2==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                _SpecularColor3 ("Specular Color3--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial3==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                _SpecularColor4 ("Specular Color4--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial4==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
+                _SpecularColor5 ("Specular Color5--{condition_show:{type:AND,conditions:[{type:PROPERTY_BOOL,data:_SpecularHighlights==1},{type:PROPERTY_BOOL,data:_UseMaterial5==1}]}}", Color) = (1.0, 1.0, 1.0, 1.0)
                 // [HDR] _SpecularColor ("Specular Color--{condition_show:{type:PROPERTY_BOOL,data:_SpecularHighlights==1.0}}", Color) = (1.0, 1.0, 1.0, 1.0)
             [HideInInspector] end_specular("", Int) = 0
             //endex
