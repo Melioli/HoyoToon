@@ -207,12 +207,19 @@ namespace HoyoToon
             string relativePackagePath = "Packages/" + packageName;
 
             string[] assetGUIDs = AssetDatabase.FindAssets("", new[] { relativePackagePath }).ToArray();
-            string[] foldersToExclude = Directory.GetDirectories(packagePath).Select(x => AssetDatabase.AssetPathToGUID("Packages/" + packageName + "/" + Path.GetFileName(x))).ToArray();
+            string[] foldersToExclude = Directory.GetDirectories(packagePath)
+                .Where(x => !Path.GetFileName(x).Equals("VRChat", StringComparison.OrdinalIgnoreCase))
+                .Select(x => AssetDatabase.AssetPathToGUID("Packages/" + packageName + "/" + Path.GetFileName(x)))
+                .ToArray();
             assetGUIDs = assetGUIDs.Except(foldersToExclude).ToArray();
 
             foreach (string guid in assetGUIDs)
             {
                 string oldPath = AssetDatabase.GUIDToAssetPath(guid);
+                if (oldPath.Contains("/VRChat/", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue; // Skip files in VRChat folder
+                }
                 string ext = Path.GetExtension(oldPath);
                 string newPath = Path.Combine(relativePackagePath, "HoyoTemp", guid + ext);
 
