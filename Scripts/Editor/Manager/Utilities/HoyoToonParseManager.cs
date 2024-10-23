@@ -6,11 +6,12 @@ using UnityEditor.PackageManager.Requests;
 using System;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 
 namespace HoyoToon
 {
-    public class HoyoToonParseManager
+    public static class HoyoToonParseManager
     {
         public enum BodyType
         {
@@ -98,17 +99,17 @@ namespace HoyoToon
                 directoryPath = Directory.GetParent(directoryPath).FullName;
             }
 
-            string texturesPath = FindTexturesFolder(directoryPath);
+            string materialsPath = FindMaterialsFolder(directoryPath);
 
-            if (Directory.Exists(texturesPath))
+            if (Directory.Exists(materialsPath))
             {
-                DetermineBodyTypeFromTextures(texturesPath);
+                DetermineBodyTypeFromJson(materialsPath);
             }
             else
             {
-                string validFolderNames = string.Join(", ", new[] { "Textures", "Texture", "Tex" });
-                EditorUtility.DisplayDialog("Error", $"Textures folder path does not exist. Ensure your textures are in a folder named {validFolderNames}.", "OK");
-                HoyoToonLogs.ErrorDebug("You need to have a Textures folder matching the valid names (e.g., 'Textures', 'Texture', 'Tex') and have all the textures inside of them.");
+                string validFolderNames = string.Join(", ", new[] { "Materials", "Material", "Mat" });
+                EditorUtility.DisplayDialog("Error", $"Materials folder path does not exist. Ensure your materials are in a folder named {validFolderNames}.", "OK");
+                HoyoToonLogs.ErrorDebug("You need to have a Materials folder matching the valid names (e.g., 'Materials', 'Material', 'Mat') and have all the materials inside of them.");
                 currentBodyType = BodyType.WuWa;
             }
 
@@ -142,9 +143,10 @@ namespace HoyoToon
             return null;
         }
 
-        private static string FindTexturesFolder(string startPath)
+
+        private static string FindMaterialsFolder(string startPath)
         {
-            string[] validFolderNames = { "Textures", "Texture", "Tex" };
+            string[] validFolderNames = { "Materials", "Material", "Mat" };
 
             // Search in the current directory and up to 3 levels up
             for (int i = 0; i < 4; i++)
@@ -164,52 +166,109 @@ namespace HoyoToon
             return null;
         }
 
-        private static void DetermineBodyTypeFromTextures(string texturesPath)
+        public static void DetermineBodyTypeFromJson(string jsonPath)
         {
-            string[] textureFiles = Directory.GetFiles(texturesPath, "*.png");
+            HoyoToonLogs.LogDebug($"Searching for JSON files in: {jsonPath}");
+            string[] jsonFiles = Directory.GetFiles(jsonPath, "*Face.json");
+            HoyoToonLogs.LogDebug($"Found {jsonFiles.Length} JSON files");
+
             bool bodyTypeSet = false;
 
-            foreach (string textureFile in textureFiles)
+            foreach (string jsonFile in jsonFiles)
             {
-                string textureName = Path.GetFileNameWithoutExtension(textureFile);
+                HoyoToonLogs.LogDebug($"Processing file: {jsonFile}");
+                string jsonContent = File.ReadAllText(jsonFile);
+                JObject jsonObject = JObject.Parse(jsonContent);
 
-                if (!bodyTypeSet && textureName.ToLower().Contains("hair_mask".ToLower()))
+                if (TryGetTextureNameFromJson(jsonObject, "_FaceExpression", out string expressionMapName))
                 {
+                    HoyoToonLogs.LogDebug($"Found _FaceExpression: {expressionMapName}");
+                    SetHSRBodyType(expressionMapName, ref bodyTypeSet);
+                }
+                else if (TryGetTextureNameFromJson(jsonObject, "_FaceMapTex", out string faceMapName))
+                {
+                    HoyoToonLogs.LogDebug($"Found _FaceMapTex: {faceMapName}");
+                    SetGIBodyType(faceMapName, ref bodyTypeSet);
+                }
+                else if (jsonObject["m_SavedProperties"]?["m_Floats"]?["_SPCubeMapIntensity"] != null)
+                {
+                    HoyoToonLogs.LogDebug("Found _SPCubeMapIntensity");
+                    currentBodyType = BodyType.HI3P1;
+                    bodyTypeSet = true;
+                }
+                else if (TryGetTextureNameFromJson(jsonObject, "_MetalMapGrp", out _) || TryGetTextureNameFromJson(jsonObject, "_MicsGrp", out _))
+                {
+                    HoyoToonLogs.LogDebug("Found _MetalMapGrp or _MicsGrp");
                     currentBodyType = BodyType.Hi3P2;
                     bodyTypeSet = true;
-                    HoyoToonLogs.LogDebug($"Matched texture: {textureName} with BodyType.Hi3P2");
                 }
-                else if (!bodyTypeSet && textureName.ToLower().Contains("expressionmap".ToLower()))
+                else
                 {
-                    if (textureFile.Contains("Lady")) { currentBodyType = BodyType.HSRLady; bodyTypeSet = true; }
-                    else if (textureName.Contains("Maid")) { currentBodyType = BodyType.HSRMaid; bodyTypeSet = true; }
-                    else if (textureName.Contains("Girl")) { currentBodyType = BodyType.HSRGirl; bodyTypeSet = true; }
-                    else if (textureName.Contains("Kid")) { currentBodyType = BodyType.HSRKid; bodyTypeSet = true; }
-                    else if (textureName.Contains("Lad")) { currentBodyType = BodyType.HSRLad; bodyTypeSet = true; }
-                    else if (textureName.Contains("Male")) { currentBodyType = BodyType.HSRMale; bodyTypeSet = true; }
-                    else if (textureName.Contains("Boy")) { currentBodyType = BodyType.HSRBoy; bodyTypeSet = true; }
-                    else if (textureName.Contains("Miss")) { currentBodyType = BodyType.HSRMiss; bodyTypeSet = true; }
+                    HoyoToonLogs.LogDebug("No matching json properties found in this file");
                 }
-                else if (!bodyTypeSet && textureName.ToLower().Contains("lightmap".ToLower()))
-                {
-                    if (textureName.Contains("Boy")) { currentBodyType = BodyType.GIBoy; bodyTypeSet = true; }
-                    else if (textureName.Contains("Girl")) { currentBodyType = BodyType.GIGirl; bodyTypeSet = true; }
-                    else if (textureName.Contains("Lady")) { currentBodyType = BodyType.GILady; bodyTypeSet = true; }
-                    else if (textureName.Contains("Male")) { currentBodyType = BodyType.GIMale; bodyTypeSet = true; }
-                    else if (textureName.Contains("Loli")) { currentBodyType = BodyType.GILoli; bodyTypeSet = true; }
-                    else if (!textureName.ToLower().Contains("boy") && !textureName.ToLower().Contains("girl")
-                    && !textureName.ToLower().Contains("lady") && !textureName.ToLower().Contains("male") && !textureName.ToLower().Contains("loli"))
-                    {
-                        currentBodyType = BodyType.HI3P1;
-                        bodyTypeSet = true;
-                        HoyoToonLogs.LogDebug($"Matched texture: {textureName} with BodyType.Hi3P1");
-                    }
-                }
+
+                if (bodyTypeSet) break;
             }
+
             if (!bodyTypeSet)
             {
                 currentBodyType = BodyType.WuWa;
                 HoyoToonLogs.LogDebug($"No specific match found. Setting BodyType to WuWa");
+            }
+
+            HoyoToonLogs.LogDebug($"Determined BodyType: {currentBodyType}");
+        }
+
+        private static bool TryGetTextureNameFromJson(JObject jsonObject, string key, out string textureName)
+        {
+            textureName = null;
+            var texEnvs = jsonObject["m_SavedProperties"]?["m_TexEnvs"];
+            if (texEnvs == null)
+            {
+                HoyoToonLogs.LogDebug("m_SavedProperties or m_TexEnvs not found in JSON");
+                return false;
+            }
+
+            foreach (var prop in texEnvs.Children<JProperty>())
+            {
+                if (prop.Name == key)
+                {
+                    textureName = prop.Value["m_Texture"]?["Name"]?.ToString();
+                    if (!string.IsNullOrEmpty(textureName))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            HoyoToonLogs.LogDebug($"Texture name not found for key '{key}'");
+            return false;
+        }
+
+        private static void SetHSRBodyType(string expressionMapName, ref bool bodyTypeSet)
+        {
+            if (expressionMapName.Contains("Maid")) { currentBodyType = BodyType.HSRMaid; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Lady")) { currentBodyType = BodyType.HSRLady; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Girl")) { currentBodyType = BodyType.HSRGirl; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Kid")) { currentBodyType = BodyType.HSRKid; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Lad")) { currentBodyType = BodyType.HSRLad; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Male")) { currentBodyType = BodyType.HSRMale; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Boy")) { currentBodyType = BodyType.HSRBoy; bodyTypeSet = true; }
+            else if (expressionMapName.Contains("Miss")) { currentBodyType = BodyType.HSRMiss; bodyTypeSet = true; }
+        }
+
+        private static void SetGIBodyType(string faceMapName, ref bool bodyTypeSet)
+        {
+            if (faceMapName.Contains("Boy")) { currentBodyType = BodyType.GIBoy; bodyTypeSet = true; }
+            else if (faceMapName.Contains("Girl")) { currentBodyType = BodyType.GIGirl; bodyTypeSet = true; }
+            else if (faceMapName.Contains("Lady")) { currentBodyType = BodyType.GILady; bodyTypeSet = true; }
+            else if (faceMapName.Contains("Male")) { currentBodyType = BodyType.GIMale; bodyTypeSet = true; }
+            else if (faceMapName.Contains("Loli")) { currentBodyType = BodyType.GILoli; bodyTypeSet = true; }
+            else
+            {
+                currentBodyType = BodyType.HI3P1;
+                bodyTypeSet = true;
+                HoyoToonLogs.LogDebug($"Matched texture: {faceMapName} with BodyType.Hi3P1");
             }
         }
 

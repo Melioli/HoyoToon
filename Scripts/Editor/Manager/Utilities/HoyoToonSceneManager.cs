@@ -7,7 +7,7 @@ namespace HoyoToon
     public class HoyoToonSceneManager
     {
         [MenuItem("GameObject/HoyoToon/Scene/Add AvatarLight", priority = 0)]
-        private static void AddAvatarLight()
+        public static void AddAvatarLight()
         {
             var selectedObject = Selection.activeGameObject;
             if (selectedObject == null)

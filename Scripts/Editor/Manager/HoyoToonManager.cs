@@ -23,7 +23,7 @@ namespace HoyoToon
         }
 
         [MenuItem("Assets/HoyoToon/Mesh/Setup FBX", priority = 10)]
-        private static void SetupFBX()
+        public static void SetupFBX()
         {
             HoyoToonMeshManager.SetFBXImportSettings(HoyoToonParseManager.GetAssetSelectionPaths());
         }
