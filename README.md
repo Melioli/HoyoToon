@@ -3,7 +3,6 @@
     <a href="https://github.com/Melioli/HoyoToon"><img src="https://github.com/user-attachments/assets/249a06ae-784e-49cf-aaec-2d9367f07cc1" alt="HoyoToon"/></a>
 </p><br>
 
-
 <p align="center">
     <a href="https://github.com/Melioli/HoyoToon/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/License-GPL--3.0-702963?style=for-the-badge"></a><br>
     <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Melioli/HoyoToon?style=for-the-badge"
@@ -18,7 +17,7 @@
 
 ## Features
 
-- A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games and now Wuthering waves too. 
+- A shader designed for the Built-in Pipeline, aiming to accurately reproduce the shading style of Hoyoverse games and now Wuthering waves too.
 - The shader is based on the latest version of each game. (no beta or old code)
 - Supports Genshin Impact
 - Supports Honkai Impact (Part 1 and 2)
@@ -32,34 +31,39 @@
 - Auto updater for seamless updates of the shader and accompanying scripts.
 
 ## How to Install
+
 You can install HoyoToon through 3 methods.
+
 - **VRChat Creator Companion**
 - **Unity Package**
 - **Unity Package Manager**
 
 ### VRChat Creator Companion
+
 - Open the VPM package listing [website](https://melioli.github.io/vpm/)
 - Press Add to VCC
-- Open your creator companion, and go to your project you'll wish to install HoyoToon in. 
-- Press on Manage Project. 
-- On the bottom you'll be able to see the option to install HoyoToon, click the + button. 
+- Open your creator companion, and go to your project you'll wish to install HoyoToon in.
+- Press on Manage Project.
+- On the bottom you'll be able to see the option to install HoyoToon, click the + button.
 - Open your unity project to a freshly installed HoyoToon
- 
-### Unity Package 
-- Go to the github [releases page](https://github.com/Melioli/HoyoToon/releases) of hoyotoon  
-- Download the Unity Package 
-- Drag the Unity Package inside of your open Unity and import. 
+
+### Unity Package
+
+- Go to the github [releases page](https://github.com/Melioli/HoyoToon/releases) of hoyotoon
+- Download the Unity Package
+- Drag the Unity Package inside of your open Unity and import.
 - you've successfully installed HoyoToon
- 
-### Unity Package Manager 
-- Open your Unity project 
-- Inside of Unity at the top bar, press on Window then Package Manager. 
+
+### Unity Package Manager
+
+- Open your Unity project
+- Inside of Unity at the top bar, press on Window then Package Manager.
 - Add the package by clicking on the +, and adding the `https://github.com/Melioli/HoyoToon.git`
 - Unity will now install HoyoToon for you
 
 ## Contact
 
-- [Discord server](https://discord.gg/meliverse)
+- [Discord server](https://discord.gg/hoyotoon)
 - [Meliodas's Twitter](https://twitter.com/Meliodas7DL)
 - [Manashiku's Twitter](https://twitter.com/Manashiku)
 - [Chip's Twitter](https://twitter.com/CBTDWG)
@@ -72,8 +76,8 @@ You can install HoyoToon through 3 methods.
 
 - The [GPL-3.0 License](https://github.com/Melioli/HoyoToon/blob/main/LICENSE) applies.
 - If you decide to use this shader in its original form for VRChat avatars, renders, animations, or any other medium that does not involve modifying the shader, please give credit to us.
-- If you use this shader as a basis for creating your own shader, please be sure to give credit to us. This does also include shaders in other forms, nodes, Blender, or ports to different pipelines, or engines. 
-- If you're affiliated with Festivity, Omatsuri or Primotoon in any shape or form, then you will not be allowed to utilize any of our code or assets for anything.    
+- If you use this shader as a basis for creating your own shader, please be sure to give credit to us. This does also include shaders in other forms, nodes, Blender, or ports to different pipelines, or engines.
+- If you're affiliated with Festivity, Omatsuri or Primotoon in any shape or form, then you will not be allowed to utilize any of our code or assets for anything.
 - In compliance with the license, you are free to redistribute the files as long as you attach a link to the source repository.
 
 ## Contributing
