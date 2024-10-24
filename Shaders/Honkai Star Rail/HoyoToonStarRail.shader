@@ -125,10 +125,10 @@ Shader "HoyoToon/Star Rail/Character"
                 _ShadowRamp ("Shadow Ramp", Range(0.01, 1)) = 1
                 _ShadowColor ("Shadow Color", Color) = (0.5, 0.5, 0.5, 1)
                 [HideInInspector] start_shadowcontrol ("Shadow Levels--{condition_show:{type:PROPERTY_BOOL,data:_ES_LEVEL_ADJUST_ON==1.0}}", Float) = 0
-                    _ES_LevelSkinLightColor ("Skin Light", Color) = (1, 1, 1, 0.5)
-                    _ES_LevelSkinShadowColor ("Skin Shadow", Color) = (1, 1, 1, 0.5)
-                    _ES_LevelHighLightColor ("Base Light Color", Color) = (1, 1, 1, 0.5)
-                    _ES_LevelShadowColor ("Base Shadow Color", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelSkinLightColor ("Skin Shadow Color", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelSkinShadowColor ("Skin Light Color", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelHighLightColor ("Base Shadow Color", Color) = (1, 1, 1, 0.5)
+                    _ES_LevelShadowColor ("Base Light Color", Color) = (1, 1, 1, 0.5)
                     _ES_LevelShadow ("Shadow Level", Range(0, 1)) = 0.0
                     _ES_LevelMid ("Mid Level", Range(0, 1)) = 0.55
                     _ES_LevelHighLight ("High Light Level", Range(0, 1)) = 1.0
