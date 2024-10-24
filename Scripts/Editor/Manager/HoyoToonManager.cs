@@ -72,7 +72,7 @@ namespace HoyoToon
         [MenuItem("HoyoToon/Socials/Discord", priority = 20)]
         static void MenuHoyoToonDiscord()
         {
-            Application.OpenURL("https://discord.gg/meliverse");
+            Application.OpenURL("https://discord.gg/hoyotoon");
         }
 
         // [MenuItem("HoyoToon/Resources/Documentation", priority = 10)]

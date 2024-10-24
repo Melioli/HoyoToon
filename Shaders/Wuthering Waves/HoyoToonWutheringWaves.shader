@@ -7,8 +7,8 @@ Shader "HoyoToon/Wuthering Waves/Character"
         [HideInInspector] ShaderBG ("UI/background", Float) = 0
         [HideInInspector] ShaderLogo ("UI/wuwalogo", Float) = 0
         [HideInInspector] shader_is_using_hoyeditor ("", Float) = 0
-        [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/Melioli/HoyoToon},hover:Github}", Float) = 0
-        [HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/meliverse},hover:Discord}", Float) = 0
+        [HideInInspector] footer_github ("{texture:{name:hoyogithub},action:{type:URL,data:https://github.com/HoyoToon/HoyoToon},hover:Github}", Float) = 0
+        [HideInInspector] footer_discord ("{texture:{name:hoyodiscord},action:{type:URL,data:https://discord.gg/hoyotoon},hover:Discord}", Float) = 0
 
         [HoyoToonShaderOptimizerLockButton] _ShaderOptimizerEnabled ("Lock Material", Float) = 0
 
