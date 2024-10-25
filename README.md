@@ -49,7 +49,7 @@ You can install HoyoToon through 3 methods.
 
 ### Unity Package
 
-- Go to the github [releases page](https://github.com/Melioli/HoyoToon/releases) of hoyotoon
+- Go to the github [releases page](https://github.com/Hoyotoon/HoyoToon/releases) of hoyotoon
 - Download the Unity Package
 - Drag the Unity Package inside of your open Unity and import.
 - you've successfully installed HoyoToon
