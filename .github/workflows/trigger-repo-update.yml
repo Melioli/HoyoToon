@@ -10,7 +10,7 @@ on:
 
 env:
   triggerUpdate: ${{ true }}
-  repoOwner: "Melioli"
+  repoOwner: "Hoyotoon"
   repoName: "vpm"
   repoBranch: "main"
   workflowName: "build-listing.yml"
