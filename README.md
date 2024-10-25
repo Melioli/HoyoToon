@@ -58,7 +58,7 @@ You can install HoyoToon through 3 methods.
 
 - Open your Unity project
 - Inside of Unity at the top bar, press on Window then Package Manager.
-- Add the package by clicking on the +, and adding the `https://github.com/Melioli/HoyoToon.git`
+- Add the package by clicking on the +, and adding the `https://github.com/Hoyotoon/HoyoToon.git`
 - Unity will now install HoyoToon for you
 
 ## Contact
