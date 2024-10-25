@@ -1,7 +1,7 @@
 {
   "name": "com.meliverse.hoyotoon",
   "displayName": "HoyoToon",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "Shader for Unity (Built-in Rendering Pipeline) attempting to replicate the shading of miHoYo developed games.\nThis is for datamined assets, not custom-made ones nor the MMD variants.",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.2",
@@ -25,8 +25,8 @@
     "VRC"
   ],
   "documentationUrl": "https://docs.hoyotoon.com",
-  "changelogUrl": "https://github.com/Melioli/HoyoToon/releases/latest/",
-  "licensesUrl": "https://github.com/Melioli/HoyoToon/blob/main/LICENSE",
+  "changelogUrl": "https://github.com/HoyoToon/HoyoToon/releases/latest/",
+  "licensesUrl": "https://github.com/HoyoToon/HoyoToon/blob/main/LICENSE",
   "author": {
     "name": "Meliodas & Manashiku",
     "url": "https://hoyotoon.com"
@@ -35,7 +35,7 @@
   "legacyFiles": {},
   "homepage": "https://hoyotoon.com",
   "bugs": {
-    "url": "https://github.com/Melioli/HoyoToon/issues"
+    "url": "https://github.com/HoyoToon/HoyoToon/issues"
   },
   "hideInEditor": false,
   "unity": "2019.4",
